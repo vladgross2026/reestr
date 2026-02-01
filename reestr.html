@@ -325,6 +325,12 @@
       overflow: hidden;
     }
 
+    /* Когда блок открыт — прокрутка, чтобы все документы были видны в режиме редактирования */
+    .collapsible-block:not(.collapsed) .collapsible-body {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
     .dashboard-cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -802,6 +808,11 @@
     .delete-mode-controls button.secondary {
       background: var(--hover);
       color: var(--text-secondary);
+    }
+
+    .delete-mode-controls button.add-doc-btn {
+      background: var(--accent);
+      color: white;
     }
 
     .delete-mode-pencil {
@@ -1473,6 +1484,10 @@
       border: 1px solid var(--border);
       overflow: hidden;
       margin-top: 24px;
+      height: 82vh;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .calendar-header {
@@ -1482,6 +1497,7 @@
       padding: 16px 20px;
       background: var(--bg-input);
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .calendar-header span {
@@ -1508,12 +1524,17 @@
     .calendar-days {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(5, minmax(72px, 1fr));
       gap: 6px;
       padding: 16px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .calendar-day {
-      aspect-ratio: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -1525,6 +1546,8 @@
       font-size: 13px;
       line-height: 1.3;
       background: var(--bg-input);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .calendar-day:hover {
@@ -1540,11 +1563,13 @@
     .calendar-day .num {
       font-weight: 600;
       color: var(--text);
+      flex-shrink: 0;
     }
 
     .calendar-day.empty {
       background: transparent;
       pointer-events: none;
+      overflow: hidden;
     }
 
     .event {
@@ -1553,6 +1578,7 @@
       border-radius: 50%;
       margin-top: 4px;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .event.red { background: #ef4444; }
@@ -1567,6 +1593,11 @@
       margin-top: 4px;
       display: block;
       line-height: 1.2;
+      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
     }
 
     .event-delete {
@@ -1583,6 +1614,7 @@
       cursor: pointer;
       margin-left: 4px;
       transition: var(--transition);
+      flex-shrink: 0;
     }
 
     .event-delete:hover {
@@ -1944,7 +1976,7 @@
       pointer-events: all;
     }
 
-    /* === Загрузочный экран (шестерёнка) === */
+    /* === Загрузочный экран: лифт === */
     #loader {
       position: fixed;
       top: 0;
@@ -1953,23 +1985,256 @@
       height: 100%;
       background: var(--bg);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.4s ease;
+      overflow: hidden;
     }
     #loader.hidden {
       opacity: 0;
       pointer-events: none;
     }
-    #loader .gear {
-      width: 108px;
-      height: 108px;
-      animation: gear-spin 0.8s linear infinite;
+    #loader .loader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
     }
-    @keyframes gear-spin {
+    #loader .loader-text {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      animation: elevator-text-pulse 1s ease-in-out infinite;
+    }
+    @keyframes elevator-text-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Шахта лифта + шкивы + канаты (стиль чертежа), 6 этажей */
+    #loader .elevator-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 288px;
+    }
+    /* Блок шахты + шкивы сверху */
+    #loader .elevator-shaft-block {
+      position: relative;
+      width: 78px;
+      flex-shrink: 0;
+    }
+    #loader .elevator-head {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      z-index: 3;
+    }
+    #loader .pulley {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-muted);
+      background: transparent;
+      box-shadow: inset 0 0 0 1px var(--border);
+      animation: pulley-spin 1.05s cubic-bezier(0.25, 0.5, 0.35, 1) forwards;
+    }
+    /* Канавка шкива (где лежит канат) */
+    #loader .pulley::after {
+      content: '';
+      position: absolute;
+      inset: 5px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    #loader .pulley-right {
+      animation-direction: reverse;
+    }
+    @keyframes pulley-spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+    #loader .elevator-shaft {
+      width: 78px;
+      height: 240px;
+      margin-top: 26px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Линии этажей (6 этажей): видны при проезде кабины */
+    #loader .elevator-shaft::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 38px,
+        rgba(255,255,255,0.07) 38px,
+        rgba(255,255,255,0.07) 40px
+      );
+      pointer-events: none;
+    }
+    /* Направляющие рельсы по бокам шахты */
+    #loader .rail {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+      opacity: 0.6;
+    }
+    #loader .rail-left { left: 22px; }
+    #loader .rail-right { right: 22px; }
+    /* Противовес: движется вниз, пока кабина вверх */
+    #loader .counterweight {
+      position: absolute;
+      left: 6px;
+      width: 10px;
+      height: 20px;
+      top: 0;
+      border: 1px solid var(--text-muted);
+      border-radius: 1px;
+      background: var(--bg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      animation: counterweight-ride 1.05s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+      z-index: 1;
+    }
+    @keyframes counterweight-ride {
+      0% { transform: translateY(0); }
+      3% { transform: translateY(2px); }
+      7% { transform: translateY(10px); }
+      12% { transform: translateY(24px); }
+      19% { transform: translateY(46px); }
+      28% { transform: translateY(70px); }
+      38% { transform: translateY(96px); }
+      48% { transform: translateY(120px); }
+      58% { transform: translateY(146px); }
+      68% { transform: translateY(172px); }
+      78% { transform: translateY(190px); }
+      87% { transform: translateY(200px); }
+      92% { transform: translateY(203px); }
+      96% { transform: translateY(207px); }
+      99% { transform: translateY(204px); }
+      100% { transform: translateY(204px); }
+    }
+    /* Канаты: три линии, как у настоящего лифта */
+    #loader .cable {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--text-muted) 0,
+        var(--text-muted) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+      background-size: 1px 6px;
+      opacity: 0.65;
+      animation: cable-scroll-down 1.05s linear forwards;
+    }
+    #loader .cable-left { left: 14px; }
+    #loader .cable-center { left: 50%; transform: translateX(-50%); animation-name: cable-scroll-up; }
+    #loader .cable-right { right: 14px; left: auto; animation-name: cable-scroll-up; }
+    @keyframes cable-scroll-down {
+      from { background-position: 0 0; }
+      to { background-position: 0 44px; }
+    }
+    @keyframes cable-scroll-up {
+      from { background-position: 0 0; }
+      to { background-position: 0 -44px; }
+    }
+    /* Кабина лифта: контур + детали + лёгкая тень */
+    #loader .elevator-cab {
+      position: absolute;
+      left: 20px;
+      right: 14px;
+      height: 36px;
+      bottom: 0;
+      background: var(--bg);
+      border: 1px solid var(--text-muted);
+      border-radius: 2px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+      animation: elevator-ride 1.05s cubic-bezier(0.2, 0.6, 0.32, 1) forwards;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    /* Шов дверей */
+    #loader .elevator-cab::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: var(--border);
+      transform: translateX(-50%);
+      opacity: 0.8;
+    }
+    /* Порог (нижняя грань кабины) */
+    #loader .elevator-cab::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--text-muted);
+      opacity: 0.5;
+      border-radius: 0 0 2px 2px;
+    }
+    #loader .elevator-cab .cab-display {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+    }
+    /* Движение кабины: плавный разгон — равномерный ход — торможение — приземление с лёгким покачиванием (6 этажей) */
+    @keyframes elevator-ride {
+      0% { transform: translate(0, 0); }
+      2% { transform: translate(0.1px, -1px); }
+      5% { transform: translate(-0.12px, -5px); }
+      9% { transform: translate(0.15px, -12px); }
+      14% { transform: translate(-0.18px, -24px); }
+      20% { transform: translate(0.12px, -42px); }
+      28% { transform: translate(-0.15px, -64px); }
+      36% { transform: translate(0.18px, -86px); }
+      45% { transform: translate(-0.12px, -108px); }
+      54% { transform: translate(0.15px, -130px); }
+      63% { transform: translate(-0.18px, -152px); }
+      72% { transform: translate(0.12px, -174px); }
+      80% { transform: translate(-0.15px, -190px); }
+      87% { transform: translate(0, -200px); }
+      91% { transform: translate(0, -203px); }
+      95% { transform: translate(0, -207px); }
+      98% { transform: translate(0, -205px); }
+      100% { transform: translate(0, -204px); }
     }
 
     /* === Стили пунктов меню === */
@@ -2060,6 +2325,30 @@
       font-size: 12px;
       color: var(--text-muted);
       user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .thought-cell-close {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .thought-cell-close:hover {
+      background: var(--danger);
+      color: white;
     }
     .thought-cell-body {
       flex: 1;
@@ -2172,11 +2461,26 @@
     <button type="button" id="admin-logout-btn">Выйти</button>
   </div>
   <div id="loader" aria-hidden="true">
-    <svg class="gear" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#e0e0e0" stroke="#c0c0c0" stroke-width="1.2" d="M60 32 L53.3 37.7 L56.2 46 L47.6 47.6 L46 56.2 L37.7 53.3 L32 60 L26.3 53.3 L18 56.2 L16.4 47.6 L7.8 46 L10.7 37.7 L4 32 L10.7 26.3 L7.8 18 L16.4 16.4 L18 7.8 L26.3 10.7 L32 4 L37.7 10.7 L46 7.8 L47.6 16.4 L56.2 18 L53.3 26.3 Z"/>
-      <circle cx="32" cy="32" r="10" fill="var(--bg)" stroke="#b0b0b0" stroke-width="1.5"/>
-      <circle cx="32" cy="32" r="3" fill="var(--accent)"/>
-    </svg>
+    <div class="loader-content">
+      <div class="elevator-wrap">
+        <div class="elevator-shaft-block">
+          <div class="elevator-head" aria-hidden="true">
+            <div class="pulley pulley-left"></div>
+            <div class="pulley pulley-right"></div>
+          </div>
+          <div class="elevator-shaft">
+            <div class="rail rail-left" aria-hidden="true"></div>
+            <div class="rail rail-right" aria-hidden="true"></div>
+            <div class="cable cable-left" aria-hidden="true"></div>
+            <div class="cable cable-center" aria-hidden="true"></div>
+            <div class="cable cable-right" aria-hidden="true"></div>
+            <div class="counterweight" aria-hidden="true"></div>
+            <div class="elevator-cab"></div>
+          </div>
+        </div>
+      </div>
+      <span class="loader-text">Загрузка</span>
+    </div>
   </div>
   <div class="registry-title" id="registry-title"><span class="registry-title-text">Реестр по объектам капитального ремонта</span></div>
 
@@ -2428,7 +2732,7 @@
           loader.classList.add('hidden');
           setTimeout(() => loader.remove(), 400);
         }
-      }, 1000);
+      }, 1050);
 
       const registryTitle = document.getElementById('registry-title');
       const selector = document.getElementById('object-selector');
@@ -3424,9 +3728,10 @@
               </div>
             </div>
           </div>
-          <div class="delete-mode-controls" style="display:none;" id="delete-controls-${addr}">
-            <button class="secondary" id="cancel-delete-mode-${addr}">Отмена</button>
-            <button id="confirm-delete-selected-${addr}">Удалить выбранные</button>
+          <div class="delete-mode-controls" style="display:none;" id="delete-controls-${addr}" data-addr="${escapeHtml(addr)}">
+            <button class="add-doc-btn create-doc-btn" data-addr="${escapeHtml(addr)}" title="Добавить новый документ">Создать документ</button>
+            <button class="secondary cancel-delete-mode-btn" id="cancel-delete-mode-${addr}">Отмена</button>
+            <button class="confirm-delete-selected-btn" id="confirm-delete-selected-${addr}">Удалить выбранные</button>
           </div>
           <div class="post-body open">
             <div class="collapsible-block">
@@ -3476,6 +3781,63 @@
               card.classList.add('delete-mode-active');
               card.querySelectorAll('.doc-item .comment-input').forEach(inp => inp.classList.add('delete-mode-comment'));
             }
+          });
+        }
+
+        // Создать документ (в режиме редактирования)
+        const createDocBtn = card.querySelector('.create-doc-btn');
+        if (createDocBtn) {
+          createDocBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const popup = document.createElement('div');
+            popup.className = 'add-tag-popup';
+            popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;';
+            popup.innerHTML = `
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:320px;">
+                <h3 style="margin-bottom:16px;font-size:16px;">Создать документ</h3>
+                <label style="display:block;font-size:12px;color:var(--text-muted);margin-bottom:4px;">Название документа</label>
+                <input type="text" id="new-doc-name" placeholder="Например: Дополнительный акт" style="width:100%;padding:8px 12px;margin-bottom:12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
+                <label style="display:block;font-size:12px;color:var(--text-muted);margin-bottom:4px;">Пакет</label>
+                <select id="new-doc-packet" style="width:100%;padding:8px 12px;margin-bottom:20px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
+                  <option value="main">Первый пакет документов</option>
+                  <option value="extra">Второй пакет документов</option>
+                </select>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                  <button type="button" class="secondary" id="create-doc-cancel" style="padding:8px 16px;background:var(--hover);color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Отмена</button>
+                  <button type="button" id="create-doc-save" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">Добавить</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(popup);
+            const nameInput = popup.querySelector('#new-doc-name');
+            const packetSelect = popup.querySelector('#new-doc-packet');
+            const closePopup = () => popup.remove();
+            popup.querySelector('#create-doc-cancel').addEventListener('click', closePopup);
+            popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(); });
+            popup.querySelector('#create-doc-save').addEventListener('click', () => {
+              const name = nameInput.value.trim();
+              if (!name) { alert('Введите название документа.'); return; }
+              const packet = packetSelect.value;
+              if (!data[addr]) data[addr] = { main: [], extra: [] };
+              data[addr].main = data[addr].main || [];
+              data[addr].extra = data[addr].extra || [];
+              if (data[addr].mainDocs === MAIN_DOCS || !Array.isArray(data[addr].mainDocs)) data[addr].mainDocs = MAIN_DOCS.slice();
+              if (data[addr].extraDocs === EXTRA_DOCS || !Array.isArray(data[addr].extraDocs)) data[addr].extraDocs = EXTRA_DOCS.slice();
+              if (packet === 'main') {
+                data[addr].mainDocs.push(name);
+                ensureArrayLength(data[addr].main, data[addr].mainDocs.length);
+                data[addr].main[data[addr].main.length - 1] = data[addr].main[data[addr].main.length - 1] || { checked: false, comment: '' };
+              } else {
+                data[addr].extraDocs.push(name);
+                ensureArrayLength(data[addr].extra, data[addr].extraDocs.length);
+                data[addr].extra[data[addr].extra.length - 1] = data[addr].extra[data[addr].extra.length - 1] || { checked: false, comment: '' };
+              }
+              localStorage.setItem('registryData', JSON.stringify(data));
+              popup.remove();
+              renderObject(addr);
+              showToast();
+            });
+            nameInput.focus();
           });
         }
 
@@ -3682,7 +4044,8 @@
 
           item.addEventListener('click', e => {
             if (!isFullMode) return;
-            const deleteControls = document.getElementById(`delete-controls-${addr}`);
+            const cardPost = item.closest('.post');
+            const deleteControls = cardPost ? cardPost.querySelector('.delete-mode-controls') : null;
             if (deleteControls && deleteControls.style.display === 'flex') {
               item.classList.toggle('selected');
               return;
@@ -3699,23 +4062,24 @@
           const commentPreview = item.querySelector('.comment-preview');
           if (!isFullMode && commentInput) commentInput.readOnly = true;
 
-          commentInput.addEventListener('blur', () => {
-            const checked = item.classList.contains('checked');
-            const comment = commentInput.value;
-            commentPreview.innerHTML = parseMarkdown(comment);
-            updateData(addr, type, idx, checked, comment, null, true);
-          });
-
-          commentInput.addEventListener('input', () => {
-            commentPreview.innerHTML = parseMarkdown(commentInput.value);
-          });
+          if (commentInput) {
+            commentInput.addEventListener('blur', () => {
+              const checked = item.classList.contains('checked');
+              const comment = commentInput.value;
+              if (commentPreview) commentPreview.innerHTML = parseMarkdown(comment);
+              updateData(addr, type, idx, checked, comment, null, true);
+            });
+            commentInput.addEventListener('input', () => {
+              if (commentPreview) commentPreview.innerHTML = parseMarkdown(commentInput.value);
+            });
+          }
         });
 
-        // === Режим удаления: кнопки Завершить, Отмена, Удалить выбранные ===
+        // === Режим удаления: кнопки Отмена, Удалить выбранные ===
         const cardEl = container.closest('.post');
-        const deleteControlsEl = document.getElementById(`delete-controls-${addr}`);
+        const deleteControlsEl = cardEl ? cardEl.querySelector('.delete-mode-controls') : null;
 
-        if (!cardEl._deleteModeAttached) {
+        if (cardEl && !cardEl._deleteModeAttached) {
           cardEl._deleteModeAttached = true;
 
           function closeDeleteMode() {
@@ -3728,10 +4092,11 @@
             clearSelectedItems(addr);
           }
 
-          document.getElementById(`cancel-delete-mode-${addr}`).addEventListener('click', closeDeleteMode);
-
-          document.getElementById(`confirm-delete-selected-${addr}`).addEventListener('click', () => {
-            const card = document.getElementById(`delete-controls-${addr}`).closest('.post');
+          const cancelBtn = cardEl.querySelector('.cancel-delete-mode-btn');
+          const confirmBtn = cardEl.querySelector('.confirm-delete-selected-btn');
+          if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteMode);
+          if (confirmBtn) confirmBtn.addEventListener('click', () => {
+            const card = deleteControlsEl ? deleteControlsEl.closest('.post') : null;
             if (card) confirmDeleteSelectedBoth(addr, card);
           });
         }
@@ -4683,7 +5048,7 @@
         const head = el.querySelector('.thought-cell-head');
         if (!head) return;
         head.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.thought-cell-resize')) return;
+          if (e.target.closest('.thought-cell-resize') || e.target.closest('.thought-cell-close')) return;
           e.preventDefault();
           const startX = e.clientX - cell.x;
           const startY = e.clientY - cell.y;
@@ -4753,7 +5118,7 @@
           el.style.top = cell.y + 'px';
           el.style.width = cell.w + 'px';
           el.style.height = cell.h + 'px';
-          el.innerHTML = '<div class="thought-cell-head">Ячейка</div><textarea class="thought-cell-body" placeholder="Ваша мысль..."></textarea><div class="thought-cell-resize"></div>';
+          el.innerHTML = '<div class="thought-cell-head"><span>Ячейка</span><button type="button" class="thought-cell-close" title="Удалить ячейку">×</button></div><textarea class="thought-cell-body" placeholder="Ваша мысль..."></textarea><div class="thought-cell-resize"></div>';
           const bodyEl = el.querySelector('.thought-cell-body');
           bodyEl.value = cell.text || '';
           bodyEl.addEventListener('input', () => {
@@ -4761,6 +5126,16 @@
             saveThoughtsBoard();
           });
           bodyEl.addEventListener('blur', () => saveThoughtsBoard());
+          const closeBtn = el.querySelector('.thought-cell-close');
+          if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              thoughtsBoard.cells = (thoughtsBoard.cells || []).filter(c => c.id !== cell.id);
+              thoughtsBoard.connections = (thoughtsBoard.connections || []).filter(conn => conn.from !== cell.id && conn.to !== cell.id);
+              renderThoughtsBoard();
+              saveThoughtsBoard();
+            });
+          }
           makeThoughtCellDraggable(el, cell);
           makeThoughtCellResizable(el, cell);
           board.appendChild(el);
