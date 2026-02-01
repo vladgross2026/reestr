@@ -113,13 +113,18 @@
       font-weight: 300;
       margin: 32px 0;
       color: var(--text);
-      cursor: pointer;
       letter-spacing: 0.2em;
       line-height: 1.4;
       transition: var(--transition);
+      cursor: default;
     }
 
-    .registry-title:hover {
+    .registry-title .registry-title-text {
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .registry-title .registry-title-text:hover {
       color: var(--accent);
     }
 
@@ -1316,14 +1321,58 @@
 
     .data-export-excel-btn:disabled {
       opacity: 0.5;
-      cursor: not-allowed;
+    }
+
+    .data-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .data-edit-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .data-edit-btn:hover { background: var(--hover); color: var(--text); }
+    .data-edit-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .data-add-col-btn, .data-add-row-btn {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .data-add-col-btn:hover, .data-add-row-btn:hover { opacity: 0.9; }
+    .data-table .col-header-cell { display: flex; align-items: center; gap: 6px; }
+    .data-table .col-header-cell input.col-name-input {
+      padding: 4px 6px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); font-size: 13px; width: 100%;
+    }
+    .data-table .col-move { display: flex; flex-direction: column; gap: 0; }
+    .data-table .col-move button { padding: 2px 6px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); cursor: pointer; font-size: 11px; }
+    .data-table .row-header-cell { display: flex; align-items: center; gap: 6px; }
+    .data-table .row-header-cell input.row-name-input {
+      padding: 4px 6px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); font-size: 13px; width: 100%;
     }
 
     .object-export-docs-btn {
       padding: 8px 14px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #fff;
       border-radius: var(--radius-sm);
       font-family: inherit;
       font-size: 13px;
@@ -1332,9 +1381,8 @@
     }
 
     .object-export-docs-btn:hover {
-      background: var(--hover);
-      border-color: var(--accent);
-      color: var(--accent);
+      opacity: 0.9;
+      filter: brightness(1.1);
     }
 
     .data-table-wrap {
@@ -1924,10 +1972,14 @@
       to { transform: rotate(360deg); }
     }
 
-    /* === Доска мыслей === */
-    .sidebar a.sidebar-item-thoughts {
+    /* === Стили пунктов меню === */
+    .sidebar a.sidebar-item-roadmap {
       font-weight: 600;
-      color: var(--accent);
+      color: #c9a227;
+    }
+    .sidebar a.sidebar-item-data {
+      font-weight: 600;
+      color: #c9a227;
     }
     .thoughts-modal {
       position: fixed;
@@ -2054,9 +2106,71 @@
       pointer-events: none;
       z-index: 2;
     }
+
+    /* === Полоска пароля и режим наблюдателя === */
+    .password-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border);
+      margin: -24px -24px 24px -24px;
+      flex-wrap: wrap;
+    }
+    .password-strip label { color: var(--text-secondary); font-size: 14px; }
+    .password-strip input[type="password"] {
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      min-width: 160px;
+    }
+    .password-strip button {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .password-strip button:hover { filter: brightness(1.1); }
+    .full-mode-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: rgba(34, 197, 94, 0.15);
+      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      margin: -24px -24px 24px -24px;
+    }
+    .full-mode-bar span { color: var(--success); font-size: 14px; font-weight: 500; }
+    .full-mode-bar button {
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .full-mode-bar button:hover { color: var(--text); background: var(--hover); }
+    body.observer-mode .full-mode-only { display: none !important; }
   </style>
 </head>
 <body>
+  <div id="password-strip" class="password-strip">
+    <label>Режим наблюдателя. Введите пароль для полного доступа:</label>
+    <input type="password" id="admin-password" placeholder="Пароль" autocomplete="off">
+    <button type="button" id="admin-login-btn">Войти</button>
+  </div>
+  <div id="full-mode-bar" class="full-mode-bar" style="display: none;">
+    <span>Полный режим</span>
+    <button type="button" id="admin-logout-btn">Выйти</button>
+  </div>
   <div id="loader" aria-hidden="true">
     <svg class="gear" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
       <path fill="#e0e0e0" stroke="#c0c0c0" stroke-width="1.2" d="M60 32 L53.3 37.7 L56.2 46 L47.6 47.6 L46 56.2 L37.7 53.3 L32 60 L26.3 53.3 L18 56.2 L16.4 47.6 L7.8 46 L10.7 37.7 L4 32 L10.7 26.3 L7.8 18 L16.4 16.4 L18 7.8 L26.3 10.7 L32 4 L37.7 10.7 L46 7.8 L47.6 16.4 L56.2 18 L53.3 26.3 Z"/>
@@ -2064,7 +2178,7 @@
       <circle cx="32" cy="32" r="3" fill="var(--accent)"/>
     </svg>
   </div>
-  <div class="registry-title" id="registry-title">Реестр по объектам капитального ремонта</div>
+  <div class="registry-title" id="registry-title"><span class="registry-title-text">Реестр по объектам капитального ремонта</span></div>
 
   <div class="header">
     <div class="hamburger" id="hamburger">
@@ -2084,7 +2198,7 @@
           <option value="">Выберите объект...</option>
         </select>
       </div>
-      <button class="add-object-btn" id="add-object-btn">+</button>
+      <button class="add-object-btn full-mode-only" id="add-object-btn">+</button>
     </div>
     <a href="#" class="dashboard-link" id="show-dashboard">dashboard</a>
   </div>
@@ -2093,26 +2207,52 @@
 
   <div class="sidebar" id="sidebar">
     <div class="sidebar-close" id="sidebar-close">&times;</div>
+    <h3 class="sidebar-reestr" id="sidebar-reestr" style="cursor:pointer;margin-top:0;">Реестр</h3>
     <h3>Действия</h3>
     <ul>
-      <li><a href="#" id="show-thoughts" class="sidebar-item-thoughts">📌 Доска мыслей</a></li>
-      <li><a href="#" id="btn-export">Экспорт в TXT</a></li>
-      <li><a href="#" id="btn-import">Импорт из TXT</a></li>
+      <li><a href="#" class="full-mode-only" id="btn-export">Экспорт в TXT</a></li>
+      <li><a href="#" class="full-mode-only" id="btn-import">Импорт из TXT</a></li>
       <li><a href="#" id="btn-comments">Комментарии</a></li>
       <li><a href="#" id="show-calendar">Календарь</a></li>
-      <li><a href="#" id="show-reminders">Умные напоминания</a></li>
-      <li><a href="#" id="show-roadmap">Дорожная карта объектов</a></li>
-      <li><a href="#" id="show-data">Справочная информация</a></li>
+      <li><a href="#" id="show-reminders">Создать напоминание</a></li>
       <li><a href="#" id="create-note">Создать заметку</a></li>
+      <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap">Дорожная карта объектов</a></li>
+      <li><a href="#" id="show-data" class="sidebar-item-data">Справочная информация</a></li>
       <li><a href="#" id="show-dashboard-sidebar">Сводка</a></li>
+      <li><a href="#" id="show-thoughts">Доска мыслей</a></li>
     </ul>
     <h3 class="collapsible" id="system-toggle">Система <span class="arrow">▶</span></h3>
     <ul class="collapsible-content" id="system-menu" style="display: none;">
       <li><a href="#" id="btn-toggle-theme">Тема: как в системе</a></li>
       <li><a href="#" id="btn-toggle-cursor-style">Стиль выкл</a></li>
       <li><a href="#" id="btn-history">История изменений</a></li>
-      <li><a href="#" id="btn-reset">Сбросить всё</a></li>
+      <li><a href="#" class="full-mode-only" id="btn-reset">Сбросить всё</a></li>
+      <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
+        <label style="font-size:12px;color:var(--text-muted);display:block;">URL данных (автозагрузка при открытии)</label>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <input type="url" id="registry-data-url" placeholder="https://raw.githubusercontent.com/..." style="flex:1;min-width:140px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;">
+          <button type="button" id="save-data-url-btn" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Сохранить</button>
+        </div>
+      </li>
     </ul>
+  </div>
+
+  <div class="history-modal" id="import-modal" style="display:none;">
+    <div class="history-content" style="max-width:480px;">
+      <span class="close-modal" id="close-import-modal">&times;</span>
+      <h2>Импорт данных</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Загрузите данные из файла или по ссылке (например, на JSON в GitHub).</p>
+      <div style="margin-bottom:16px;">
+        <button type="button" id="import-from-file-btn" style="padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;">Выбрать файл</button>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Загрузить по ссылке</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="url" id="import-url-input" placeholder="https://..." style="flex:1;min-width:180px;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;">
+          <button type="button" id="import-by-url-btn" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;">Загрузить</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast">Изменения сохранены</div>
@@ -2147,7 +2287,7 @@
       <h2>Умные напоминания</h2>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Добавьте напоминания по объектам или общие. Они появятся на главной: просроченные — красным, на эту неделю — синим.</p>
       <div id="reminders-list"></div>
-      <div class="add-reminder-form">
+      <div class="add-reminder-form full-mode-only">
         <select id="reminder-obj" title="Объект">
           <option value="">— все —</option>
         </select>
@@ -2164,12 +2304,12 @@
       <div class="thoughts-header">
         <h2>Доска мыслей</h2>
         <div>
-          <button type="button" class="thoughts-connect-btn" id="thoughts-connect-btn">Связать ячейки</button>
+          <button type="button" class="thoughts-connect-btn full-mode-only" id="thoughts-connect-btn">Связать ячейки</button>
           <span class="close-modal" id="close-thoughts" style="cursor:pointer;margin-left:12px;">&times;</span>
         </div>
       </div>
       <div class="thoughts-board" id="thoughts-board">
-        <button type="button" class="thoughts-plus" id="thoughts-plus" title="Добавить ячейку">+</button>
+        <button type="button" class="thoughts-plus full-mode-only" id="thoughts-plus" title="Добавить ячейку">+</button>
         <svg class="thoughts-svg" id="thoughts-svg"><defs><marker id="arrowhead-thoughts" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--accent)"/></marker></defs></svg>
       </div>
     </div>
@@ -2178,9 +2318,9 @@
   <div class="roadmap-container" id="roadmap-container" style="display:none;">
     <div class="roadmap-header-row">
       <h2 class="roadmap-title">Дорожная карта объектов</h2>
-      <button type="button" class="roadmap-edit-btn" id="roadmap-edit-btn" title="Режим редактирования столбцов и ячеек">✎</button>
-      <button type="button" class="roadmap-add-col-btn" id="roadmap-add-column" style="display:none;">Создать столбец</button>
-      <button type="button" class="data-export-excel-btn" id="roadmap-export-excel">Экспорт в Excel</button>
+      <button type="button" class="roadmap-edit-btn full-mode-only" id="roadmap-edit-btn" title="Режим редактирования столбцов и ячеек">✎</button>
+      <button type="button" class="roadmap-add-col-btn full-mode-only" id="roadmap-add-column" style="display:none;">Создать столбец</button>
+      <button type="button" class="data-export-excel-btn full-mode-only" id="roadmap-export-excel">Экспорт в Excel</button>
     </div>
     <div class="roadmap-wrap" id="roadmap-wrap">
       <table class="roadmap-table" id="roadmap-table">
@@ -2198,25 +2338,25 @@
   <div class="data-container" id="data-container" style="display:none;">
     <div class="data-header">
       <h2>Справочная информация по объекту</h2>
-      <div class="data-selector-wrap">
+      <div class="data-selector-wrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <label>Объект:</label>
         <select class="data-object-select" id="data-object-select">
           <option value="">Выберите объект...</option>
         </select>
-        <button type="button" class="data-export-excel-btn" id="data-export-excel">Экспорт в Excel</button>
+        <div class="data-header-actions">
+          <button type="button" class="data-edit-btn" id="data-edit-btn" title="Режим редактирования столбцов и строк">✎</button>
+          <button type="button" class="data-add-col-btn" id="data-add-column" style="display:none;">Добавить столбец</button>
+          <button type="button" class="data-add-row-btn" id="data-add-row" style="display:none;">Добавить строку</button>
+          <button type="button" class="data-export-excel-btn" id="data-export-excel">Экспорт в Excel</button>
+        </div>
       </div>
     </div>
     <div class="data-table-wrap" id="data-table-wrap">
       <p class="data-empty-hint" id="data-empty-hint">Выберите объект из списка</p>
       <table class="data-table" id="data-table" style="display:none;">
         <thead>
-          <tr>
+          <tr id="data-thead-row">
             <th class="data-cell-label"></th>
-            <th>ФИО</th>
-            <th>Должность</th>
-            <th>Основание</th>
-            <th>Контакт</th>
-            <th>Комментарий</th>
           </tr>
         </thead>
         <tbody id="data-table-body">
@@ -2317,8 +2457,18 @@
       let roadmapEditMode = false;
       let customTags = JSON.parse(localStorage.getItem('customTags') || '[]');
       let smartReminders = JSON.parse(localStorage.getItem('smartReminders')) || [];
+      let isFullMode = sessionStorage.getItem('registryFullMode') === '1';
       const undoStack = [];
       const UNDO_MAX = 50;
+
+      function updateObserverUI() {
+        document.body.classList.toggle('observer-mode', !isFullMode);
+        const strip = document.getElementById('password-strip');
+        const bar = document.getElementById('full-mode-bar');
+        if (strip) strip.style.display = isFullMode ? 'none' : 'flex';
+        if (bar) bar.style.display = isFullMode ? 'flex' : 'none';
+        if (selector && selector.value) renderObject(selector.value);
+      }
 
       function pushUndo(action) {
         undoStack.push(action);
@@ -2420,6 +2570,21 @@
         'Представитель подрядчика'
       ];
       const DATA_COLS = ['fio', 'dolzhnost', 'osnovanie', 'kontakt', 'comment'];
+      const DATA_COL_NAMES = { fio: 'ФИО', dolzhnost: 'Должность', osnovanie: 'Основание', kontakt: 'Контакт', comment: 'Комментарий' };
+
+      let dataColumns = JSON.parse(localStorage.getItem('dataColumns')) || [];
+      let dataRows = JSON.parse(localStorage.getItem('dataRows')) || [];
+      let dataEditMode = false;
+      if (dataColumns.length === 0) {
+        dataColumns = DATA_COLS.map((key, i) => ({ id: key, name: DATA_COL_NAMES[key] || key, order: i }));
+        localStorage.setItem('dataColumns', JSON.stringify(dataColumns));
+      }
+      if (dataRows.length === 0) {
+        dataRows = DATA_ROWS.map((name, i) => ({ id: 'row_' + i, name, order: i }));
+        localStorage.setItem('dataRows', JSON.stringify(dataRows));
+      }
+      function saveDataColumns() { localStorage.setItem('dataColumns', JSON.stringify(dataColumns)); }
+      function saveDataRows() { localStorage.setItem('dataRows', JSON.stringify(dataRows)); }
 
       const dataContainer = document.getElementById('data-container');
       const dataObjectSelect = document.getElementById('data-object-select');
@@ -2434,7 +2599,7 @@
       const roadmapEditBtn = document.getElementById('roadmap-edit-btn');
 
       // === Кнопка РЕЕСТР ===
-      registryTitle.addEventListener('click', () => {
+      function goToMainScreen() {
         calendarContainer.style.display = 'none';
         dataContainer.style.display = 'none';
         roadmapContainer.style.display = 'none';
@@ -2443,12 +2608,20 @@
         selector.value = '';
         updateSelectorDisplay();
         renderObject(null);
-      });
+      }
+      registryTitle.addEventListener('click', goToMainScreen);
 
       // === Hamburger ===
       const hamburger = document.getElementById('hamburger');
       const sidebar = document.getElementById('sidebar');
       const sidebarClose = document.getElementById('sidebar-close');
+
+      document.getElementById('sidebar-reestr').addEventListener('click', (e) => {
+        e.preventDefault();
+        goToMainScreen();
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+      });
 
       hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('open');
@@ -2463,6 +2636,19 @@
           hamburger.classList.remove('open');
           sidebar.classList.remove('open');
         }
+      });
+
+      // === Escape закрывает модалки и боковое меню ===
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+        if (document.getElementById('history-modal').style.display === 'flex') document.getElementById('history-modal').style.display = 'none';
+        if (document.getElementById('comments-modal').style.display === 'flex') document.getElementById('comments-modal').style.display = 'none';
+        if (document.getElementById('dashboard-modal').style.display === 'flex') document.getElementById('dashboard-modal').style.display = 'none';
+        if (document.getElementById('reminders-modal').style.display === 'flex') document.getElementById('reminders-modal').style.display = 'none';
+        if (document.getElementById('import-modal').style.display === 'flex') document.getElementById('import-modal').style.display = 'none';
+        if (document.getElementById('thoughts-modal').classList.contains('open')) { document.getElementById('thoughts-modal').classList.remove('open'); if (typeof saveThoughtsBoard === 'function') saveThoughtsBoard(); }
       });
 
       // === Стикер-заметки ===
@@ -2743,6 +2929,28 @@
         updateSelectorDisplay();
       }
       populateSelector();
+
+      // === Режим наблюдателя / полный режим ===
+      document.getElementById('admin-login-btn').addEventListener('click', () => {
+        const pwd = document.getElementById('admin-password');
+        if (pwd && pwd.value === 'grossadmin') {
+          isFullMode = true;
+          sessionStorage.setItem('registryFullMode', '1');
+          pwd.value = '';
+          updateObserverUI();
+        } else {
+          alert('Неверный пароль.');
+        }
+      });
+      document.getElementById('admin-password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
+      });
+      document.getElementById('admin-logout-btn').addEventListener('click', () => {
+        isFullMode = false;
+        sessionStorage.removeItem('registryFullMode');
+        updateObserverUI();
+      });
+      updateObserverUI();
 
       // === Добавить объект ===
       addObjectBtn.addEventListener('click', () => {
@@ -3077,12 +3285,14 @@
             }
           });
           const rowData = personsData[addr] || {};
-          DATA_ROWS.forEach((label, rowIdx) => {
-            const row = rowData[rowIdx] || {};
-            DATA_COLS.forEach(colKey => {
-              const val = (row[colKey] || '').toString().trim();
+          const rows = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const cols = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          rows.forEach(row => {
+            const r = rowData[row.id] || {};
+            cols.forEach(col => {
+              const val = (r[col.id] || '').toString().trim();
               if (val && val.toLowerCase().includes(query)) {
-                results.push({ type: 'Справочная информация', addr, text: label + ': ' + val.substring(0, 50) + (val.length > 50 ? '…' : ''), openToData: true });
+                results.push({ type: 'Справочная информация', addr, text: (row.name || '') + ': ' + val.substring(0, 50) + (val.length > 50 ? '…' : ''), openToData: true });
               }
             });
           });
@@ -3230,6 +3440,15 @@
           </div>
         `;
         container.appendChild(card);
+
+        if (!isFullMode) {
+          card.querySelector('.delete-mode-pencil')?.classList.add('full-mode-only');
+          card.querySelector('.delete-object-btn')?.classList.add('full-mode-only');
+          card.querySelector('.object-meta')?.classList.add('full-mode-only');
+          card.querySelector('.delete-mode-controls')?.classList.add('full-mode-only');
+          const objCommentTextarea = card.querySelector('.object-comment textarea');
+          if (objCommentTextarea) objCommentTextarea.readOnly = true;
+        }
 
         card.querySelectorAll('.collapsible-head').forEach(head => {
           head.addEventListener('click', () => {
@@ -3462,6 +3681,7 @@
           if (isChecked) item.classList.add('checked');
 
           item.addEventListener('click', e => {
+            if (!isFullMode) return;
             const deleteControls = document.getElementById(`delete-controls-${addr}`);
             if (deleteControls && deleteControls.style.display === 'flex') {
               item.classList.toggle('selected');
@@ -3477,6 +3697,7 @@
 
           const commentInput = item.querySelector('.comment-input');
           const commentPreview = item.querySelector('.comment-preview');
+          if (!isFullMode && commentInput) commentInput.readOnly = true;
 
           commentInput.addEventListener('blur', () => {
             const checked = item.classList.contains('checked');
@@ -4009,37 +4230,116 @@
         });
       }
 
+      const dataTheadRow = document.getElementById('data-thead-row');
+      const dataEditBtn = document.getElementById('data-edit-btn');
+      const dataAddColumnBtn = document.getElementById('data-add-column');
+      const dataAddRowBtn = document.getElementById('data-add-row');
+
+      function migratePersonsDataToRowColId(addr) {
+        if (!personsData[addr]) return;
+        const rowData = personsData[addr];
+        const sortedRows = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const sortedCols = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        for (let rowIdx = 0; rowIdx < sortedRows.length; rowIdx++) {
+          const rowId = sortedRows[rowIdx].id;
+          if (rowData[rowIdx] !== undefined && typeof rowData[rowIdx] === 'object') {
+            if (!rowData[rowId]) rowData[rowId] = {};
+            sortedCols.forEach((col) => {
+              if (rowData[rowIdx][col.id] !== undefined) rowData[rowId][col.id] = rowData[rowIdx][col.id];
+            });
+            delete rowData[rowIdx];
+          }
+        }
+        for (let i = 99; i >= 0; i--) if (rowData[i] !== undefined) delete rowData[i];
+      }
+
       function renderDataTable(addr) {
         if (!addr) {
           dataEmptyHint.style.display = 'block';
           dataTable.style.display = 'none';
           return;
         }
+        migratePersonsDataToRowColId(addr);
         dataEmptyHint.style.display = 'none';
         dataTable.style.display = 'table';
         if (!personsData[addr]) personsData[addr] = {};
         const rowData = personsData[addr];
+        const cols = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const rows = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+        dataEditBtn.classList.toggle('active', dataEditMode);
+        dataAddColumnBtn.style.display = dataEditMode ? 'inline-block' : 'none';
+        dataAddRowBtn.style.display = dataEditMode ? 'inline-block' : 'none';
+
+        while (dataTheadRow.children.length > 1) dataTheadRow.removeChild(dataTheadRow.lastChild);
+        cols.forEach((col) => {
+          const th = document.createElement('th');
+          if (dataEditMode) {
+            th.innerHTML = '<div class="col-header-cell"><input type="text" class="col-name-input" value="' + (col.name || '').replace(/"/g, '&quot;') + '" data-col-id="' + col.id + '" placeholder="Название"><div class="col-move"><button type="button" class="col-move-up" data-col-id="' + col.id + '">▲</button><button type="button" class="col-move-down" data-col-id="' + col.id + '">▼</button></div></div>';
+          } else {
+            th.textContent = col.name || '';
+          }
+          dataTheadRow.appendChild(th);
+        });
+        if (dataEditMode) {
+          dataTheadRow.querySelectorAll('.col-name-input').forEach(input => {
+            input.addEventListener('change', () => {
+              const col = dataColumns.find(c => c.id === input.dataset.colId);
+              if (col) { col.name = input.value.trim() || 'Столбец'; saveDataColumns(); }
+            });
+          });
+          dataTheadRow.querySelectorAll('.col-move-up').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.dataset.colId;
+              const sorted = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              const idx = sorted.findIndex(c => c.id === id);
+              if (idx <= 0) return;
+              const col = dataColumns.find(c => c.id === id);
+              const prev = sorted[idx - 1];
+              [col.order, prev.order] = [prev.order, col.order];
+              saveDataColumns();
+              renderDataTable(addr);
+            });
+          });
+          dataTheadRow.querySelectorAll('.col-move-down').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.dataset.colId;
+              const sorted = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+              const idx = sorted.findIndex(c => c.id === id);
+              if (idx < 0 || idx >= sorted.length - 1) return;
+              const col = dataColumns.find(c => c.id === id);
+              const next = sorted[idx + 1];
+              [col.order, next.order] = [next.order, col.order];
+              saveDataColumns();
+              renderDataTable(addr);
+            });
+          });
+        }
 
         dataTableBody.innerHTML = '';
-        DATA_ROWS.forEach((label, rowIdx) => {
+        rows.forEach((row, rowIdx) => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td class="data-cell-label">${label}</td>`;
-          DATA_COLS.forEach(colKey => {
+          const labelTd = document.createElement('td');
+          labelTd.className = 'data-cell-label';
+          if (dataEditMode) {
+            labelTd.innerHTML = '<div class="row-header-cell"><input type="text" class="row-name-input" value="' + (row.name || '').replace(/"/g, '&quot;') + '" data-row-id="' + row.id + '" placeholder="Строка"><div class="col-move"><button type="button" class="row-move-up" data-row-id="' + row.id + '">▲</button><button type="button" class="row-move-down" data-row-id="' + row.id + '">▼</button></div></div>';
+          } else {
+            labelTd.textContent = row.name || '';
+          }
+          tr.appendChild(labelTd);
+          if (!rowData[row.id]) rowData[row.id] = {};
+          cols.forEach((col) => {
             const td = document.createElement('td');
-            const val = (rowData[rowIdx] && rowData[rowIdx][colKey]) || '';
-            const placeholders = { fio: 'ФИО', dolzhnost: 'Должность', osnovanie: 'Основание', kontakt: 'Контакт', comment: 'Комментарий' };
-            const isComment = colKey === 'comment';
-            const el = isComment ? document.createElement('textarea') : document.createElement('input');
-            if (!isComment) el.type = 'text';
-            el.placeholder = placeholders[colKey] || '';
+            const val = (rowData[row.id][col.id] || '').trim();
+            const el = document.createElement('input');
+            el.type = 'text';
+            el.placeholder = col.name || '';
             el.value = val;
-            el.dataset.row = rowIdx;
-            el.dataset.col = colKey;
+            el.dataset.rowId = row.id;
+            el.dataset.colId = col.id;
             el.addEventListener('blur', () => {
-              const r = parseInt(el.dataset.row);
-              const c = el.dataset.col;
-              if (!personsData[addr][r]) personsData[addr][r] = {};
-              personsData[addr][r][c] = el.value.trim();
+              if (!personsData[addr][row.id]) personsData[addr][row.id] = {};
+              personsData[addr][row.id][col.id] = el.value.trim();
               localStorage.setItem('personsData', JSON.stringify(personsData));
               showToast();
             });
@@ -4047,8 +4347,77 @@
             tr.appendChild(td);
           });
           dataTableBody.appendChild(tr);
+          if (dataEditMode) {
+            tr.querySelectorAll('.row-name-input').forEach(input => {
+              input.addEventListener('change', () => {
+                const r = dataRows.find(x => x.id === input.dataset.rowId);
+                if (r) { r.name = input.value.trim() || 'Строка'; saveDataRows(); }
+              });
+            });
+            tr.querySelectorAll('.row-move-up').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const id = btn.dataset.rowId;
+                const sorted = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                const idx = sorted.findIndex(r => r.id === id);
+                if (idx <= 0) return;
+                const row = dataRows.find(r => r.id === id);
+                const prev = sorted[idx - 1];
+                [row.order, prev.order] = [prev.order, row.order];
+                saveDataRows();
+                renderDataTable(addr);
+              });
+            });
+            tr.querySelectorAll('.row-move-down').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const id = btn.dataset.rowId;
+                const sorted = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                const idx = sorted.findIndex(r => r.id === id);
+                if (idx < 0 || idx >= sorted.length - 1) return;
+                const row = dataRows.find(r => r.id === id);
+                const next = sorted[idx + 1];
+                [row.order, next.order] = [next.order, row.order];
+                saveDataRows();
+                renderDataTable(addr);
+              });
+            });
+          }
         });
       }
+
+      dataEditBtn.addEventListener('click', () => {
+        dataEditMode = !dataEditMode;
+        renderDataTable(dataObjectSelect.value || null);
+      });
+      dataAddColumnBtn.addEventListener('click', () => {
+        const id = 'col_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const maxOrder = dataColumns.length ? Math.max(...dataColumns.map(c => c.order ?? 0), -1) : -1;
+        dataColumns.push({ id, name: 'Новый столбец', order: maxOrder + 1 });
+        saveDataColumns();
+        OBJECTS.forEach(addr => {
+          if (!personsData[addr]) personsData[addr] = {};
+          dataRows.forEach(r => {
+            if (!personsData[addr][r.id]) personsData[addr][r.id] = {};
+            personsData[addr][r.id][id] = '';
+          });
+        });
+        localStorage.setItem('personsData', JSON.stringify(personsData));
+        renderDataTable(dataObjectSelect.value || null);
+        showToast();
+      });
+      dataAddRowBtn.addEventListener('click', () => {
+        const id = 'row_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const maxOrder = dataRows.length ? Math.max(...dataRows.map(r => r.order ?? 0), -1) : -1;
+        dataRows.push({ id, name: 'Новая строка', order: maxOrder + 1 });
+        saveDataRows();
+        OBJECTS.forEach(addr => {
+          if (!personsData[addr]) personsData[addr] = {};
+          personsData[addr][id] = {};
+          dataColumns.forEach(c => { personsData[addr][id][c.id] = ''; });
+        });
+        localStorage.setItem('personsData', JSON.stringify(personsData));
+        renderDataTable(dataObjectSelect.value || null);
+        showToast();
+      });
 
       document.getElementById('show-data').addEventListener('click', (e) => {
         e.preventDefault();
@@ -4073,22 +4442,21 @@
           return;
         }
         const rowData = personsData[addr] || {};
-        const colKeys = ['fio', 'dolzhnost', 'osnovanie', 'kontakt', 'comment'];
-        const colTitles = ['ФИО', 'Должность', 'Основание', 'Контакт', 'Комментарий'];
-        const colWidths = ['180', '140', '140', '140', '220'];
+        const cols = dataColumns.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const rows = dataRows.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         let tableRows = '';
         tableRows += '<tr style="font-weight:bold; background:#4472C4; color:#fff; font-size:11pt;">';
         tableRows += '<td style="border:1px solid #000; padding:8px 10px; width:280px;">Роль / Категория</td>';
-        colTitles.forEach((t, i) => {
-          tableRows += `<td style="border:1px solid #000; padding:8px 10px; width:${colWidths[i]}px;">${escapeHtml(t)}</td>`;
+        cols.forEach(col => {
+          tableRows += '<td style="border:1px solid #000; padding:8px 10px; min-width:100px;">' + escapeHtml(col.name || '') + '</td>';
         });
         tableRows += '</tr>';
-        DATA_ROWS.forEach((label, rowIdx) => {
+        rows.forEach(row => {
           tableRows += '<tr>';
-          tableRows += `<td style="border:1px solid #000; padding:6px 10px; background:#E7E6E6; font-weight:500;">${escapeHtml(label)}</td>`;
-          colKeys.forEach(colKey => {
-            const val = (rowData[rowIdx] && rowData[rowIdx][colKey]) || '';
-            tableRows += `<td style="border:1px solid #000; padding:6px 10px;">${escapeHtml(val)}</td>`;
+          tableRows += '<td style="border:1px solid #000; padding:6px 10px; background:#E7E6E6; font-weight:500;">' + escapeHtml(row.name || '') + '</td>';
+          cols.forEach(col => {
+            const val = (rowData[row.id] && rowData[row.id][col.id]) || '';
+            tableRows += '<td style="border:1px solid #000; padding:6px 10px;">' + escapeHtml(val) + '</td>';
           });
           tableRows += '</tr>';
         });
@@ -4456,6 +4824,75 @@
         }
       });
 
+      // === Применить импортированные данные (из файла или по URL) ===
+      function applyImportedData(imported) {
+        try {
+          if (imported.registry) data = imported.registry;
+          if (imported.calendar) calendarData = imported.calendar;
+          if (imported.history) history = imported.history;
+          if (imported.objects && Array.isArray(imported.objects)) {
+            OBJECTS = imported.objects;
+            localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
+            populateSelector();
+            if (dataContainer.style.display === 'block') populateDataSelector();
+          }
+          if (imported.personsData) {
+            personsData = imported.personsData;
+            localStorage.setItem('personsData', JSON.stringify(personsData));
+            if (dataContainer.style.display === 'block') renderDataTable(dataObjectSelect.value || null);
+          }
+          if (imported.stickyNotes && Array.isArray(imported.stickyNotes)) {
+            stickyNotes = imported.stickyNotes;
+            localStorage.setItem('stickyNotes', JSON.stringify(stickyNotes));
+            renderStickyNotes();
+          }
+          if (imported.roadmapData) {
+            roadmapData = imported.roadmapData;
+            localStorage.setItem('roadmapData', JSON.stringify(roadmapData));
+          }
+          if (imported.roadmapNotes) {
+            roadmapNotes = imported.roadmapNotes;
+            localStorage.setItem('roadmapNotes', JSON.stringify(roadmapNotes));
+          }
+          if (imported.roadmapColumns && Array.isArray(imported.roadmapColumns)) {
+            roadmapColumns = imported.roadmapColumns;
+            localStorage.setItem('roadmapColumns', JSON.stringify(roadmapColumns));
+          }
+          if (imported.dataColumns && Array.isArray(imported.dataColumns)) {
+            dataColumns = imported.dataColumns;
+            localStorage.setItem('dataColumns', JSON.stringify(dataColumns));
+          }
+          if (imported.dataRows && Array.isArray(imported.dataRows)) {
+            dataRows = imported.dataRows;
+            localStorage.setItem('dataRows', JSON.stringify(dataRows));
+          }
+          if (imported.customTags && Array.isArray(imported.customTags)) {
+            customTags = imported.customTags;
+            localStorage.setItem('customTags', JSON.stringify(customTags));
+          }
+          if (imported.thoughtsBoard) {
+            thoughtsBoard = imported.thoughtsBoard;
+            localStorage.setItem('thoughtsBoard', JSON.stringify(thoughtsBoard));
+            if (thoughtsModal.classList.contains('open')) renderThoughtsBoard();
+          }
+          if (imported.smartReminders && Array.isArray(imported.smartReminders)) {
+            smartReminders = imported.smartReminders;
+            localStorage.setItem('smartReminders', JSON.stringify(smartReminders));
+          }
+          if (roadmapContainer.style.display === 'block') renderRoadmap();
+          renderDeadlineReminders();
+          localStorage.setItem('registryData', JSON.stringify(data));
+          localStorage.setItem('calendarData', JSON.stringify(calendarData));
+          localStorage.setItem('historyLog', JSON.stringify(history));
+          showToast();
+          if (calendarContainer.style.display === 'block') renderCalendar();
+          if (selector && selector.value) renderObject(selector.value);
+          updateObserverUI();
+        } catch (err) {
+          alert('Ошибка загрузки данных: ' + (err.message || err));
+        }
+      }
+
       // === Экспорт ===
       document.getElementById('btn-export').addEventListener('click', () => {
         const fullData = {
@@ -4468,6 +4905,8 @@
           roadmapData: roadmapData,
           roadmapNotes: roadmapNotes,
           roadmapColumns: roadmapColumns,
+          dataColumns: dataColumns,
+          dataRows: dataRows,
           customTags: customTags,
           thoughtsBoard: thoughtsBoard,
           smartReminders: smartReminders
@@ -4484,8 +4923,21 @@
         showToast();
       });
 
-      // === Импорт ===
-      document.getElementById('btn-import').addEventListener('click', () => {
+      // === Импорт (модалка: файл или по ссылке) ===
+      const importModal = document.getElementById('import-modal');
+      document.getElementById('btn-import').addEventListener('click', (e) => {
+        e.preventDefault();
+        sidebar.classList.remove('open');
+        hamburger.classList.remove('open');
+        importModal.style.display = 'flex';
+      });
+      document.getElementById('close-import-modal').addEventListener('click', () => {
+        importModal.style.display = 'none';
+      });
+      importModal.addEventListener('click', (e) => {
+        if (e.target === importModal) importModal.style.display = 'none';
+      });
+      document.getElementById('import-from-file-btn').addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt, .json';
@@ -4496,57 +4948,8 @@
           reader.onload = () => {
             try {
               const imported = JSON.parse(reader.result);
-              if (imported.registry) data = imported.registry;
-              if (imported.calendar) calendarData = imported.calendar;
-              if (imported.history) history = imported.history;
-              if (imported.objects && Array.isArray(imported.objects)) {
-                OBJECTS = imported.objects;
-                localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
-                populateSelector();
-                if (dataContainer.style.display === 'block') populateDataSelector();
-              }
-              if (imported.personsData) {
-                personsData = imported.personsData;
-                localStorage.setItem('personsData', JSON.stringify(personsData));
-                if (dataContainer.style.display === 'block') renderDataTable(dataObjectSelect.value || null);
-              }
-              if (imported.stickyNotes && Array.isArray(imported.stickyNotes)) {
-                stickyNotes = imported.stickyNotes;
-                localStorage.setItem('stickyNotes', JSON.stringify(stickyNotes));
-                renderStickyNotes();
-              }
-              if (imported.roadmapData) {
-                roadmapData = imported.roadmapData;
-                localStorage.setItem('roadmapData', JSON.stringify(roadmapData));
-              }
-              if (imported.roadmapNotes) {
-                roadmapNotes = imported.roadmapNotes;
-                localStorage.setItem('roadmapNotes', JSON.stringify(roadmapNotes));
-              }
-              if (imported.roadmapColumns && Array.isArray(imported.roadmapColumns)) {
-                roadmapColumns = imported.roadmapColumns;
-                localStorage.setItem('roadmapColumns', JSON.stringify(roadmapColumns));
-              }
-              if (imported.customTags && Array.isArray(imported.customTags)) {
-                customTags = imported.customTags;
-                localStorage.setItem('customTags', JSON.stringify(customTags));
-              }
-              if (imported.thoughtsBoard) {
-                thoughtsBoard = imported.thoughtsBoard;
-                localStorage.setItem('thoughtsBoard', JSON.stringify(thoughtsBoard));
-                if (thoughtsModal.classList.contains('open')) renderThoughtsBoard();
-              }
-              if (imported.smartReminders && Array.isArray(imported.smartReminders)) {
-                smartReminders = imported.smartReminders;
-                localStorage.setItem('smartReminders', JSON.stringify(smartReminders));
-              }
-              if (roadmapContainer.style.display === 'block') renderRoadmap();
-              renderDeadlineReminders();
-              localStorage.setItem('registryData', JSON.stringify(data));
-              localStorage.setItem('calendarData', JSON.stringify(calendarData));
-              localStorage.setItem('historyLog', JSON.stringify(history));
-              showToast();
-              if (calendarContainer.style.display === 'block') renderCalendar();
+              applyImportedData(imported);
+              importModal.style.display = 'none';
             } catch (err) {
               alert('Ошибка чтения файла: ' + err.message);
             }
@@ -4555,6 +4958,46 @@
         };
         input.click();
       });
+      document.getElementById('import-by-url-btn').addEventListener('click', () => {
+        const urlInput = document.getElementById('import-url-input');
+        const url = (urlInput && urlInput.value && urlInput.value.trim()) || '';
+        if (!url) {
+          alert('Введите ссылку на JSON.');
+          return;
+        }
+        fetch(url).then(r => {
+          if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+          return r.json();
+        }).then(imported => {
+          applyImportedData(imported);
+          importModal.style.display = 'none';
+          urlInput.value = '';
+        }).catch(err => alert('Не удалось загрузить по ссылке: ' + (err.message || err)));
+      });
+
+      // === URL данных при открытии ===
+      const registryDataUrlInput = document.getElementById('registry-data-url');
+      if (registryDataUrlInput) registryDataUrlInput.value = localStorage.getItem('registryDataUrl') || '';
+      document.getElementById('save-data-url-btn').addEventListener('click', () => {
+        const url = registryDataUrlInput && registryDataUrlInput.value && registryDataUrlInput.value.trim();
+        if (url) {
+          localStorage.setItem('registryDataUrl', url);
+          showToast();
+        } else {
+          localStorage.removeItem('registryDataUrl');
+        }
+      });
+
+      // === Автозагрузка по URL при открытии страницы ===
+      const savedDataUrl = localStorage.getItem('registryDataUrl');
+      if (savedDataUrl) {
+        fetch(savedDataUrl).then(r => {
+          if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+          return r.json();
+        }).then(imported => applyImportedData(imported)).catch(e => {
+          console.warn('Автозагрузка по URL не удалась:', e);
+        });
+      }
 
       // === Сброс ===
       document.getElementById('btn-reset').addEventListener('click', () => {
@@ -4568,6 +5011,8 @@
           localStorage.removeItem('roadmapData');
           localStorage.removeItem('roadmapNotes');
           localStorage.removeItem('roadmapColumns');
+          localStorage.removeItem('dataColumns');
+          localStorage.removeItem('dataRows');
           localStorage.removeItem('thoughtsBoard');
           localStorage.removeItem('smartReminders');
           localStorage.removeItem('lastSelectedObject');
@@ -4602,6 +5047,7 @@
           document.getElementById('history-modal').style.display = 'none';
           dashboardModal.style.display = 'none';
           document.getElementById('comments-modal').style.display = 'none';
+          if (importModal) importModal.style.display = 'none';
           const addTagPopup = document.querySelector('.add-tag-popup');
           if (addTagPopup) addTagPopup.remove();
         }
