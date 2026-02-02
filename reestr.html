@@ -10,14 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #141414;
-      --bg-card: #1a1a1a;
-      --bg-input: #1f1f1f;
-      --bg-post: #1a1a1a;
-      --text: #d4d4d4;
-      --text-secondary: #9d9d9d;
-      --text-muted: #6e6e6e;
-      --border: #333333;
+      --bg: #06090d;
+      --bg-card: #0c1117;
+      --bg-input: #0f1419;
+      --bg-post: #0c1117;
+      --text: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --border: #21262d;
       --font-weight-body: 400;
       --border-width: 1px;
       --accent: #0078d4;
@@ -27,7 +27,7 @@
       --success-bg: rgba(34, 197, 94, 0.15);
       --danger: #f14c4c;
       --warning: #cca700;
-      --hover: #2d2d30;
+      --hover: #161b22;
       --transition: all 0.2s ease;
       --radius: 8px;
       --radius-sm: 6px;
@@ -47,6 +47,25 @@
 
     html {
       background-color: var(--bg);
+    }
+    body:not(.light-theme) {
+      position: relative;
+    }
+    body:not(.light-theme)::before {
+      content: '';
+      position: fixed;
+      inset: -80px;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 80% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 50% at 50% 80%, rgba(20, 184, 166, 0.05) 0%, transparent 50%);
+      animation: darkThemeGrad 25s ease-in-out infinite;
+    }
+    @keyframes darkThemeGrad {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
     }
 
     html.light-theme {
@@ -331,32 +350,63 @@
       overflow-x: hidden;
     }
 
-    .dashboard-cards {
+    .dashboard-modal .modal-content { max-width: 960px; }
+    .dashboard-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
     }
-
-    .dashboard-card {
-      padding: 14px 16px;
+    @media (max-width: 700px) { .dashboard-stats { grid-template-columns: repeat(2, 1fr); } }
+    .dashboard-stat-card {
+      padding: 20px 24px;
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       text-align: center;
+      transition: var(--transition);
     }
-
-    .dashboard-card .number {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--accent);
+    .dashboard-stat-card:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
+    .dashboard-stat-card.priority { border-left: 4px solid #eab308; }
+    .dashboard-stat-card.overdue { border-left: 4px solid #f14c4c; }
+    .dashboard-stat-card.commission { border-left: 4px solid #8b5cf6; }
+    .dashboard-stat-card.total { border-left: 4px solid var(--accent); }
+    .dashboard-stat-card .number { font-size: 32px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.2; }
+    .dashboard-stat-card .label { font-size: 13px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+    .dashboard-section-title { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .dashboard-objects-list { display: flex; flex-direction: column; gap: 8px; }
+    .dashboard-object-row {
+      display: grid; grid-template-columns: 1fr 120px 80px;
+      align-items: center; gap: 16px; padding: 14px 18px;
+      background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: var(--transition); cursor: pointer;
     }
-
-    .dashboard-card .label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .dashboard-object-row:hover { background: var(--hover); border-color: var(--accent); }
+    @media (max-width: 600px) { .dashboard-object-row { grid-template-columns: 1fr auto; } .dashboard-object-row .obj-progress { grid-column: 1 / -1; } }
+    .dashboard-object-row .obj-name { font-weight: 500; color: var(--text); }
+    .dashboard-object-row .obj-tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+    .dashboard-object-row .obj-tag.tag-priority { background: rgba(234, 179, 8, 0.25); color: #eab308; }
+    .dashboard-object-row .obj-tag.tag-done { background: rgba(34, 197, 94, 0.25); color: var(--success); }
+    .dashboard-object-row .obj-progress { font-size: 13px; color: var(--text-muted); }
+    .dashboard-object-row .obj-progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+    .dashboard-object-row .obj-progress-bar .fill { height: 100%; background: var(--success); border-radius: 3px; transition: width 0.3s; }
+    .dashboard-object-row .obj-progress-bar .fill.partial { background: linear-gradient(90deg, var(--success), var(--warning)); }
+    .dashboard-object-row .obj-progress-bar .fill.empty { background: var(--border); }
+    .dashboard-package-section { margin-top: 24px; }
+    .dashboard-package-title {
+      font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 12px;
+      padding: 12px 16px; background: rgba(59, 130, 246, 0.08); border-radius: var(--radius-sm); border-left: 4px solid var(--accent);
     }
+    .dashboard-doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .dashboard-doc-card {
+      padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 14px; line-height: 1.45; color: var(--text-secondary);
+      display: flex; align-items: flex-start; gap: 10px; transition: var(--transition);
+    }
+    .dashboard-doc-card.checked {
+      background: rgba(34, 197, 94, 0.08); border-color: rgba(34, 197, 94, 0.3); color: var(--text);
+    }
+    .dashboard-doc-card .num { font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
 
     .recent-object-btn {
       padding: 6px 12px;
@@ -1856,13 +1906,6 @@
       margin-bottom: 4px;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 40px;
-      color: var(--text-muted);
-      font-size: 15px;
-    }
-
     /* === Стикер-заметки === */
     .sticky-note {
       position: fixed;
@@ -2448,19 +2491,195 @@
     }
     .full-mode-bar button:hover { color: var(--text); background: var(--hover); }
     body.observer-mode .full-mode-only { display: none !important; }
+
+    /* === Кастомные модалки вместо prompt/alert/confirm === */
+    .custom-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 3000;
+    }
+    .custom-modal-overlay.show { display: flex; }
+    .custom-modal {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; min-width: 320px; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .custom-modal h3 { font-size: 16px; margin-bottom: 16px; }
+    .custom-modal p { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+    .custom-modal input[type="text"] {
+      width: 100%; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius-sm); font-size: 14px; margin-bottom: 16px;
+    }
+    .custom-modal .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .custom-modal .modal-buttons button {
+      padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; border: 1px solid var(--border);
+    }
+    .custom-modal .modal-buttons .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .custom-modal .modal-buttons .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .custom-modal .modal-buttons .btn-secondary { background: var(--hover); color: var(--text-secondary); }
+    .custom-modal .modal-buttons button:hover { filter: brightness(1.1); }
+    .toast.toast-error { color: var(--danger); }
+
+    /* === Улучшенный empty state === */
+    .empty-state {
+      text-align: center; padding: 60px 40px; color: var(--text-muted); font-size: 15px;
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+    .empty-state .empty-title { font-size: 18px; color: var(--text-secondary); }
+    .empty-state .empty-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .empty-state .empty-actions button, .empty-state .empty-actions a {
+      padding: 10px 18px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm);
+      font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .empty-state .empty-actions .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    }
+    .empty-state .empty-actions .btn-outline:hover { background: var(--hover); color: var(--accent); }
+    .search-shortcut-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* === Прогресс документов === */
+    .doc-progress-bar {
+      height: 4px; background: var(--bg-input); border-radius: 2px; overflow: hidden; margin-top: 8px;
+      min-width: 100px; max-width: 120px;
+    }
+    .doc-progress-bar .progress-fill {
+      height: 100%; background: var(--success); border-radius: 2px; transition: width 0.2s ease;
+    }
+    .doc-progress-text { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* === Кнопка быстрого напоминания === */
+    .quick-reminder-btn {
+      padding: 4px 10px; font-size: 12px; background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);
+    }
+    .quick-reminder-btn:hover { background: var(--hover); color: var(--accent); border-color: var(--accent); }
+
+    .header-badges { display: flex; align-items: center; gap: 8px; }
+    .header-badge { padding: 4px 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; }
+    .header-badge.overdue { background: rgba(241, 76, 76, 0.2); color: var(--danger); cursor: pointer; }
+    .header-badge.overdue:hover { background: rgba(241, 76, 76, 0.3); }
+    .save-indicator { position: fixed; bottom: 60px; right: 24px; font-size: 12px; color: var(--success); opacity: 0; transition: opacity 0.3s; z-index: 1500; }
+    .save-indicator.show { opacity: 1; animation: saveFade 2s forwards; }
+    @keyframes saveFade { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+    .timeline-mini { display: flex; gap: 4px; align-items: flex-end; height: 24px; margin-top: 4px; }
+    .timeline-mini .bar { width: 8px; min-height: 4px; background: var(--border); border-radius: 2px; transition: var(--transition); }
+    .timeline-mini .bar.has-deadline { background: var(--accent); }
+    .timeline-mini .bar.overdue { background: var(--danger); }
+    .timeline-mini .bar.soon { background: var(--warning); }
+    .sidebar-count { font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+    .pinned-badge { color: var(--warning); font-size: 12px; margin-left: 4px; }
+    .object-group-label { font-size: 11px; color: var(--text-muted); padding: 4px 8px; text-transform: uppercase; }
+
+    /* === Bulk actions для документов === */
+    .bulk-docs-btn {
+      padding: 6px 12px; font-size: 12px; background: var(--success-bg); color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.4); border-radius: var(--radius-sm); cursor: pointer;
+    }
+    .bulk-docs-btn:hover { filter: brightness(1.1); }
+
+    /* === Мобильная адаптация === */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .header { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+      .search-wrap { max-width: 100%; order: 1; width: 100%; }
+      .selector-container { order: 2; flex: 1; min-width: 0; }
+      .dashboard-link { order: 3; }
+      .registry-title { font-size: 20px; letter-spacing: 0.1em; margin: 20px 0; }
+      .sidebar { width: 100%; left: -100%; }
+      .sidebar.open { left: 0; }
+      .post { margin-bottom: 12px; }
+      .post-header { padding: 14px 16px; font-size: 14px; flex-wrap: wrap; }
+      .object-meta { flex-direction: column; align-items: flex-start !important; }
+      .doc-item { padding: 12px 14px; }
+      .empty-state { padding: 40px 20px; }
+      .modal-content, .history-content, .comments-content { width: 95%; padding: 20px; }
+      .add-object-btn { position: static; transform: none; margin-top: 4px; }
+    }
+    @media (max-width: 480px) {
+      .dashboard-cards { grid-template-columns: repeat(2, 1fr); }
+      .recent-object-btn { font-size: 12px; padding: 6px 10px; }
+      .hamburger { width: 28px; height: 24px; }
+    }
+
+    /* === Посадочный экран === */
+    body.landing-visible { overflow: hidden; }
+    body.loader-visible { overflow: hidden; }
+    #landing-screen {
+      position: fixed; inset: 0; z-index: 9998; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;
+      background: #06090d; overflow: hidden;
+    }
+    #landing-screen.hidden { display: none; }
+    .landing-bg {
+      position: absolute; inset: -50px;
+      transform: translate(calc(var(--mx, 0px)), calc(var(--my, 0px)));
+      transition: transform 0.15s ease-out;
+    }
+    .landing-bg::before, .landing-bg::after, .landing-bg .grad {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+      animation: landingGrad 20s ease-in-out infinite;
+    }
+    .landing-bg .grad { width: 400px; height: 400px; }
+    .landing-bg .grad.g1 { background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%); top: 10%; left: 20%; animation-delay: 0s; }
+    .landing-bg .grad.g2 { background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 70%); top: 60%; right: 15%; animation-delay: -5s; }
+    .landing-bg .grad.g3 { background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%); bottom: 20%; left: 40%; animation-delay: -10s; }
+    .landing-bg .grad.g4 { background: radial-gradient(circle, rgba(249, 115, 22, 0.25) 0%, transparent 70%); top: 30%; right: 35%; animation-delay: -15s; }
+    @keyframes landingGrad {
+      0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+      33% { transform: scale(1.1) translate(2%, -2%); opacity: 0.6; }
+      66% { transform: scale(0.95) translate(-2%, 2%); opacity: 0.45; }
+    }
+    .landing-content { position: relative; z-index: 1; width: 100%; max-width: 560px; text-align: center; }
+    .landing-title { font-size: 13px; font-weight: normal; letter-spacing: 0.35em; color: rgba(255,255,255,0.5); margin-bottom: 32px; text-transform: uppercase; }
+    .landing-search-wrap { position: relative; width: 100%; margin-bottom: 12px; }
+    .landing-search-inner {
+      display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+      background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 14px; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .landing-search-inner:focus-within { border-color: rgba(59, 130, 246, 0.6); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+    .landing-search-inner input {
+      flex: 1; background: none; border: none; color: #fff; font-size: 16px; font-family: inherit;
+      outline: none;
+    }
+    .landing-search-inner input::placeholder { color: rgba(148, 163, 184, 0.5); }
+    .landing-search-clear { background: none; border: none; color: rgba(148, 163, 184, 0.6); font-size: 18px; cursor: pointer; padding: 4px; display: none; }
+    .landing-search-clear.show { display: block; }
+    .landing-search-clear:hover { color: #fff; }
+    .landing-search-results {
+      position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px;
+      background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px; max-height: 280px; overflow-y: auto; display: none;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+    .landing-search-results.show { display: block; }
+    .landing-search-results .result-item {
+      padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1); font-size: 15px; transition: background 0.15s;
+    }
+    .landing-search-results .result-item:last-child { border-bottom: none; }
+    .landing-search-results .result-item:hover, .landing-search-results .result-item.selected { background: rgba(59, 130, 246, 0.15); }
+    .landing-search-hint { font-size: 12px; color: rgba(148, 163, 184, 0.5); margin-top: 8px; margin-bottom: 28px; }
+    .landing-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; transition: opacity 0.3s; }
+    .landing-chips.dimmed { opacity: 0.5; }
+    .landing-chip {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+      background: transparent; border: none;
+      border-radius: 6px; color: rgba(226, 232, 240, 0.9); font-size: 14px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .landing-chip:hover { background: rgba(59, 130, 246, 0.15); }
+    .landing-hamburger {
+      position: absolute; top: 24px; right: 24px; width: 44px; height: 44px;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+      background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px; cursor: pointer; color: rgba(226, 232, 240, 0.8); z-index: 10;
+      transition: all 0.2s;
+    }
+    .landing-hamburger:hover { background: rgba(59, 130, 246, 0.2); }
+    .landing-hamburger span { display: block; width: 20px; height: 2px; background: currentColor; border-radius: 1px; }
   </style>
 </head>
-<body>
-  <div id="password-strip" class="password-strip">
-    <label>Режим наблюдателя. Введите пароль для полного доступа:</label>
-    <input type="password" id="admin-password" placeholder="Пароль" autocomplete="off">
-    <button type="button" id="admin-login-btn">Войти</button>
-  </div>
-  <div id="full-mode-bar" class="full-mode-bar" style="display: none;">
-    <span>Полный режим</span>
-    <button type="button" id="admin-logout-btn">Выйти</button>
-  </div>
-  <div id="loader" aria-hidden="true">
+<body id="main-body">
+  <div id="loader" aria-hidden="true" style="opacity:1;transition:opacity 0.4s ease;">
     <div class="loader-content">
       <div class="elevator-wrap">
         <div class="elevator-shaft-block">
@@ -2482,51 +2701,91 @@
       <span class="loader-text">Загрузка</span>
     </div>
   </div>
+  <div id="landing-screen" class="hidden">
+    <div class="landing-bg" id="landing-bg">
+      <div class="grad g1"></div>
+      <div class="grad g2"></div>
+      <div class="grad g3"></div>
+      <div class="grad g4"></div>
+    </div>
+    <button type="button" class="landing-hamburger" id="landing-hamburger" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="landing-content">
+      <h1 class="landing-title">Реестр по объектам капитального ремонта</h1>
+      <div class="landing-search-wrap">
+        <div class="landing-search-inner">
+          <input type="text" id="landing-search-input" placeholder="Найти раздел…" autocomplete="off">
+          <button type="button" class="landing-search-clear" id="landing-search-clear" aria-label="Очистить">×</button>
+        </div>
+        <div class="landing-search-results" id="landing-search-results"></div>
+      </div>
+      <p class="landing-search-hint">Начните вводить или выберите раздел ниже</p>
+      <p class="landing-search-hint" style="margin-top: -16px; margin-bottom: 16px; font-size: 11px;">↑↓ — выбор, Enter — открыть, Esc — закрыть</p>
+      <button type="button" class="landing-chip" id="landing-reestr-btn">Реестр</button>
+    </div>
+  </div>
+
+  <div id="main-app" style="display:none;">
+  <div id="password-strip" class="password-strip">
+    <label>Режим наблюдателя. Введите пароль для полного доступа:</label>
+    <input type="password" id="admin-password" placeholder="Пароль" autocomplete="off">
+    <button type="button" id="admin-login-btn">Войти</button>
+  </div>
+  <div id="full-mode-bar" class="full-mode-bar" style="display: none;">
+    <span>Полный режим</span>
+    <button type="button" id="admin-logout-btn">Выйти</button>
+  </div>
   <div class="registry-title" id="registry-title"><span class="registry-title-text">Реестр по объектам капитального ремонта</span></div>
 
   <div class="header">
-    <div class="hamburger" id="hamburger">
+    <div class="hamburger" id="hamburger" role="button" aria-label="Открыть меню" tabindex="0">
       <span></span>
       <span></span>
       <span></span>
     </div>
     <div class="search-wrap">
-      <input type="text" class="search-input" id="search-input" placeholder="Поиск..." autocomplete="off">
-      <div class="search-results" id="search-results"></div>
+      <input type="text" class="search-input" id="search-input" placeholder="Поиск..." autocomplete="off" aria-label="Поиск по объектам и документам">
+      <span class="search-shortcut-hint" style="display:none;" id="search-shortcut-hint">Ctrl+K</span>
+      <div class="search-results" id="search-results" role="listbox"></div>
     </div>
     <div class="selector-container">
       <div class="selector-wrapper" id="selector-wrapper">
-        <div class="selector-display" id="selector-display">Выберите объект...</div>
+        <div class="selector-display" id="selector-display" tabindex="0" role="button" aria-label="Выбор объекта">Выберите объект...</div>
         <div class="selector-list" id="selector-list"></div>
         <select class="selector selector-native" id="object-selector" aria-hidden="true" tabindex="-1">
           <option value="">Выберите объект...</option>
         </select>
       </div>
-      <button class="add-object-btn full-mode-only" id="add-object-btn">+</button>
+      <button class="add-object-btn full-mode-only" id="add-object-btn" aria-label="Добавить объект" title="Добавить объект">+</button>
     </div>
     <a href="#" class="dashboard-link" id="show-dashboard">dashboard</a>
+    <span class="header-badge overdue" id="header-overdue-badge" style="display:none;" title="Просроченные объекты">0</span>
+    <span class="save-indicator" id="save-indicator">Сохранено</span>
   </div>
   <div class="recent-objects" id="recent-objects"></div>
   <div class="deadline-reminders" id="deadline-reminders"></div>
 
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar" id="sidebar" role="navigation" aria-label="Боковое меню">
     <div class="sidebar-close" id="sidebar-close">&times;</div>
     <h3 class="sidebar-reestr" id="sidebar-reestr" style="cursor:pointer;margin-top:0;">Реестр</h3>
     <h3>Действия</h3>
     <ul>
       <li><a href="#" class="full-mode-only" id="btn-export">Экспорт в TXT</a></li>
       <li><a href="#" class="full-mode-only" id="btn-import">Импорт из TXT</a></li>
-      <li><a href="#" id="btn-comments">Комментарии</a></li>
-      <li><a href="#" id="show-calendar">Календарь</a></li>
-      <li><a href="#" id="show-reminders">Создать напоминание</a></li>
-      <li><a href="#" id="create-note">Создать заметку</a></li>
-      <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap">Дорожная карта объектов</a></li>
-      <li><a href="#" id="show-data" class="sidebar-item-data">Справочная информация</a></li>
-      <li><a href="#" id="show-dashboard-sidebar">Сводка</a></li>
-      <li><a href="#" id="show-thoughts">Доска мыслей</a></li>
+      <li><a href="#" id="btn-comments" title="Все комментарии к объектам">Комментарии</a></li>
+      <li><a href="#" id="show-calendar" title="Календарь событий">Календарь <span class="sidebar-count" id="sidebar-calendar-count"></span></a></li>
+      <li><a href="#" id="show-reminders" title="Умные напоминания">Создать напоминание <span class="sidebar-count" id="sidebar-reminders-count"></span></a></li>
+      <li><a href="#" id="create-note" title="Создать стикер-заметку">Создать заметку</a></li>
+      <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap" title="Дорожная карта по этапам">Дорожная карта объектов</a></li>
+      <li><a href="#" id="show-data" class="sidebar-item-data" title="Справочная информация по объектам">Справочная информация</a></li>
+      <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
+      <li><a href="#" id="show-thoughts" title="Доска для заметок и связей">Доска мыслей</a></li>
+      <li><a href="#" id="show-batch-edit" class="full-mode-only" title="Изменить тег/срок у нескольких объектов">Массовое изменение</a></li>
     </ul>
     <h3 class="collapsible" id="system-toggle">Система <span class="arrow">▶</span></h3>
     <ul class="collapsible-content" id="system-menu" style="display: none;">
+      <li><a href="#" id="show-archived" class="full-mode-only" title="Архивные объекты">Архив</a></li>
       <li><a href="#" id="btn-toggle-theme">Тема: как в системе</a></li>
       <li><a href="#" id="btn-toggle-cursor-style">Стиль выкл</a></li>
       <li><a href="#" id="btn-history">История изменений</a></li>
@@ -2561,6 +2820,15 @@
 
   <div class="toast" id="toast">Изменения сохранены</div>
 
+  <div class="custom-modal-overlay" id="custom-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="custom-modal-title">
+    <div class="custom-modal" id="custom-modal">
+      <h3 id="custom-modal-title">Заголовок</h3>
+      <p id="custom-modal-message"></p>
+      <input type="text" id="custom-modal-input" style="display:none;" placeholder="">
+      <div class="modal-buttons" id="custom-modal-buttons"></div>
+    </div>
+  </div>
+
   <div class="history-modal" id="history-modal">
     <div class="history-content">
       <span class="close-modal" id="close-history">&times;</span>
@@ -2585,6 +2853,35 @@
     </div>
   </div>
 
+  <div class="history-modal" id="archived-modal" style="display:none;">
+    <div class="history-content" style="max-width:480px;">
+      <span class="close-modal" id="close-archived">&times;</span>
+      <h2>Архив объектов</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Восстановить объект из архива</p>
+      <div id="archived-list"></div>
+    </div>
+  </div>
+  <div class="history-modal" id="batch-edit-modal" style="display:none;">
+    <div class="history-content" style="max-width:480px;">
+      <span class="close-modal" id="close-batch-edit">&times;</span>
+      <h2>Массовое изменение</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Выберите объекты и укажите новые значения:</p>
+      <div id="batch-objects-list" style="max-height:200px;overflow-y:auto;margin-bottom:16px;"></div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text-muted);">Метка:</label>
+        <select id="batch-tag" style="width:100%;padding:8px 12px;margin-top:4px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
+          <option value="">— не менять —</option>
+          <option value="Приоритет">Приоритет</option>
+          <option value="Завершён">Завершён</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text-muted);">Срок:</label>
+        <input type="date" id="batch-deadline" style="width:100%;padding:8px 12px;margin-top:4px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
+      </div>
+      <button type="button" id="batch-apply" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">Применить</button>
+    </div>
+  </div>
   <div class="history-modal reminders-modal" id="reminders-modal" style="display:none;">
     <div class="history-content" style="max-width:560px;">
       <span class="close-modal" id="close-reminders">&times;</span>
@@ -2625,6 +2922,7 @@
       <button type="button" class="roadmap-edit-btn full-mode-only" id="roadmap-edit-btn" title="Режим редактирования столбцов и ячеек">✎</button>
       <button type="button" class="roadmap-add-col-btn full-mode-only" id="roadmap-add-column" style="display:none;">Создать столбец</button>
       <button type="button" class="data-export-excel-btn full-mode-only" id="roadmap-export-excel">Экспорт в Excel</button>
+      <button type="button" class="data-export-excel-btn" id="roadmap-export-pdf" title="Печать / Сохранить как PDF" style="background:var(--text-muted);">PDF</button>
     </div>
     <div class="roadmap-wrap" id="roadmap-wrap">
       <table class="roadmap-table" id="roadmap-table">
@@ -2652,6 +2950,7 @@
           <button type="button" class="data-add-col-btn" id="data-add-column" style="display:none;">Добавить столбец</button>
           <button type="button" class="data-add-row-btn" id="data-add-row" style="display:none;">Добавить строку</button>
           <button type="button" class="data-export-excel-btn" id="data-export-excel">Экспорт в Excel</button>
+          <button type="button" class="data-export-excel-btn" id="data-export-pdf" title="Печать / Сохранить как PDF" style="background:var(--text-muted);">PDF</button>
         </div>
       </div>
     </div>
@@ -2681,12 +2980,33 @@
   </div>
 
   <div class="posts-container" id="posts-container">
-    <div class="empty-state" id="empty-state">Выберите объект из списка выше</div>
+    <div class="empty-state" id="empty-state">
+      <span class="empty-title">Выберите объект из списка выше</span>
+      <span>или создайте новый, либо откройте dashboard для сводки</span>
+      <div class="empty-actions">
+        <a href="#" id="empty-add-object" class="full-mode-only">+ Создать объект</a>
+        <a href="#" id="empty-show-dashboard">Dashboard</a>
+        <a href="#" id="empty-show-roadmap" class="btn-outline">Дорожная карта</a>
+      </div>
+      <span class="search-shortcut-hint">Нажмите Ctrl+K для быстрого поиска</span>
+    </div>
   </div>
 
   <div id="sticky-notes-container"></div>
+  </div><!-- /main-app -->
 
   <script>
+    const LANDING_SECTIONS = [
+      { id: 'main', title: 'Реестр объектов' },
+      { id: 'dashboard', title: 'Сводка (Dashboard)' },
+      { id: 'roadmap', title: 'Дорожная карта' },
+      { id: 'data', title: 'Справочная информация' },
+      { id: 'calendar', title: 'Календарь' },
+      { id: 'thoughts', title: 'Доска мыслей' },
+      { id: 'reminders', title: 'Создать напоминание' },
+      { id: 'comments', title: 'Комментарии' }
+    ];
+
     // === Markdown парсер ===
     function parseMarkdown(text) {
       return text
@@ -2726,13 +3046,171 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        if (loader) {
-          loader.classList.add('hidden');
-          setTimeout(() => loader.remove(), 400);
+      const mainBody = document.getElementById('main-body');
+      const mainApp = document.getElementById('main-app');
+      const landingScreen = document.getElementById('landing-screen');
+      const landingBg = document.getElementById('landing-bg');
+      const landingSearchInput = document.getElementById('landing-search-input');
+      const landingSearchResults = document.getElementById('landing-search-results');
+      const landingSearchClear = document.getElementById('landing-search-clear');
+      const landingReestrBtn = document.getElementById('landing-reestr-btn');
+      const landingHamburger = document.getElementById('landing-hamburger');
+
+      const loader = document.getElementById('loader');
+      if (mainBody) mainBody.classList.add('loader-visible');
+      function hideLoader() {
+        if (!loader) return;
+        loader.classList.add('hidden');
+        setTimeout(() => {
+          loader.remove();
+          if (landingScreen) landingScreen.classList.remove('hidden');
+          if (mainBody) { mainBody.classList.remove('loader-visible'); mainBody.classList.add('landing-visible'); }
+        }, 400);
+      }
+      setTimeout(hideLoader, 2500);
+
+      function hideLandingAndGoTo(viewId) {
+        landingScreen.classList.add('hidden');
+        mainApp.style.display = 'block';
+        mainBody.classList.remove('landing-visible');
+        if (viewId) {
+          if (viewId === 'main') document.querySelector('[data-view="main"]')?.click?.();
+          else if (viewId === 'roadmap') document.getElementById('show-roadmap')?.click?.();
+          else if (viewId === 'data') document.getElementById('show-data')?.click?.();
+          else if (viewId === 'calendar') document.getElementById('show-calendar')?.click?.();
+          else if (viewId === 'thoughts') document.getElementById('show-thoughts')?.click?.();
+          else if (viewId === 'dashboard') document.getElementById('show-dashboard')?.click?.();
+          else if (viewId === 'reminders') document.getElementById('show-reminders')?.click?.();
+          else if (viewId === 'comments') document.getElementById('btn-comments')?.click?.();
         }
-      }, 1050);
+      }
+
+      if (landingReestrBtn) landingReestrBtn.addEventListener('click', () => hideLandingAndGoTo('main'));
+
+      let landingSearchIndex = 0;
+      let landingSearchFiltered = [];
+
+      function filterLandingResults(q) {
+        const t = (q || '').trim().toLowerCase();
+        if (!t) return LANDING_SECTIONS.slice();
+        return LANDING_SECTIONS.filter(s => (s.title + ' ' + s.id).toLowerCase().includes(t));
+      }
+
+      function renderLandingSearchResults(items) {
+        landingSearchFiltered = items;
+        landingSearchIndex = 0;
+        landingSearchResults.innerHTML = items.map((s, i) => '<div class="result-item" data-index="' + i + '" data-view="' + s.id + '">' + s.title + '</div>').join('');
+        landingSearchResults.classList.toggle('show', items.length > 0);
+        landingSearchResults.querySelectorAll('.result-item').forEach((el, i) => {
+          el.classList.toggle('selected', i === 0);
+          el.addEventListener('click', () => {
+            const v = el.dataset.view;
+            hideLandingAndGoTo(v);
+            landingSearchInput.value = '';
+            landingSearchClear.classList.remove('show');
+            landingSearchResults.classList.remove('show');
+          });
+        });
+      }
+
+      landingSearchInput.addEventListener('input', () => {
+        const q = landingSearchInput.value;
+        landingSearchClear.classList.toggle('show', q.length > 0);
+        renderLandingSearchResults(filterLandingResults(q));
+      });
+
+      landingSearchInput.addEventListener('focus', () => {
+        const items = filterLandingResults(landingSearchInput.value);
+        if (items.length) renderLandingSearchResults(items);
+      });
+
+      landingSearchInput.addEventListener('blur', () => { setTimeout(() => { landingSearchResults.classList.remove('show'); }, 150); });
+
+      landingSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { landingSearchInput.value = ''; landingSearchClear.classList.remove('show'); landingSearchResults.classList.remove('show'); landingSearchInput.blur(); return; }
+        if (!landingSearchResults.classList.contains('show') || landingSearchFiltered.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); landingSearchIndex = Math.min(landingSearchIndex + 1, landingSearchFiltered.length - 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); landingSearchIndex = Math.max(landingSearchIndex - 1, 0); }
+        else if (e.key === 'Enter') {
+          e.preventDefault();
+          const s = landingSearchFiltered[landingSearchIndex];
+          if (s) { hideLandingAndGoTo(s.id); landingSearchInput.value = ''; landingSearchClear.classList.remove('show'); landingSearchResults.classList.remove('show'); }
+        }
+        landingSearchResults.querySelectorAll('.result-item').forEach((el, i) => el.classList.toggle('selected', i === landingSearchIndex));
+        landingSearchResults.querySelector('.result-item.selected')?.scrollIntoView({ block: 'nearest' });
+      });
+
+      landingSearchClear.addEventListener('click', () => { landingSearchInput.value = ''; landingSearchClear.classList.remove('show'); landingSearchResults.classList.remove('show'); landingSearchInput.focus(); });
+
+      landingHamburger.addEventListener('click', () => { hideLandingAndGoTo('main'); setTimeout(() => { document.getElementById('hamburger')?.click(); }, 50); });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!landingScreen || landingScreen.classList.contains('hidden')) return;
+        const w = window.innerWidth, h = window.innerHeight;
+        const x = (e.clientX / w - 0.5) * 24;
+        const y = (e.clientY / h - 0.5) * 24;
+        if (landingBg) { landingBg.style.setProperty('--mx', x + 'px'); landingBg.style.setProperty('--my', y + 'px'); }
+      });
+
+
+      const overlay = document.getElementById('custom-modal-overlay');
+      const modalTitle = document.getElementById('custom-modal-title');
+      const modalMsg = document.getElementById('custom-modal-message');
+      const modalInput = document.getElementById('custom-modal-input');
+      const modalBtns = document.getElementById('custom-modal-buttons');
+      function showAlert(msg, title = 'Уведомление') {
+        return new Promise(resolve => {
+          modalTitle.textContent = title;
+          modalMsg.textContent = msg;
+          modalMsg.style.display = 'block';
+          modalInput.style.display = 'none';
+          modalBtns.innerHTML = '<button type="button" class="btn-primary" id="modal-ok">OK</button>';
+          overlay.classList.add('show');
+          overlay.querySelector('#modal-ok').focus();
+          overlay.querySelector('#modal-ok').onclick = () => { overlay.classList.remove('show'); resolve(); };
+          overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove('show'); resolve(); } };
+        });
+      }
+      function showConfirm(msg, title = 'Подтверждение') {
+        return new Promise(resolve => {
+          modalTitle.textContent = title;
+          modalMsg.textContent = msg;
+          modalMsg.style.display = 'block';
+          modalInput.style.display = 'none';
+          modalBtns.innerHTML = '<button type="button" class="btn-secondary" id="modal-cancel">Отмена</button><button type="button" class="btn-danger" id="modal-ok">Да</button>';
+          overlay.classList.add('show');
+          overlay.querySelector('#modal-ok').focus();
+          overlay.querySelector('#modal-ok').onclick = () => { overlay.classList.remove('show'); resolve(true); };
+          overlay.querySelector('#modal-cancel').onclick = () => { overlay.classList.remove('show'); resolve(false); };
+          overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove('show'); resolve(false); } };
+        });
+      }
+      function showPrompt(msg, title = 'Ввод', placeholder = '') {
+        return new Promise(resolve => {
+          modalTitle.textContent = title;
+          modalMsg.textContent = msg;
+          modalMsg.style.display = 'block';
+          modalInput.style.display = 'block';
+          modalInput.placeholder = placeholder;
+          modalInput.value = '';
+          modalBtns.innerHTML = '<button type="button" class="btn-secondary" id="modal-cancel">Отмена</button><button type="button" class="btn-primary" id="modal-ok">OK</button>';
+          overlay.classList.add('show');
+          modalInput.focus();
+          const doResolve = (val) => { overlay.classList.remove('show'); resolve(val); };
+          overlay.querySelector('#modal-ok').onclick = () => doResolve(modalInput.value.trim());
+          overlay.querySelector('#modal-cancel').onclick = () => doResolve(null);
+          modalInput.onkeydown = e => { if (e.key === 'Enter') doResolve(modalInput.value.trim()); if (e.key === 'Escape') doResolve(null); };
+          overlay.onclick = e => { if (e.target === overlay) doResolve(null); };
+        });
+      }
+      function showToastError(msg) {
+        const t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('toast-error');
+        t.classList.add('show');
+        setTimeout(() => { t.classList.remove('show'); t.classList.remove('toast-error'); t.textContent = 'Изменения сохранены'; }, 3000);
+      }
 
       const registryTitle = document.getElementById('registry-title');
       const selector = document.getElementById('object-selector');
@@ -2761,9 +3239,15 @@
       let roadmapEditMode = false;
       let customTags = JSON.parse(localStorage.getItem('customTags') || '[]');
       let smartReminders = JSON.parse(localStorage.getItem('smartReminders')) || [];
+      let archivedObjects = JSON.parse(localStorage.getItem('archivedObjects') || '[]');
+      let pinnedObjectIds = JSON.parse(localStorage.getItem('pinnedObjectIds') || '[]');
+      let batchSelectedObjects = [];
       let isFullMode = sessionStorage.getItem('registryFullMode') === '1';
       const undoStack = [];
       const UNDO_MAX = 50;
+      function getActiveObjects() { return OBJECTS.filter(o => !archivedObjects.includes(o)); }
+      function savePinned() { localStorage.setItem('pinnedObjectIds', JSON.stringify(pinnedObjectIds)); }
+      function saveArchived() { localStorage.setItem('archivedObjects', JSON.stringify(archivedObjects)); }
 
       function updateObserverUI() {
         document.body.classList.toggle('observer-mode', !isFullMode);
@@ -3189,26 +3673,59 @@
         selectorDisplay.innerHTML = '<span class="selector-obj-name">' + escapeHtml(addr) + '</span>' + getSelectorTagHtml(tag);
       }
 
+      function extractCity(addr) {
+        const m = addr.match(/г\.\s*([^,]+)/);
+        return m ? m[1].trim() : 'Другие';
+      }
       function fillSelectorList() {
-        selectorList.innerHTML = '';
-        selectorOptionIndex = OBJECTS.indexOf(selector.value);
-        if (selectorOptionIndex < 0) selectorOptionIndex = 0;
-        OBJECTS.forEach(obj => {
-          const tag = data[obj]?.tag || '';
-          const opt = document.createElement('div');
-          opt.className = 'selector-option';
-          opt.dataset.addr = obj;
-          opt.innerHTML = '<span class="selector-obj-name">' + escapeHtml(obj) + '</span>' + getSelectorTagHtml(tag);
-          opt.addEventListener('click', () => {
-            selector.value = obj;
-            updateSelectorDisplay();
-            selectorWrapper.classList.remove('open');
-            selector.dispatchEvent(new Event('change', { bubbles: true }));
-          });
-          selectorList.appendChild(opt);
+        const list = getActiveObjects().slice();
+        list.sort((a, b) => {
+          const pinA = pinnedObjectIds.indexOf(a);
+          const pinB = pinnedObjectIds.indexOf(b);
+          if (pinA >= 0 && pinB < 0) return -1;
+          if (pinA < 0 && pinB >= 0) return 1;
+          if (pinA >= 0 && pinB >= 0) return pinA - pinB;
+          return a.localeCompare(b);
         });
-        const opts = selectorList.querySelectorAll('.selector-option');
+        const byCity = {};
+        list.forEach(obj => { const c = extractCity(obj); if (!byCity[c]) byCity[c] = []; byCity[c].push(obj); });
+        const cities = Object.keys(byCity).sort();
+        selectorList.innerHTML = '';
+        selectorOptionIndex = list.indexOf(selector.value);
+        if (selectorOptionIndex < 0) selectorOptionIndex = 0;
+        cities.forEach(city => {
+          if (cities.length > 1) {
+            const label = document.createElement('div');
+            label.className = 'selector-option object-group-label';
+            label.textContent = city;
+            label.style.cursor = 'default';
+            selectorList.appendChild(label);
+          }
+          byCity[city].forEach(obj => {
+            const tag = data[obj]?.tag || '';
+            const isPinned = pinnedObjectIds.includes(obj);
+            const opt = document.createElement('div');
+            opt.className = 'selector-option';
+            opt.dataset.addr = obj;
+            opt.innerHTML = '<span class="selector-obj-name">' + escapeHtml(obj) + '</span>' + (isPinned ? '<span class="pinned-badge">📌</span>' : '') + getSelectorTagHtml(tag);
+            opt.addEventListener('click', () => {
+              selector.value = obj;
+              updateSelectorDisplay();
+              selectorWrapper.classList.remove('open');
+              selector.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            selectorList.appendChild(opt);
+          });
+        });
+        const opts = selectorList.querySelectorAll('.selector-option[data-addr]');
+        const idx = Array.from(opts).findIndex(o => o.dataset.addr === selector.value);
+        selectorOptionIndex = idx >= 0 ? idx : 0;
         opts.forEach((el, i) => el.classList.toggle('selected', i === selectorOptionIndex));
+        if (list.length && !list.includes(selector.value)) {
+          selector.value = list[0];
+          updateSelectorDisplay();
+          selector.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       }
 
       selectorDisplay.addEventListener('click', (e) => {
@@ -3224,7 +3741,7 @@
       // === Заполнить селектор (нативный select для значения) ===
       function populateSelector() {
         selector.innerHTML = '<option value="">Выберите объект...</option>';
-        OBJECTS.forEach(obj => {
+        getActiveObjects().forEach(obj => {
           const opt = document.createElement('option');
           opt.value = obj;
           opt.textContent = obj;
@@ -3235,7 +3752,7 @@
       populateSelector();
 
       // === Режим наблюдателя / полный режим ===
-      document.getElementById('admin-login-btn').addEventListener('click', () => {
+      document.getElementById('admin-login-btn').addEventListener('click', async () => {
         const pwd = document.getElementById('admin-password');
         if (pwd && pwd.value === 'grossadmin') {
           isFullMode = true;
@@ -3243,7 +3760,7 @@
           pwd.value = '';
           updateObserverUI();
         } else {
-          alert('Неверный пароль.');
+          await showAlert('Неверный пароль.', 'Ошибка');
         }
       });
       document.getElementById('admin-password').addEventListener('keydown', (e) => {
@@ -3257,13 +3774,12 @@
       updateObserverUI();
 
       // === Добавить объект ===
-      addObjectBtn.addEventListener('click', () => {
-        const newObjName = prompt('Введите название нового объекта:');
-        if (newObjName && newObjName.trim()) {
+      addObjectBtn.addEventListener('click', async () => {
+        const newObjName = await showPrompt('Введите название нового объекта:', 'Новый объект', 'ул. Примерная, 1');
+        if (newObjName) {
           const cleanName = newObjName.trim();
           if (!OBJECTS.includes(cleanName)) {
             OBJECTS.push(cleanName);
-            // Сохраняем в localStorage
             localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
             const opt = document.createElement('option');
             opt.value = cleanName;
@@ -3274,7 +3790,7 @@
             renderObject(cleanName);
             showToast();
           } else {
-            alert('Объект с таким названием уже существует.');
+            await showAlert('Объект с таким названием уже существует.', 'Ошибка');
           }
         }
       });
@@ -3324,7 +3840,7 @@
       function renderRecentObjects() {
         const wrap = document.getElementById('recent-objects');
         if (!wrap) return;
-        const ids = (JSON.parse(localStorage.getItem('recentObjectIds') || '[]')).filter(a => OBJECTS.includes(a));
+        const ids = (JSON.parse(localStorage.getItem('recentObjectIds') || '[]')).filter(a => getActiveObjects().includes(a));
         wrap.innerHTML = '';
         ids.forEach(addr => {
           const objTag = data[addr]?.tag || '';
@@ -3346,7 +3862,7 @@
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'recent-object-btn';
-          btn.innerHTML = escapeHtml(addr) + tagHtml +
+          btn.innerHTML = escapeHtml(addr) + (pinnedObjectIds.includes(addr) ? '<span class="pinned-badge">📌</span>' : '') + tagHtml +
             (objDeadline ? `<span class="obj-deadline ${deadlineClass}">${formatDateRu(objDeadline)}</span>` : '');
           btn.addEventListener('click', () => {
             calendarContainer.style.display = 'none';
@@ -3373,11 +3889,12 @@
         if (!wrap) return;
         const today = new Date().toISOString().slice(0, 10);
         const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
-        const overdueObj = OBJECTS.filter(addr => {
+        const activeObjs = getActiveObjects();
+        const overdueObj = activeObjs.filter(addr => {
           const d = data[addr]?.deadline || '';
           return d && d < today;
         });
-        const thisWeekObj = OBJECTS.filter(addr => {
+        const thisWeekObj = activeObjs.filter(addr => {
           const d = data[addr]?.deadline || '';
           return d && d >= today && d <= weekEnd;
         });
@@ -3482,6 +3999,39 @@
             wrap.appendChild(el);
           });
         }
+        const timelineWrap = document.createElement('div');
+        timelineWrap.className = 'timeline-mini';
+        timelineWrap.title = 'Шкала сроков на 14 дней';
+        for (let i = -3; i <= 10; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() + i);
+          const dateKey = d.toISOString().slice(0, 10);
+          const hasDeadline = activeObjs.some(a => data[a]?.deadline === dateKey) || (smartReminders || []).some(r => r.date === dateKey);
+          const isOverdue = dateKey < today;
+          const isSoon = dateKey >= today && dateKey <= weekEnd;
+          const bar = document.createElement('div');
+          bar.className = 'bar' + (hasDeadline ? (isOverdue ? ' overdue' : isSoon ? ' soon' : ' has-deadline') : '');
+          bar.style.height = hasDeadline ? '18px' : '6px';
+          timelineWrap.appendChild(bar);
+        }
+        wrap.appendChild(timelineWrap);
+        updateHeaderOverdue();
+        updateSidebarCounts();
+      }
+      function updateHeaderOverdue() {
+        const badge = document.getElementById('header-overdue-badge');
+        if (!badge) return;
+        const today = new Date().toISOString().slice(0, 10);
+        const count = getActiveObjects().filter(a => data[a]?.deadline && data[a].deadline < today).length + (smartReminders || []).filter(r => r.date && r.date < today).length;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+        badge.onclick = () => count > 0 && (document.getElementById('deadline-reminders')?.scrollIntoView?.({ behavior: 'smooth' }));
+      }
+      function updateSidebarCounts() {
+        const calCount = document.getElementById('sidebar-calendar-count');
+        const remCount = document.getElementById('sidebar-reminders-count');
+        if (calCount) { const n = Object.keys(calendarData || {}).length; calCount.textContent = n ? `(${n})` : ''; }
+        if (remCount) { const n = (smartReminders || []).filter(r => r.date && r.date >= new Date().toISOString().slice(0, 10)).length; remCount.textContent = n ? `(${n})` : ''; }
       }
 
       // === Модалка «Умные напоминания» ===
@@ -3509,7 +4059,7 @@
         e.preventDefault();
         const sel = document.getElementById('reminder-obj');
         sel.innerHTML = '<option value="">— все —</option>';
-        OBJECTS.forEach(addr => { const o = document.createElement('option'); o.value = addr; o.textContent = addr; sel.appendChild(o); });
+        getActiveObjects().forEach(addr => { const o = document.createElement('option'); o.value = addr; o.textContent = addr; sel.appendChild(o); });
         renderRemindersList();
         remindersModal.style.display = 'flex';
         hamburger.classList.remove('open');
@@ -3535,7 +4085,7 @@
 
       // При загрузке: показать последний выбранный объект и блок недавних
       renderRecentObjects();
-      if (lastSelectedObject && OBJECTS.includes(lastSelectedObject)) {
+      if (lastSelectedObject && getActiveObjects().includes(lastSelectedObject)) {
         calendarContainer.style.display = 'none';
         dataContainer.style.display = 'none';
         roadmapContainer.style.display = 'none';
@@ -3656,11 +4206,19 @@
         if (!addr) {
           container.innerHTML = '';
           emptyState.style.display = 'block';
+          if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', null);
+          history.replaceState(null, '', location.pathname + location.search);
           return;
         }
+        history.replaceState(null, '', location.pathname + location.search + '#object/' + encodeURIComponent(addr));
+        calendarContainer.style.display = 'none';
+        dataContainer.style.display = 'none';
+        roadmapContainer.style.display = 'none';
+        container.style.display = 'block';
         emptyState.style.display = 'none';
         addToRecent(addr);
         renderObject(addr);
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', addr);
       });
 
       function renderObject(addr) {
@@ -3703,13 +4261,27 @@
           else if (objDeadline <= new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10)) deadlineClass = 'soon';
         }
         const deadlineBadge = objDeadline ? `<span class="object-deadline-badge ${deadlineClass}">Срок: ${formatDateRu(objDeadline)}${objDeadline < today ? ' (просрочено)' : ''}</span>` : '';
+        const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+        const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+        const mainState = data[addr]?.main || [];
+        const extraState = data[addr]?.extra || [];
+        const totalDocs = mainList.length + extraList.length;
+        const checkedCount = [...mainList.map((_, i) => mainState[i]?.checked), ...extraList.map((_, i) => extraState[i]?.checked)].filter(Boolean).length;
+        const progressPct = totalDocs ? Math.round((checkedCount / totalDocs) * 100) : 0;
+        const progressBar = `<div class="doc-progress-bar" title="${checkedCount}/${totalDocs} документов"><div class="progress-fill" style="width:${progressPct}%"></div></div><span class="doc-progress-text">${checkedCount}/${totalDocs}</span>`;
         card.innerHTML += `
           <div class="post-header">
             <div>
               <span>${escapeHtml(addr)}</span>${tagBadge}${deadlineBadge}
+              <button type="button" class="quick-reminder-btn" data-addr="${escapeHtml(addr)}" title="Добавить напоминание по объекту">📅</button>
+              <button type="button" class="quick-reminder-btn pin-object-btn full-mode-only" data-addr="${escapeHtml(addr)}" title="Закрепить объект">📌</button>
+              <button type="button" class="quick-reminder-btn duplicate-object-btn full-mode-only" data-addr="${escapeHtml(addr)}" title="Дублировать объект">⧉</button>
+              <button type="button" class="quick-reminder-btn copy-status-btn full-mode-only" data-addr="${escapeHtml(addr)}" title="Скопировать статус документов с другого объекта">📋</button>
               <button type="button" class="delete-mode-pencil" id="delete-mode-pencil-${addr}" title="Режим удаления ячеек и комментарии">✎</button>
-              <button type="button" class="delete-object-btn" id="delete-object-${addr}" title="Удалить объект из списка">Удалить объект</button>
-              <div class="object-meta">
+              <button type="button" class="delete-object-btn full-mode-only" id="delete-object-${addr}" title="Отправить в архив">В архив</button>
+              <button type="button" class="quick-reminder-btn object-export-pdf-btn" data-addr="${escapeHtml(addr)}" title="Печать / PDF объекта">PDF</button>
+              <div class="object-meta" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+              <div>${progressBar}</div>
                 <div class="tag-select-wrap">
                   <label>Метка:</label>
                   <select class="object-tag-select" id="tag-${addr}">
@@ -3730,6 +4302,7 @@
           </div>
           <div class="delete-mode-controls" style="display:none;" id="delete-controls-${addr}" data-addr="${escapeHtml(addr)}">
             <button class="add-doc-btn create-doc-btn" data-addr="${escapeHtml(addr)}" title="Добавить новый документ">Создать документ</button>
+            <button class="bulk-docs-btn bulk-mark-all-btn" data-addr="${escapeHtml(addr)}" title="Отметить все документы как выполненные">Отметить всё</button>
             <button class="secondary cancel-delete-mode-btn" id="cancel-delete-mode-${addr}">Отмена</button>
             <button class="confirm-delete-selected-btn" id="confirm-delete-selected-${addr}">Удалить выбранные</button>
           </div>
@@ -3761,6 +4334,85 @@
             if (block) block.classList.toggle('collapsed');
           });
         });
+
+        const quickReminderBtn = card.querySelector('.quick-reminder-btn');
+        if (quickReminderBtn) {
+          quickReminderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const sel = document.getElementById('reminder-obj');
+            if (sel) { sel.innerHTML = '<option value="">— все —</option>'; getActiveObjects().forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; o.selected = a === addr; sel.appendChild(o); }); }
+            renderRemindersList();
+            remindersModal.style.display = 'flex';
+            hamburger.classList.remove('open');
+            sidebar.classList.remove('open');
+          });
+        }
+        const pinBtn = card.querySelector('.pin-object-btn');
+        if (pinBtn) pinBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const i = pinnedObjectIds.indexOf(addr);
+          if (i >= 0) pinnedObjectIds.splice(i, 1); else pinnedObjectIds.push(addr);
+          savePinned();
+          populateSelector();
+          fillSelectorList();
+          renderRecentObjects();
+          showToast();
+        });
+        const dupBtn = card.querySelector('.duplicate-object-btn');
+        if (dupBtn) dupBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const newName = await showPrompt('Название нового объекта:', 'Дублировать', addr);
+          if (!newName || !newName.trim()) return;
+          const name = newName.trim();
+          if (OBJECTS.includes(name)) { await showAlert('Объект с таким названием уже существует.', 'Ошибка'); return; }
+          OBJECTS.push(name);
+          data[name] = JSON.parse(JSON.stringify(data[addr] || {}));
+          if (data[name].mainDocs) data[name].mainDocs = data[name].mainDocs.slice();
+          if (data[name].extraDocs) data[name].extraDocs = data[name].extraDocs?.slice?.() || [];
+          if (data[name].main) data[name].main = JSON.parse(JSON.stringify(data[name].main || []));
+          if (data[name].extra) data[name].extra = JSON.parse(JSON.stringify(data[name].extra || []));
+          personsData[name] = personsData[addr] ? JSON.parse(JSON.stringify(personsData[addr])) : {};
+          roadmapData[name] = roadmapData[addr] ? JSON.parse(JSON.stringify(roadmapData[addr])) : {};
+          roadmapNotes[name] = roadmapNotes[addr] ? JSON.parse(JSON.stringify(roadmapNotes[addr])) : {};
+          localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
+          localStorage.setItem('registryData', JSON.stringify(data));
+          localStorage.setItem('personsData', JSON.stringify(personsData));
+          localStorage.setItem('roadmapData', JSON.stringify(roadmapData));
+          localStorage.setItem('roadmapNotes', JSON.stringify(roadmapNotes));
+          populateSelector();
+          selector.value = name;
+          updateSelectorDisplay();
+          renderObject(name);
+          addToRecent(name);
+          showToast();
+        });
+        const copyStatusBtn = card.querySelector('.copy-status-btn');
+        if (copyStatusBtn) copyStatusBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const others = getActiveObjects().filter(a => a !== addr);
+          if (others.length === 0) { showAlert('Нет других объектов для копирования.', 'Ошибка'); return; }
+          const popup = document.createElement('div');
+          popup.className = 'add-tag-popup';
+          popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;';
+          popup.innerHTML = '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:320px;"><h3 style="margin-bottom:16px;">Скопировать статус документов</h3><p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">С какого объекта скопировать?</p><select id="copy-source-sel" style="width:100%;padding:10px 14px;margin-bottom:20px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">' + others.map(a => '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>').join('') + '</select><div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" class="btn-secondary" id="copy-cancel">Отмена</button><button type="button" class="btn-primary" id="copy-ok">Копировать</button></div></div>';
+          document.body.appendChild(popup);
+          const close = (src) => { popup.remove(); if (src) {
+            const srcData = data[src] || {};
+            data[addr] = data[addr] || {};
+            data[addr].main = srcData.main ? JSON.parse(JSON.stringify(srcData.main)) : [];
+            data[addr].extra = srcData.extra ? JSON.parse(JSON.stringify(srcData.extra)) : [];
+            data[addr].mainDocs = srcData.mainDocs ? srcData.mainDocs.slice() : (MAIN_DOCS.slice());
+            data[addr].extraDocs = srcData.extraDocs ? srcData.extraDocs.slice() : (EXTRA_DOCS?.slice?.() || []);
+            localStorage.setItem('registryData', JSON.stringify(data));
+            renderObject(addr);
+            showToast();
+          }};
+          popup.querySelector('#copy-ok').onclick = () => close(popup.querySelector('#copy-source-sel').value);
+          popup.querySelector('#copy-cancel').onclick = () => close(null);
+          popup.onclick = ev => { if (ev.target === popup) close(null); };
+        });
+        const pdfBtn = card.querySelector('.object-export-pdf-btn');
+        if (pdfBtn) pdfBtn.addEventListener('click', (e) => { e.stopPropagation(); container.style.display = 'block'; roadmapContainer.style.display = 'none'; dataContainer.style.display = 'none'; calendarContainer.style.display = 'none'; renderObject(addr); setTimeout(() => window.print(), 100); });
 
         const deleteModePencil = card.querySelector('.delete-mode-pencil');
         const deleteControls = card.querySelector('.delete-mode-controls');
@@ -3816,7 +4468,7 @@
             popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(); });
             popup.querySelector('#create-doc-save').addEventListener('click', () => {
               const name = nameInput.value.trim();
-              if (!name) { alert('Введите название документа.'); return; }
+              if (!name) { showAlert('Введите название документа.', 'Ошибка'); return; }
               const packet = packetSelect.value;
               if (!data[addr]) data[addr] = { main: [], extra: [] };
               data[addr].main = data[addr].main || [];
@@ -3843,20 +4495,12 @@
 
         const deleteObjectBtn = card.querySelector('.delete-object-btn');
         if (deleteObjectBtn) {
-          deleteObjectBtn.addEventListener('click', (e) => {
+          deleteObjectBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            if (!confirm(`Удалить объект «${addr}» из списка? Данные объекта будут удалены.`)) return;
-            const idx = OBJECTS.indexOf(addr);
-            if (idx !== -1) OBJECTS.splice(idx, 1);
-            delete data[addr];
-            delete personsData[addr];
-            delete roadmapData[addr];
-            delete roadmapNotes[addr];
-            localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
-            localStorage.setItem('registryData', JSON.stringify(data));
-            localStorage.setItem('personsData', JSON.stringify(personsData));
-            localStorage.setItem('roadmapData', JSON.stringify(roadmapData));
-            localStorage.setItem('roadmapNotes', JSON.stringify(roadmapNotes));
+            const ok = await showConfirm(`Отправить объект «${addr}» в архив? Данные сохранятся.`, 'В архив');
+            if (!ok) return;
+            if (!archivedObjects.includes(addr)) archivedObjects.push(addr);
+            saveArchived();
             populateSelector();
             updateSelectorDisplay();
             renderRecentObjects();
@@ -3929,7 +4573,7 @@
                 const name = nameInput.value.trim();
                 if (!name) return;
                 const color = colorHex.value || colorInput.value;
-                if (customTags.some(t => t.name === name)) { alert('Тег с таким названием уже есть.'); return; }
+                if (customTags.some(t => t.name === name)) { showAlert('Тег с таким названием уже есть.', 'Ошибка'); return; }
                 customTags.push({ name, color });
                 localStorage.setItem('customTags', JSON.stringify(customTags));
                 pushUndo({ type: 'tag', addr, oldTag: data[addr]?.tag || '' });
@@ -4014,6 +4658,7 @@
         }
       }
 
+      let lastDocItemClicked = null;
       function renderDocs(container, docs, addr, type, data) {
         if (!container) return;
         const state = data[addr]?.[type] || Array(docs.length).fill({ checked: false, comment: '' });
@@ -4051,22 +4696,52 @@
               return;
             }
             if (e.target.tagName === 'TEXTAREA' || e.target.classList.contains('comment-preview')) return;
-            const wasChecked = item.classList.contains('checked');
-            item.classList.toggle('checked');
-            const checked = item.classList.contains('checked');
-            const comment = item.querySelector('.comment-input').value;
-            updateData(addr, type, idx, checked, comment, wasChecked);
+            const items = Array.from(container.querySelectorAll('.doc-item'));
+            const clickIdx = items.indexOf(item);
+            if (e.shiftKey && lastDocItemClicked && lastDocItemClicked.addr === addr && lastDocItemClicked.type === type) {
+              const lastIdx = lastDocItemClicked.idx;
+              const [lo, hi] = lastIdx <= clickIdx ? [lastIdx, clickIdx] : [clickIdx, lastIdx];
+              const targetChecked = !item.classList.contains('checked');
+              for (let i = lo; i <= hi; i++) {
+                const it = items[i];
+                if (!it) continue;
+                it.classList.toggle('checked', targetChecked);
+                const cmt = it.querySelector('.comment-input')?.value || '';
+                updateData(addr, type, i, targetChecked, cmt, !targetChecked);
+              }
+            } else {
+              const wasChecked = item.classList.contains('checked');
+              item.classList.toggle('checked');
+              const checked = item.classList.contains('checked');
+              const comment = item.querySelector('.comment-input').value;
+              updateData(addr, type, idx, checked, comment, wasChecked);
+              lastDocItemClicked = { addr, type, idx };
+            }
           });
 
           const commentInput = item.querySelector('.comment-input');
           const commentPreview = item.querySelector('.comment-preview');
           if (!isFullMode && commentInput) commentInput.readOnly = true;
 
+          item.addEventListener('dblclick', e => {
+            if (!isFullMode) return;
+            if (e.target.tagName === 'TEXTAREA' || e.target.classList.contains('comment-preview')) return;
+            const cardPost = item.closest('.post');
+            const deleteControls = cardPost?.querySelector('.delete-mode-controls');
+            if (deleteControls && deleteControls.style.display === 'flex') return;
+            if (commentInput) {
+              commentInput.style.display = 'block';
+              if (commentPreview) commentPreview.style.display = 'none';
+              commentInput.focus();
+            }
+          });
+
           if (commentInput) {
             commentInput.addEventListener('blur', () => {
+              if (commentPreview) { commentPreview.style.display = ''; commentPreview.innerHTML = parseMarkdown(commentInput.value); }
+              commentInput.style.display = 'none';
               const checked = item.classList.contains('checked');
               const comment = commentInput.value;
-              if (commentPreview) commentPreview.innerHTML = parseMarkdown(comment);
               updateData(addr, type, idx, checked, comment, null, true);
             });
             commentInput.addEventListener('input', () => {
@@ -4094,10 +4769,26 @@
 
           const cancelBtn = cardEl.querySelector('.cancel-delete-mode-btn');
           const confirmBtn = cardEl.querySelector('.confirm-delete-selected-btn');
+          const bulkMarkBtn = cardEl.querySelector('.bulk-mark-all-btn');
           if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteMode);
-          if (confirmBtn) confirmBtn.addEventListener('click', () => {
+          if (bulkMarkBtn) bulkMarkBtn.addEventListener('click', () => {
+            if (!data[addr]) data[addr] = { main: [], extra: [] };
+            const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+            const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+            data[addr].main = data[addr].main || [];
+            data[addr].extra = data[addr].extra || [];
+            ensureArrayLength(data[addr].main, mainList.length);
+            ensureArrayLength(data[addr].extra, extraList.length);
+            for (let i = 0; i < mainList.length; i++) data[addr].main[i] = { ...(data[addr].main[i] || {}), checked: true };
+            for (let i = 0; i < extraList.length; i++) data[addr].extra[i] = { ...(data[addr].extra[i] || {}), checked: true };
+            localStorage.setItem('registryData', JSON.stringify(data));
+            cardEl.querySelectorAll('.doc-item').forEach(el => el.classList.add('checked'));
+            renderObject(addr);
+            showToast();
+          });
+          if (confirmBtn) confirmBtn.addEventListener('click', async () => {
             const card = deleteControlsEl ? deleteControlsEl.closest('.post') : null;
-            if (card) confirmDeleteSelectedBoth(addr, card);
+            if (card) await confirmDeleteSelectedBoth(addr, card);
           });
         }
       }
@@ -4107,7 +4798,7 @@
       }
 
       // Удаление документов только у выбранного объекта (не глобально)
-      function confirmDeleteSelectedBoth(addr, card) {
+      async function confirmDeleteSelectedBoth(addr, card) {
         const mainDiv = card.querySelector('.docs-main');
         const extraDiv = card.querySelector('.docs-extra');
         if (!mainDiv && !extraDiv) return;
@@ -4116,12 +4807,11 @@
         const total = mainSelected.length + extraSelected.length;
 
         if (total === 0) {
-          alert('Не выбрано ни одного документа.');
+          showAlert('Не выбрано ни одного документа.', 'Ошибка');
           return;
         }
-        if (!confirm(`Вы уверены, что хотите удалить ${total} документов у этого объекта?`)) {
-          return;
-        }
+        const ok = await showConfirm(`Вы уверены, что хотите удалить ${total} документов у этого объекта?`, 'Удалить документы');
+        if (!ok) return;
 
         pushUndo({
           type: 'docs',
@@ -4197,6 +4887,8 @@
 
       function showToast() {
         toast.classList.add('show');
+        const ind = document.getElementById('save-indicator');
+        if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 2000); }
         setTimeout(() => toast.classList.remove('show'), 2000);
       }
 
@@ -4372,6 +5064,7 @@
         container.style.display = 'none';
         emptyState.style.display = 'none';
         renderCalendar();
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('calendar', null);
       });
 
       // === Дорожная карта объектов ===
@@ -4433,7 +5126,7 @@
         }
 
         roadmapTbody.innerHTML = '';
-        OBJECTS.forEach((addr, index) => {
+        getActiveObjects().forEach((addr, index) => {
           if (!roadmapData[addr]) roadmapData[addr] = {};
           if (!roadmapNotes[addr]) roadmapNotes[addr] = {};
           const row = document.createElement('tr');
@@ -4527,6 +5220,7 @@
         emptyState.style.display = 'none';
         roadmapContainer.style.display = 'block';
         renderRoadmap();
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('roadmap', null);
       });
 
       // === Экспорт дорожной карты в Excel ===
@@ -4540,7 +5234,7 @@
         });
         headerRow += '</tr>';
         let bodyRows = '';
-        OBJECTS.forEach((addr, index) => {
+        getActiveObjects().forEach((addr, index) => {
           const rd = roadmapData[addr] || {};
           const rn = roadmapNotes[addr] || {};
           bodyRows += '<tr>';
@@ -4584,10 +5278,13 @@
         showToast();
       });
 
+      document.getElementById('roadmap-export-pdf')?.addEventListener('click', () => window.print());
+      document.getElementById('data-export-pdf')?.addEventListener('click', () => window.print());
+
       // === Кнопка "Данные" ===
       function populateDataSelector() {
         dataObjectSelect.innerHTML = '<option value="">Выберите объект...</option>';
-        OBJECTS.forEach(obj => {
+        getActiveObjects().forEach(obj => {
           const opt = document.createElement('option');
           opt.value = obj;
           opt.textContent = obj;
@@ -4794,6 +5491,7 @@
         populateDataSelector();
         const currentAddr = dataObjectSelect.value;
         renderDataTable(currentAddr || null);
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('data', currentAddr || null);
       });
 
       dataObjectSelect.addEventListener('change', () => {
@@ -4803,7 +5501,7 @@
       document.getElementById('data-export-excel').addEventListener('click', () => {
         const addr = dataObjectSelect.value;
         if (!addr) {
-          alert('Сначала выберите объект.');
+          showAlert('Сначала выберите объект.', 'Ошибка');
           return;
         }
         const rowData = personsData[addr] || {};
@@ -4906,13 +5604,13 @@
         }).length;
         const commissionCol = roadmapColumns.find(c => c.name === 'Комиссия');
         const commissionCount = commissionCol ? OBJECTS.filter(addr => roadmapData[addr] && roadmapData[addr][commissionCol.id]).length : 0;
-        let html = '<div class="dashboard-cards">';
-        html += `<div class="dashboard-card"><div class="number">${priorityCount}</div><div class="label">Приоритет</div></div>`;
-        html += `<div class="dashboard-card"><div class="number">${overdueCount}</div><div class="label">Просрочено</div></div>`;
-        html += `<div class="dashboard-card"><div class="number">${commissionCount}</div><div class="label">На этапе Комиссия</div></div>`;
-        html += `<div class="dashboard-card"><div class="number">${OBJECTS.length}</div><div class="label">Всего объектов</div></div>`;
-        html += '</div>';
-        OBJECTS.forEach(addr => {
+        let html = '<div class="dashboard-stats">';
+        html += `<div class="dashboard-stat-card priority"><div class="number">${priorityCount}</div><div class="label">Приоритет</div></div>`;
+        html += `<div class="dashboard-stat-card overdue"><div class="number">${overdueCount}</div><div class="label">Просрочено</div></div>`;
+        html += `<div class="dashboard-stat-card commission"><div class="number">${commissionCount}</div><div class="label">На этапе Комиссия</div></div>`;
+        html += `<div class="dashboard-stat-card total"><div class="number">${OBJECTS.length}</div><div class="label">Всего объектов</div></div>`;
+        html += '</div><div class="dashboard-section-title">Объекты и документы</div><div class="dashboard-objects-list">';
+        getActiveObjects().forEach(addr => {
           const objData = data[addr] || { main: [], extra: [] };
           const mainList = Array.isArray(objData?.mainDocs) ? objData.mainDocs : MAIN_DOCS;
           const extraList = Array.isArray(objData?.extraDocs) ? objData.extraDocs : EXTRA_DOCS;
@@ -4920,17 +5618,33 @@
             ...mainList.map((t, i) => ({ type: 'main', idx: i, text: t, checked: objData.main?.[i]?.checked || false })),
             ...extraList.map((t, i) => ({ type: 'extra', idx: i, text: t, checked: objData.extra?.[i]?.checked || false }))
           ];
-          html += `<div class="package-title">Пакет документов: ${addr}</div>`;
-          html += `<div class="doc-package">`;
+          const total = allDocs.length;
+          const checked = allDocs.filter(d => d.checked).length;
+          const pct = total ? Math.round((checked / total) * 100) : 0;
+          const tag = objData.tag || '';
+          const tagCls = tag === 'Приоритет' ? 'tag-priority' : tag === 'Завершён' ? 'tag-done' : '';
+          html += `<div class="dashboard-object-row" data-addr="${escapeHtml(addr)}">`;
+          html += `<div class="obj-name">${escapeHtml(addr)}${tag ? `<span class="obj-tag ${tagCls}">${escapeHtml(tag)}</span>` : ''}</div>`;
+          html += `<div class="obj-progress"><div>${checked}/${total}</div><div class="obj-progress-bar"><div class="fill ${pct === 100 ? '' : pct > 0 ? 'partial' : 'empty'}" style="width:${pct}%"></div></div></div>`;
+          html += `<div style="font-size:12px;color:var(--text-muted);">${pct}%</div>`;
+          html += `</div>`;
+          html += `<div class="dashboard-package-section">`;
+          html += `<div class="dashboard-package-title">${escapeHtml(addr)}</div>`;
+          html += `<div class="dashboard-doc-grid">`;
           allDocs.forEach((doc, i) => {
             const num = doc.type === 'main' ? i + 1 : mainList.length + i + 1;
-            html += `<div class="doc-card ${doc.checked ? 'checked' : ''}">
-              <span class="num">${num}.</span>${doc.text}
-            </div>`;
+            html += `<div class="dashboard-doc-card ${doc.checked ? 'checked' : ''}"><span class="num">${num}.</span><span>${escapeHtml(doc.text)}</span></div>`;
           });
-          html += `</div>`;
+          html += `</div></div>`;
         });
+        html += '</div>';
         statsContent.innerHTML = html;
+        statsContent.querySelectorAll('.dashboard-object-row').forEach(row => {
+          row.addEventListener('click', () => {
+            const a = row.dataset.addr;
+            if (a && selector) { selector.value = a; updateSelectorDisplay(); renderObject(a); addToRecent(a); container.style.display = 'block'; emptyState.style.display = 'none'; calendarContainer.style.display = 'none'; dataContainer.style.display = 'none'; roadmapContainer.style.display = 'none'; updateBreadcrumbs('main', a); dashboardModal.style.display = 'none'; }
+          });
+        });
       }
 
       // === История ===
@@ -4991,7 +5705,6 @@
         themeToggle.textContent = themeLabels[themeMode];
         applyTheme();
       });
-
       // === Стиль Cursor (тонкие линии и шрифт) ===
       const cursorStyleToggle = document.getElementById('btn-toggle-cursor-style');
       const cursorStyleOn = localStorage.getItem('cursorStyle') === '1';
@@ -5254,6 +5967,14 @@
             smartReminders = imported.smartReminders;
             localStorage.setItem('smartReminders', JSON.stringify(smartReminders));
           }
+          if (imported.archivedObjects && Array.isArray(imported.archivedObjects)) {
+            archivedObjects = imported.archivedObjects;
+            saveArchived();
+          }
+          if (imported.pinnedObjectIds && Array.isArray(imported.pinnedObjectIds)) {
+            pinnedObjectIds = imported.pinnedObjectIds;
+            savePinned();
+          }
           if (roadmapContainer.style.display === 'block') renderRoadmap();
           renderDeadlineReminders();
           localStorage.setItem('registryData', JSON.stringify(data));
@@ -5264,7 +5985,7 @@
           if (selector && selector.value) renderObject(selector.value);
           updateObserverUI();
         } catch (err) {
-          alert('Ошибка загрузки данных: ' + (err.message || err));
+          showAlert('Ошибка загрузки данных: ' + (err.message || err), 'Ошибка');
         }
       }
 
@@ -5284,7 +6005,9 @@
           dataRows: dataRows,
           customTags: customTags,
           thoughtsBoard: thoughtsBoard,
-          smartReminders: smartReminders
+          smartReminders: smartReminders,
+          archivedObjects: archivedObjects,
+          pinnedObjectIds: pinnedObjectIds
         };
         const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -5309,6 +6032,62 @@
       document.getElementById('close-import-modal').addEventListener('click', () => {
         importModal.style.display = 'none';
       });
+      const archivedModal = document.getElementById('archived-modal');
+      const archivedListEl = document.getElementById('archived-list');
+      if (archivedListEl) archivedListEl.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-restore]');
+        if (!btn) return;
+        ev.preventDefault();
+        const addr = btn.dataset.restore;
+        archivedObjects = archivedObjects.filter(a => a !== addr);
+        saveArchived();
+        populateSelector();
+        renderRecentObjects();
+        renderDeadlineReminders();
+        archivedListEl.innerHTML = archivedObjects.length === 0 ? '<p style="color:var(--text-muted);">Архив пуст</p>' : archivedObjects.map(a => `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>${escapeHtml(a)}</span><button type="button" data-restore="${escapeHtml(a)}" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Восстановить</button></div>`).join('');
+        showToast();
+      });
+      document.getElementById('show-archived')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (archivedListEl) archivedListEl.innerHTML = archivedObjects.length === 0 ? '<p style="color:var(--text-muted);">Архив пуст</p>' : archivedObjects.map(addr => `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>${escapeHtml(addr)}</span><button type="button" data-restore="${escapeHtml(addr)}" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Восстановить</button></div>`).join('');
+        archivedModal.style.display = 'flex';
+        sidebar.classList.remove('open');
+        hamburger.classList.remove('open');
+      });
+      document.getElementById('close-archived')?.addEventListener('click', () => { archivedModal.style.display = 'none'; });
+      archivedModal?.addEventListener('click', e => { if (e.target === archivedModal) archivedModal.style.display = 'none'; });
+      const batchEditModal = document.getElementById('batch-edit-modal');
+      document.getElementById('show-batch-edit')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const list = document.getElementById('batch-objects-list');
+        list.innerHTML = getActiveObjects().map(addr => `<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;"><input type="checkbox" data-addr="${escapeHtml(addr)}">${escapeHtml(addr)}</label>`).join('');
+        document.getElementById('batch-tag').value = '';
+        document.getElementById('batch-deadline').value = '';
+        batchEditModal.style.display = 'flex';
+        sidebar.classList.remove('open');
+        hamburger.classList.remove('open');
+      });
+      document.getElementById('close-batch-edit')?.addEventListener('click', () => { batchEditModal.style.display = 'none'; });
+      batchEditModal?.addEventListener('click', e => { if (e.target === batchEditModal) batchEditModal.style.display = 'none'; });
+      document.getElementById('batch-apply')?.addEventListener('click', () => {
+        const selected = Array.from(document.querySelectorAll('#batch-objects-list input:checked')).map(cb => cb.dataset.addr);
+        const tag = document.getElementById('batch-tag').value.trim();
+        const deadline = document.getElementById('batch-deadline').value;
+        if (selected.length === 0) { showAlert('Выберите хотя бы один объект.', 'Ошибка'); return; }
+        if (!tag && !deadline) { showAlert('Укажите метку или срок.', 'Ошибка'); return; }
+        selected.forEach(addr => {
+          if (!data[addr]) data[addr] = {};
+          if (tag) data[addr].tag = tag;
+          if (deadline) data[addr].deadline = deadline;
+        });
+        localStorage.setItem('registryData', JSON.stringify(data));
+        renderDeadlineReminders();
+        if (selector.value && selected.includes(selector.value)) renderObject(selector.value);
+        populateSelector();
+        renderRecentObjects();
+        batchEditModal.style.display = 'none';
+        showToast();
+      });
       importModal.addEventListener('click', (e) => {
         if (e.target === importModal) importModal.style.display = 'none';
       });
@@ -5326,7 +6105,7 @@
               applyImportedData(imported);
               importModal.style.display = 'none';
             } catch (err) {
-              alert('Ошибка чтения файла: ' + err.message);
+              showAlert('Ошибка чтения файла: ' + err.message, 'Ошибка');
             }
           };
           reader.readAsText(file);
@@ -5337,7 +6116,7 @@
         const urlInput = document.getElementById('import-url-input');
         const url = (urlInput && urlInput.value && urlInput.value.trim()) || '';
         if (!url) {
-          alert('Введите ссылку на JSON.');
+          showAlert('Введите ссылку на JSON.', 'Ошибка');
           return;
         }
         fetch(url).then(r => {
@@ -5347,7 +6126,7 @@
           applyImportedData(imported);
           importModal.style.display = 'none';
           urlInput.value = '';
-        }).catch(err => alert('Не удалось загрузить по ссылке: ' + (err.message || err)));
+        }).catch(err => showAlert('Не удалось загрузить по ссылке: ' + (err.message || err), 'Ошибка'));
       });
 
       // === URL данных при открытии ===
@@ -5375,8 +6154,9 @@
       }
 
       // === Сброс ===
-      document.getElementById('btn-reset').addEventListener('click', () => {
-        if (confirm('Вы уверены? Все данные будут удалены.')) {
+      document.getElementById('btn-reset').addEventListener('click', async () => {
+        const ok = await showConfirm('Вы уверены? Все данные будут удалены.', 'Сбросить всё');
+        if (ok) {
           localStorage.removeItem('registryData');
           localStorage.removeItem('calendarData');
           localStorage.removeItem('historyLog');
@@ -5393,6 +6173,8 @@
           localStorage.removeItem('lastSelectedObject');
           localStorage.removeItem('recentObjectIds');
           localStorage.removeItem('customTags');
+          localStorage.removeItem('archivedObjects');
+          localStorage.removeItem('pinnedObjectIds');
           location.reload();
         }
       });
@@ -5423,6 +6205,9 @@
           dashboardModal.style.display = 'none';
           document.getElementById('comments-modal').style.display = 'none';
           if (importModal) importModal.style.display = 'none';
+          if (archivedModal) archivedModal.style.display = 'none';
+          if (batchEditModal) batchEditModal.style.display = 'none';
+          if (overlay) overlay.classList.remove('show');
           const addTagPopup = document.querySelector('.add-tag-popup');
           if (addTagPopup) addTagPopup.remove();
         }
@@ -5479,36 +6264,87 @@
         if (searchResultIndex >= 0 && items[searchResultIndex]) items[searchResultIndex].scrollIntoView({ block: 'nearest' });
       }
 
-      // === Стрелки в выпадающем списке объектов ===
+      // === Стрелки: переключение объектов (закрытый селектор) или навигация в списке (открытый) ===
       let selectorOptionIndex = -1;
       selectorDisplay.addEventListener('keydown', (e) => {
-        if (!selectorWrapper.classList.contains('open')) return;
-        const opts = selectorList.querySelectorAll('.selector-option');
-        if (opts.length === 0) return;
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          selectorOptionIndex = Math.min(selectorOptionIndex + 1, opts.length - 1);
-          opts[selectorOptionIndex].scrollIntoView({ block: 'nearest' });
-          opts.forEach((el, i) => el.classList.toggle('selected', i === selectorOptionIndex));
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          selectorOptionIndex = Math.max(selectorOptionIndex - 1, 0);
-          opts[selectorOptionIndex].scrollIntoView({ block: 'nearest' });
-          opts.forEach((el, i) => el.classList.toggle('selected', i === selectorOptionIndex));
-        } else if (e.key === 'Enter' && selectorOptionIndex >= 0 && opts[selectorOptionIndex]) {
-          e.preventDefault();
-          opts[selectorOptionIndex].click();
+        const opts = selectorList.querySelectorAll('.selector-option[data-addr]');
+        if (selectorWrapper.classList.contains('open')) {
+          if (opts.length === 0) return;
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectorOptionIndex = Math.min(selectorOptionIndex + 1, opts.length - 1);
+            opts[selectorOptionIndex].scrollIntoView({ block: 'nearest' });
+            opts.forEach((el, i) => el.classList.toggle('selected', i === selectorOptionIndex));
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectorOptionIndex = Math.max(selectorOptionIndex - 1, 0);
+            opts[selectorOptionIndex].scrollIntoView({ block: 'nearest' });
+            opts.forEach((el, i) => el.classList.toggle('selected', i === selectorOptionIndex));
+          } else if (e.key === 'Enter' && selectorOptionIndex >= 0 && opts[selectorOptionIndex]) {
+            e.preventDefault();
+            opts[selectorOptionIndex].click();
+          }
+        } else {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            const filtered = getActiveObjects().slice();
+            const curIdx = filtered.indexOf(selector.value);
+            const nextIdx = e.key === 'ArrowDown' ? (curIdx < 0 ? 0 : Math.min(curIdx + 1, filtered.length - 1)) : (curIdx <= 0 ? filtered.length - 1 : curIdx - 1);
+            if (filtered.length && filtered[nextIdx] !== undefined) {
+              e.preventDefault();
+              selector.value = filtered[nextIdx];
+              updateSelectorDisplay();
+              selector.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
         }
       });
       selectorWrapper.addEventListener('click', () => { selectorOptionIndex = -1; });
 
-      // === Инициализация ===
+      // === Инициализация + глубокие ссылки (#object/адрес) ===
+      const hashMatch = location.hash.match(/^#object\/(.+)$/);
+      if (hashMatch) {
+        try {
+          const hashAddr = decodeURIComponent(hashMatch[1]);
+          if (getActiveObjects().includes(hashAddr)) {
+            selector.value = hashAddr;
+            updateSelectorDisplay();
+          }
+        } catch (_) {}
+      }
       renderDeadlineReminders();
       if (selector.value) {
+        calendarContainer.style.display = 'none';
+        dataContainer.style.display = 'none';
+        roadmapContainer.style.display = 'none';
+        container.style.display = 'block';
+        emptyState.style.display = 'none';
         renderObject(selector.value);
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', selector.value);
+        history.replaceState(null, '', location.pathname + location.search + '#object/' + encodeURIComponent(selector.value));
       } else {
         emptyState.style.display = 'block';
       }
+
+      function updateBreadcrumbs(view, objectName) {}
+
+      // === Ctrl+K для поиска ===
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          searchInput.focus();
+          if (searchInput.value.trim()) performSearch(searchInput.value);
+        }
+      });
+
+      // === Предупреждение при закрытии с открытой модалкой ===
+      window.addEventListener('beforeunload', (e) => {
+        if (overlay && overlay.classList.contains('show')) e.preventDefault();
+      });
+
+      // === Empty state actions ===
+      document.getElementById('empty-add-object')?.addEventListener('click', (e) => { e.preventDefault(); addObjectBtn?.click(); });
+      document.getElementById('empty-show-dashboard')?.addEventListener('click', (e) => { e.preventDefault(); showDashboard?.click(); });
+      document.getElementById('empty-show-roadmap')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('show-roadmap')?.click(); });
     });
   </script>
 </body>
