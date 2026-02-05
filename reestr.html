@@ -330,11 +330,15 @@
     .dashboard-modal .modal-content { max-width: 960px; }
     .dashboard-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 16px;
       margin-bottom: 32px;
     }
     @media (max-width: 700px) { .dashboard-stats { grid-template-columns: repeat(2, 1fr); } }
+    .dashboard-stat-card.managing { border-left: 3px solid #3b82f6; }
+    .dashboard-stat-card.service { border-left: 3px solid #8b5cf6; }
+    .dashboard-stat-card.fkr { border-left: 3px solid #ec4899; }
+    .dashboard-stat-card.construction { border-left: 3px solid #f59e0b; }
     .dashboard-stat-card {
       padding: 16px 20px;
       background: var(--bg-card);
@@ -353,13 +357,27 @@
     .dashboard-objects-list { display: flex; flex-direction: column; gap: 8px; }
     .dashboard-object-row {
       display: grid; grid-template-columns: 1fr 120px 80px;
-      align-items: center; gap: 14px; padding: 12px 16px;
+      align-items: center; gap: 14px; padding: 12px 16px 12px 36px;
       background: var(--bg-card); border-bottom: 1px solid var(--border);
       transition: background 0.15s ease; cursor: pointer;
+      position: relative;
     }
     .dashboard-object-row:hover { background: var(--hover); }
-    @media (max-width: 600px) { .dashboard-object-row { grid-template-columns: 1fr auto; } .dashboard-object-row .obj-progress { grid-column: 1 / -1; } }
+    @media (max-width: 600px) { .dashboard-object-row { grid-template-columns: 1fr auto; padding-left: 36px; } .dashboard-object-row .obj-progress { grid-column: 1 / -1; } }
     .dashboard-object-row .obj-name { font-weight: 500; color: var(--text); }
+    .dashboard-object-row .obj-expand-arrow {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+    .dashboard-object-row.expanded .obj-expand-arrow {
+      transform: translateY(-50%) rotate(90deg);
+    }
     .dashboard-object-row .obj-tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
     .dashboard-object-row .obj-tag.tag-priority { background: rgba(234, 179, 8, 0.25); color: #eab308; }
     .dashboard-object-row .obj-tag.tag-done { background: rgba(34, 197, 94, 0.25); color: var(--success); }
@@ -368,7 +386,16 @@
     .dashboard-object-row .obj-progress-bar .fill { height: 100%; background: var(--success); border-radius: 3px; transition: width 0.3s; }
     .dashboard-object-row .obj-progress-bar .fill.partial { background: linear-gradient(90deg, var(--success), var(--warning)); }
     .dashboard-object-row .obj-progress-bar .fill.empty { background: var(--border); }
-    .dashboard-package-section { margin-top: 24px; }
+    .dashboard-package-section { 
+      margin-top: 0;
+      display: none;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .dashboard-package-section.expanded {
+      display: block;
+      margin-top: 8px;
+    }
     .dashboard-package-title {
       font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 10px;
       padding: 10px 14px; background: var(--hover); border-left: 3px solid var(--accent);
@@ -378,9 +405,18 @@
       padding: 10px 14px; background: var(--bg-card); border-bottom: 1px solid var(--border);
       font-size: 13px; line-height: 1.45; color: var(--text-secondary);
       display: flex; align-items: flex-start; gap: 8px; transition: background 0.15s ease;
+      cursor: pointer;
+    }
+    .dashboard-doc-card:hover {
+      background: var(--hover);
+      color: var(--text);
     }
     .dashboard-doc-card.checked {
       background: var(--success-bg); color: var(--text);
+    }
+    .dashboard-doc-card.checked:hover {
+      background: var(--success-bg);
+      opacity: 0.9;
     }
     .dashboard-doc-card .num { font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
     .dashboard-funnel { margin-bottom: 20px; padding: 14px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
@@ -608,7 +644,7 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: var(--radius-sm);
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .selector-list-search input:focus { outline: none; border-color: var(--accent); }
@@ -620,13 +656,13 @@
     }
 
     .selector-option {
-      padding: 10px 14px;
+      padding: 8px 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      font-size: 14px;
+      font-size: 12px;
       transition: var(--transition);
       border-bottom: 1px solid var(--border);
     }
@@ -1264,6 +1300,25 @@
       text-align: left;
       font-weight: 500;
       color: var(--text-secondary);
+      vertical-align: top;
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+    .roadmap-table tbody td.roadmap-cell-object .roadmap-cell-object-name {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .roadmap-table tbody td.roadmap-cell-object .roadmap-cell-object-comment {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.3;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
 
     .roadmap-table tbody tr:hover td:first-child {
@@ -1331,6 +1386,102 @@
     .data-container {
       background: var(--bg-card);
       border-bottom: 1px solid var(--border);
+    }
+    /* === Документы === */
+    .documents-container {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+    }
+    .documents-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .documents-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .documents-header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #documents-search-input {
+      transition: border-color 0.15s ease;
+    }
+    #documents-search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .documents-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .document-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s ease;
+    }
+    .document-card:hover {
+      border-color: var(--accent);
+    }
+    .document-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .document-card-name {
+      font-weight: 500;
+      color: var(--text);
+      word-break: break-word;
+      flex: 1;
+    }
+    .document-card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .document-card-btn {
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.15s ease;
+    }
+    .document-card-btn:hover {
+      background: var(--hover);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+    .document-card-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .documents-empty {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-muted);
+      font-size: 15px;
+      grid-column: 1 / -1;
+    }
       overflow: hidden;
       margin-top: 0;
       padding: 20px;
@@ -1413,9 +1564,9 @@
 
     .data-object-dropdown.open { display: block; }
     .data-object-dropdown-option {
-      padding: 10px 14px;
+      padding: 8px 12px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 12px;
       color: var(--text);
     }
     .data-object-dropdown-option:hover { background: var(--hover); }
@@ -1514,12 +1665,6 @@
       border: 1px solid var(--border);
     }
 
-    .data-empty-hint {
-      text-align: center;
-      padding: 48px;
-      color: var(--text-muted);
-      font-size: 15px;
-    }
 
     .data-table {
       width: 100%;
@@ -1704,6 +1849,10 @@
       color: var(--text-muted);
       background: var(--bg-card);
     }
+    .calendar-weekdays span {
+      text-align: center;
+      display: block;
+    }
 
     .calendar-weekdays span:nth-child(6),
     .calendar-weekdays span:nth-child(7) {
@@ -1737,15 +1886,58 @@
       padding: 6px 8px;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, transform 0.3s ease, z-index 0s 0.3s;
       position: relative;
       font-size: 13px;
       line-height: 1.3;
       background: var(--bg-input);
       overflow: hidden;
       border: 1px solid transparent;
+      z-index: 1;
     }
 
+    .calendar-day.expanded {
+      transform: scale(1.5);
+      z-index: 1000;
+      transition: transform 0.3s ease, z-index 0s 0s;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--accent);
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    
+    .calendar-day.expanded .event-row {
+      font-size: 7px;
+      line-height: 1.2;
+      padding: 3px 5px;
+      min-height: auto;
+    }
+    
+    .calendar-day.expanded .event-row .event-time {
+      font-size: 7px;
+    }
+    
+    .calendar-day.expanded .event-row .event-text {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      word-wrap: break-word;
+      font-size: 7px;
+      line-height: 1.2;
+    }
+    
+    .calendar-day.expanded .event-row .event {
+      width: 6px;
+      height: 6px;
+    }
+    
+    .calendar-day.expanded .num {
+      font-size: 14px;
+    }
+    
+    .calendar-day.expanded .day-events {
+      gap: 2px;
+    }
 
     .calendar-day:hover {
       background: var(--hover);
@@ -1836,9 +2028,9 @@
     .calendar-day .event-delete {
       width: 16px;
       height: 16px;
-      background: var(--danger);
-      color: white;
-      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       border-radius: 2px;
       font-size: 10px;
       display: inline-flex;
@@ -1847,11 +2039,13 @@
       cursor: pointer;
       flex-shrink: 0;
       opacity: 0.8;
-      transition: opacity 0.15s ease;
+      transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     .calendar-day .event-delete:hover {
       opacity: 1;
+      color: var(--danger);
+      border-color: var(--danger);
     }
 
     .event.red { background: #ef4444; }
@@ -1876,9 +2070,9 @@
     .event-delete {
       width: 18px;
       height: 18px;
-      background: var(--danger);
-      color: white;
-      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       border-radius: 2px;
       font-size: 11px;
       display: inline-flex;
@@ -1888,10 +2082,13 @@
       margin-left: 4px;
       flex-shrink: 0;
       opacity: 0.9;
+      transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     .event-delete:hover {
       opacity: 1;
+      color: var(--danger);
+      border-color: var(--danger);
     }
 
     .calendar-sidebar {
@@ -2098,7 +2295,10 @@
     }
 
     .event-popup .event-popup-delete:hover {
-      background: rgba(239, 68, 68, 0.15);
+      background: transparent;
+      color: var(--danger);
+      border-color: var(--danger);
+      opacity: 0.8;
     }
 
     .event-popup #save-event {
@@ -2148,8 +2348,8 @@
     .rc-toolbar .rc-btn { padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); border: 1px solid transparent; font-family: inherit; }
     .rc-toolbar .rc-btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .rc-toolbar .rc-btn-primary:hover { background: var(--accent-hover); box-shadow: 0 2px 8px var(--accent-glow); }
-    .rc-toolbar .rc-btn-secondary { background: var(--bg-input); color: var(--text); border-color: var(--border); }
-    .rc-toolbar .rc-btn-secondary:hover { background: var(--hover); border-color: var(--accent); color: var(--accent); }
+    .rc-toolbar .rc-btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+    .rc-toolbar .rc-btn-secondary:hover { background: transparent; border-color: var(--accent); color: var(--accent); }
     .acts-web-node { position: absolute; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .acts-web-node.obj { background: var(--accent); color: #fff; }
     .acts-web-node.role { background: var(--success); color: #fff; }
@@ -2903,8 +3103,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 8px 20px;
-      background: rgba(34, 197, 94, 0.15);
-      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      background: transparent;
+      border-bottom: none;
       margin: -24px -24px 24px -24px;
     }
     .full-mode-bar span { color: var(--success); font-size: 14px; font-weight: 500; }
@@ -2919,6 +3119,7 @@
     }
     .full-mode-bar button:hover { color: var(--text); background: var(--hover); }
     body.observer-mode .full-mode-only { display: none !important; }
+    body.observer-mode #sticky-notes-container { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 
     /* === Кастомные модалки вместо prompt/alert/confirm === */
     .custom-modal-overlay {
@@ -2942,7 +3143,7 @@
     }
     .custom-modal .modal-buttons .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .custom-modal .modal-buttons .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
-    .custom-modal .modal-buttons .btn-secondary { background: var(--hover); color: var(--text-secondary); }
+    .custom-modal .modal-buttons .btn-secondary { background: transparent; color: var(--text-secondary); border-color: var(--border); }
     .custom-modal .modal-buttons button:hover { filter: brightness(1.1); }
     .toast.toast-error { color: var(--danger); }
 
@@ -3071,10 +3272,10 @@
       border: 1px solid var(--border);
     }
     .subcontractor-card-actions button:hover {
-      background: var(--accent); color: #fff; border-color: var(--accent);
+      background: transparent; color: var(--accent); border-color: var(--accent);
     }
     .subcontractor-card-actions button.subcontractor-delete:hover {
-      background: var(--danger); border-color: var(--danger); color: #fff;
+      background: transparent; border-color: var(--danger); color: var(--danger);
     }
     .subcontractor-card-actions button.subcontractor-duplicate,
     .subcontractor-card-actions button.contractor-duplicate,
@@ -3106,7 +3307,8 @@
       display: none; text-align: center; padding: 64px 24px; color: var(--text-muted);
       font-size: 15px; line-height: 1.6;
     }
-    .subcontractor-objects-checkboxes label { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; font-size: 13px; color: var(--text); }
+    .subcontractor-objects-checkboxes label { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; font-size: 11px; color: var(--text); }
+    #data-entity-objects-list label { font-size: 11px; }
     .subcontractor-objects-checkboxes input[type="checkbox"] { flex-shrink: 0; }
     .subcontractor-card-objects-wrap { grid-column: 1; margin-top: 2px; }
     .subcontractor-objects-toggle {
@@ -3123,6 +3325,12 @@
       border-top: 1px solid var(--border);
     }
     .subcontractor-card-objects-wrap.open .subcontractor-objects-dropdown { display: flex; }
+    .subcontractor-contract-block {
+      padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    }
+    .subcontractor-contract-block .contract-block-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .subcontractor-contract-block .contract-block-objects { max-height: 120px; overflow-y: auto; padding: 6px; background: var(--bg-card); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 4px; }
+    .subcontractor-contract-block .contract-block-objects label { font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .subcontractor-obj-badge {
       padding: 4px 10px; border-radius: var(--radius-sm); font-size: 11px;
       background: var(--bg-input); color: var(--text); border: 1px solid var(--border);
@@ -3138,7 +3346,37 @@
     .history-modal .btn-secondary {
       background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
     }
-    .history-modal .btn-secondary:hover { background: var(--hover); color: var(--text); }
+    .history-modal .btn-secondary:hover { background: transparent; color: var(--text); border-color: var(--accent); }
+    
+    /* Общий стиль для кнопок без фона */
+    .btn-secondary {
+      background: transparent !important;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: transparent !important;
+      color: var(--text);
+      border-color: var(--accent);
+    }
+    
+    /* Стили для подсказок */
+    .ui-hint {
+      font-size: 11px;
+      font-style: italic;
+      color: var(--text-muted);
+      opacity: 0.7;
+      margin: 0;
+      padding: 0;
+      line-height: 1.4;
+      border: none;
+      background: transparent;
+    }
+    .ui-hint + .ui-hint {
+      margin-top: 4px;
+    }
+    
     .subcontractor-modal-company-input { font-size: 18px !important; font-weight: 600 !important; }
     @media print { .subcontractors-fab { display: none !important; } }
 
@@ -3172,6 +3410,29 @@
       .deadline-reminders { flex-wrap: wrap; gap: 8px; }
       .data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .data-table { min-width: 600px; }
+      /* Мобильный вид таблицы справочной информации: карточки */
+      .data-table-wrap { overflow-x: visible; }
+      .data-table { min-width: 0; display: block; }
+      .data-table thead { display: none; }
+      .data-table tbody { display: block; }
+      .data-table tbody tr { display: block; border: 1px solid var(--border); margin-bottom: 12px; border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+      .data-table tbody td { display: block; padding: 10px 14px; border: none; border-bottom: 1px solid var(--border); min-width: 0; }
+      .data-table tbody td:last-child { border-bottom: none; }
+      .data-table tbody td.data-cell-label { font-weight: 600; background: var(--bg-input); color: var(--text); font-size: 14px; }
+      .data-table tbody td:not(.data-cell-label)::before { content: attr(data-label); font-weight: 600; color: var(--text-muted); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+      .data-table tbody td input,
+      .data-table tbody td textarea { min-width: 0; width: 100%; box-sizing: border-box; }
+      /* Мобильный вид дорожной карты: карточки по объектам */
+      .roadmap-table { display: block; min-width: 0; }
+      .roadmap-table thead { display: none; }
+      .roadmap-table tbody { display: block; }
+      .roadmap-table tbody tr { display: block; border: 1px solid var(--border); margin-bottom: 12px; border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+      .roadmap-table tbody td { display: block; width: 100%; min-width: 0; height: auto; padding: 10px 14px; border: none; border-bottom: 1px solid var(--border); text-align: left; }
+      .roadmap-table tbody td:last-child { border-bottom: none; }
+      .roadmap-table tbody td.roadmap-cell-object { position: static; font-weight: 600; background: var(--bg-input); font-size: 14px; }
+      .roadmap-table tbody td:not(.roadmap-cell-object)::before { content: attr(data-col-name); font-weight: 600; color: var(--text-muted); display: block; font-size: 11px; margin-bottom: 4px; }
+      .roadmap-table tbody td .roadmap-cell-note { margin-top: 4px; }
+      .roadmap-table-wrap { overflow-x: visible; }
       .calendar-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .quick-reminder-btn, .object-export-pdf-btn { min-height: 40px; min-width: 40px; padding: 8px 12px; }
       .object-export-docs-btn { min-height: 40px; padding: 10px 14px; }
@@ -3491,6 +3752,7 @@
       <li><a href="#" id="create-note" title="Создать стикер-заметку">Создать заметку</a></li>
       <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap" title="Дорожная карта по этапам">Дорожная карта объектов</a></li>
       <li><a href="#" id="show-data" class="sidebar-item-data" title="Справочная информация по объектам">Справочная информация</a></li>
+      <li><a href="#" id="show-documents" title="Загруженные документы и файлы">Документы</a></li>
       <li><a href="#" id="show-acts-signing" title="Связи ответственных по документам">Связи ответственных</a></li>
       <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
       <li><a href="#" id="show-thoughts" title="Доска для заметок и связей">Доска мыслей</a></li>
@@ -3648,6 +3910,7 @@
       <button type="button" class="data-export-excel-btn full-mode-only" id="roadmap-export-excel">Экспорт в Excel</button>
       <button type="button" class="data-export-excel-btn" id="roadmap-export-pdf" title="Печать / Сохранить как PDF">PDF</button>
     </div>
+    <p class="ui-hint" style="margin-top:-12px;margin-bottom:16px;">Нажмите кнопку редактирования, чтобы добавить столбцы этапов и отметить выполнение работ по объектам</p>
     <div class="roadmap-wrap" id="roadmap-wrap">
       <table class="roadmap-table" id="roadmap-table">
         <thead>
@@ -3664,7 +3927,7 @@
   <div class="data-container" id="data-container" style="display:none;">
     <div class="data-header">
       <h2>Справочная информация по объекту</h2>
-      <div class="data-selector-wrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="data-selector-wrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <label>Объект:</label>
         <div class="data-object-select-wrap">
           <input type="text" class="data-object-search-input" id="data-object-search-input" placeholder="Поиск или выбор объекта..." autocomplete="off" value="">
@@ -3673,6 +3936,9 @@
           </select>
           <div class="data-object-dropdown" id="data-object-dropdown"></div>
         </div>
+        <button type="button" class="btn-secondary" id="data-object-prev-btn" title="Предыдущий объект по списку" style="padding:6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:4px;"><span style="font-size:14px;">←</span> Назад</button>
+        <button type="button" class="btn-secondary" id="data-object-next-btn" title="Следующий объект по списку" style="padding:6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:4px;">Далее <span style="font-size:14px;">→</span></button>
+        <p class="ui-hint" style="margin:0;margin-left:8px;">Используйте кнопки "Назад" и "Далее" для быстрой навигации между объектами</p>
         <div class="data-header-actions">
           <button type="button" class="btn-secondary" id="data-global-search-toggle" style="padding:6px 10px;font-size:12px;" title="При включении ввод в ячейке ищет совпадения по всем объектам">Вкл общий поиск</button>
           <button type="button" class="data-edit-btn" id="data-edit-btn" title="Режим редактирования столбцов и строк"><span class="material-icons" style="font-size:18px">edit</span></button>
@@ -3681,11 +3947,12 @@
           <button type="button" class="data-export-excel-btn" id="data-export-excel">Экспорт в Excel</button>
           <button type="button" class="data-export-excel-btn" id="data-export-pdf" title="Печать / Сохранить как PDF">PDF</button>
         </div>
+        <p class="ui-hint" style="margin-top:8px;margin-bottom:0;">Включите "Общий поиск" для поиска по всем объектам при вводе в ячейке. Кнопка редактирования позволяет добавлять столбцы и строки</p>
+      </div>
       </div>
     </div>
     <div id="data-global-search-results" style="display:none;margin:8px 0;padding:10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;max-height:120px;overflow-y:auto;"></div>
     <div class="data-table-wrap" id="data-table-wrap">
-      <p class="data-empty-hint" id="data-empty-hint">Выберите объект из списка</p>
       <table class="data-table" id="data-table" style="display:none;">
         <thead>
           <tr id="data-thead-row">
@@ -3702,6 +3969,7 @@
     <div class="subcontractors-header">
       <h2>Субподрядчики<span class="subcontractors-warning-badge subcontractors-warning-badge-inline" id="subcontractors-warning-badge-page" style="display:none;"></span></h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-subcontractors" title="Скачать Excel со списком и объектами" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="subcontractors-add-btn" title="Добавить субподрядчика">+ Добавить</button>
       </div>
     </div>
@@ -3714,6 +3982,7 @@
     <div class="subcontractors-header">
       <h2>Подрядчики</h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-contractors" title="Скачать Excel со списком и объектами" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="contractors-add-btn" title="Добавить подрядчика">+ Добавить</button>
       </div>
     </div>
@@ -3726,6 +3995,7 @@
     <div class="subcontractors-header">
       <h2>Управляющие компании<span class="subcontractors-warning-badge subcontractors-warning-badge-inline" id="managing-warning-badge-page" style="display:none;"></span></h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-managing" title="Скачать Excel" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="managing-add-btn" title="Добавить">+ Добавить</button>
       </div>
     </div>
@@ -3736,6 +4006,7 @@
     <div class="subcontractors-header">
       <h2>Обслуживающие организации<span class="subcontractors-warning-badge subcontractors-warning-badge-inline" id="service-warning-badge-page" style="display:none;"></span></h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-service" title="Скачать Excel" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="service-add-btn" title="Добавить">+ Добавить</button>
       </div>
     </div>
@@ -3746,6 +4017,7 @@
     <div class="subcontractors-header">
       <h2>Фонд капитального ремонта<span class="subcontractors-warning-badge subcontractors-warning-badge-inline" id="fkr-warning-badge-page" style="display:none;"></span></h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-fkr" title="Скачать Excel" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="fkr-add-btn" title="Добавить">+ Добавить</button>
       </div>
     </div>
@@ -3756,6 +4028,7 @@
     <div class="subcontractors-header">
       <h2>Строительный контроль<span class="subcontractors-warning-badge subcontractors-warning-badge-inline" id="construction-control-warning-badge-page" style="display:none;"></span></h2>
       <div class="subcontractors-header-actions">
+        <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-construction" title="Скачать Excel" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="construction-control-add-btn" title="Добавить">+ Добавить</button>
       </div>
     </div>
@@ -3776,10 +4049,14 @@
             <a href="#" id="subcontractor-search-egrul" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);">Поиск в реестре</a>
             <button type="button" class="btn-secondary" id="subcontractor-paste-checko-exp" style="padding:6px 12px;font-size:12px;" title="Скопируйте страницу с Checko в буфер, затем нажмите — попытка извлечь ИНН и ОГРН">Подставить с Checko (эксп.)</button>
           </div>
+          <p class="ui-hint" style="margin-top:4px;">Используйте кнопки выше для быстрого заполнения реквизитов компании</p>
         </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Договор субподряда</label>
-          <input type="text" id="subcontractor-contract" placeholder="Номер и дата договора" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+        <div class="subcontractor-contracts-wrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="font-size:12px;color:var(--text-muted);">Договоры субподряда (каждый — на свои объекты)</label>
+            <button type="button" class="btn-secondary" id="subcontractor-add-contract" style="padding:6px 10px;font-size:12px;">+ Добавить договор</button>
+          </div>
+          <div id="subcontractor-contracts-list" style="display:flex;flex-direction:column;gap:12px;"></div>
         </div>
         <div>
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Ответственный за выполнение работ</label>
@@ -3808,6 +4085,7 @@
             <span style="font-size:12px;color:var(--text-muted);">Доп. ответственные и приказы (№3, №4… в справочнике)</span>
             <button type="button" class="btn-secondary" id="subcontractor-add-extra-responsible" style="padding:6px 10px;font-size:12px;">+ Добавить</button>
           </div>
+          <p class="ui-hint" style="margin-top:4px;margin-bottom:8px;">Добавьте дополнительные ответственные лица, которые будут отображаться в строках №3, №4 и далее в справочной информации объекта</p>
           <div id="subcontractor-extra-responsibles-list" style="display:flex;flex-direction:column;gap:12px;"></div>
           <input type="file" id="subcontractor-extra-order-file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;">
         </div>
@@ -3837,10 +4115,6 @@
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Доп. сведения</label>
           <textarea id="subcontractor-comment" placeholder="Комментарий, заметки" rows="2" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);resize:vertical;"></textarea>
         </div>
-        <div>
-          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Объекты, которые ведёт субподрядчик</label>
-          <div id="subcontractor-objects-list" class="subcontractor-objects-checkboxes" style="max-height:160px;overflow-y:auto;padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="subcontractor-modal-cancel">Отмена</button>
@@ -3862,6 +4136,7 @@
             <a href="#" id="contractor-search-egrul" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);">Поиск в реестре</a>
             <button type="button" class="btn-secondary" id="contractor-paste-checko-exp" style="padding:6px 12px;font-size:12px;" title="Подставить ИНН/ОГРН из буфера (эксп.)">Подставить с Checko (эксп.)</button>
           </div>
+          <p class="ui-hint" style="margin-top:4px;">Используйте кнопки выше для быстрого заполнения реквизитов компании</p>
         </div>
         <div>
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Представитель подрядчика</label>
@@ -3917,6 +4192,23 @@
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Объекты, которые ведёт подрядчик</label>
           <div id="contractor-objects-list" class="subcontractor-objects-checkboxes" style="max-height:160px;overflow-y:auto;padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;gap:6px;"></div>
         </div>
+        <div class="contractor-self-performed-wrap" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;background:var(--bg-input);">
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">На данных объектах подрядчик выполнял работы сам</label>
+          <p class="ui-hint" style="margin-top:2px;margin-bottom:8px;">Отметьте объекты, где подрядчик выполнял работы самостоятельно (без субподрядчика). Ответственный за выполнение работ будет заполнен в строке №2 справочной информации объекта</p>
+          <div id="contractor-self-objects-list" class="subcontractor-objects-checkboxes" style="max-height:100px;overflow-y:auto;padding:6px;margin-bottom:10px;display:flex;flex-direction:column;gap:4px;"></div>
+          <button type="button" class="btn-secondary" id="contractor-self-responsible-btn" style="padding:6px 12px;font-size:12px;">Указать ответственного за выполнение работ</button>
+          <div id="contractor-self-responsible-block" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">ФИО ответственного</label>
+            <input type="text" id="contractor-self-fio" list="contractor-self-fio-datalist" placeholder="ФИО" style="width:100%;padding:8px 10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);" autocomplete="off">
+            <datalist id="contractor-self-fio-datalist"></datalist>
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Должность</label>
+            <input type="text" id="contractor-self-position" placeholder="Должность" style="width:100%;padding:8px 10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Приказ</label>
+            <input type="text" id="contractor-self-order" placeholder="Номер/название приказа" style="width:100%;padding:8px 10px;margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Телефон <span style="color:var(--accent);">*</span></label>
+            <input type="text" id="contractor-self-phone" placeholder="Телефон" required style="width:100%;padding:8px 10px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+          </div>
+        </div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="contractor-modal-cancel">Отмена</button>
@@ -3926,10 +4218,10 @@
   </div>
 
   <div class="history-modal" id="data-entity-modal" style="display:none;">
-    <div class="history-content" style="max-width:480px;">
+    <div class="history-content" style="max-width:560px;max-height:90vh;overflow-y:auto;">
       <span class="close-modal" id="data-entity-modal-close">&times;</span>
       <h2 id="data-entity-modal-title">Запись</h2>
-      <div style="display:flex;flex-direction:column;gap:12px;">
+      <div id="data-entity-single-wrap" style="display:flex;flex-direction:column;gap:12px;">
         <div>
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Название компании</label>
           <input type="text" id="data-entity-company" placeholder="Название" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
@@ -3967,6 +4259,36 @@
           <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Объекты</label>
           <div id="data-entity-objects-list" style="max-height:100px;overflow-y:auto;padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;gap:6px;"></div>
         </div>
+      </div>
+      <div id="data-entity-multi-wrap" style="display:none;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Название организации</label>
+          <input type="text" id="data-entity-multi-company" placeholder="Название" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+          <div class="data-entity-lookup-row" id="data-entity-lookup-row" style="margin-top:8px;display:none;flex-wrap:wrap;gap:8px;align-items:center;">
+            <button type="button" class="btn-secondary" id="data-entity-fill-from-list" style="padding:6px 12px;font-size:12px;">Подставить из реестра</button>
+            <a href="#" id="data-entity-search-egrul" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);">Поиск в реестре</a>
+            <button type="button" class="btn-secondary" id="data-entity-paste-checko-exp" style="padding:6px 12px;font-size:12px;" title="Скопируйте страницу с Checko в буфер, затем нажмите — попытка извлечь ИНН, ОГРН и юридический адрес">Подставить с Checko (эксп.)</button>
+          </div>
+          <p class="ui-hint" id="data-entity-lookup-hint" style="margin-top:4px;display:none;">Используйте кнопки выше для быстрого заполнения реквизитов организации</p>
+        </div>
+        <div id="data-entity-inn-wrap" style="display:none;">
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">ИНН</label>
+          <input type="text" id="data-entity-inn" placeholder="ИНН" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+        </div>
+        <div id="data-entity-ogrn-wrap" style="display:none;">
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">ОГРН</label>
+          <input type="text" id="data-entity-ogrn" placeholder="ОГРН" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+        </div>
+        <div id="data-entity-legal-address-wrap" style="display:none;">
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Юридический адрес</label>
+          <input type="text" id="data-entity-legal-address" placeholder="Юридический адрес" style="width:100%;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <label style="font-size:12px;color:var(--text-muted);">Должностные лица (привязка к объектам)</label>
+          <button type="button" class="btn-secondary" id="data-entity-add-official" style="padding:6px 10px;font-size:12px;">+ Добавить</button>
+        </div>
+        <p class="ui-hint" style="margin-top:4px;margin-bottom:8px;">Добавьте должностных лиц организации и привяжите их к конкретным объектам. Данные будут отображаться в справочной информации объектов</p>
+        <div id="data-entity-officials-list" style="display:flex;flex-direction:column;gap:12px;max-height:50vh;overflow-y:auto;"></div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="data-entity-modal-cancel">Отмена</button>
@@ -4011,6 +4333,24 @@
     </div>
   </div>
 
+  <div class="documents-container" id="documents-container" style="display:none;">
+    <div class="documents-header">
+      <div>
+        <h2 style="margin:0 0 4px 0;">Документы</h2>
+        <div id="documents-count" style="font-size:13px;color:var(--text-muted);"></div>
+      </div>
+      <div class="documents-header-actions">
+        <input type="text" id="documents-search-input" placeholder="Поиск по названию файла..." autocomplete="off" style="padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);font-size:13px;min-width:200px;">
+        <button type="button" class="btn-primary" id="documents-upload-btn" style="padding:8px 16px;font-size:13px;">+ Загрузить файлы</button>
+        <input type="file" id="documents-file-input" multiple style="display:none;" accept="*/*">
+      </div>
+      <p class="ui-hint" style="margin-top:8px;margin-bottom:0;">Загруженные файлы сохраняются на сервере и доступны с любого устройства</p>
+    </div>
+    <div class="documents-list" id="documents-list">
+      <p class="documents-empty" id="documents-empty">Нет загруженных документов. Нажмите «Загрузить файлы» для добавления.</p>
+    </div>
+  </div>
+
   <div class="calendar-container" id="calendar-container" style="display:none;">
     <div class="calendar-toolbar">
       <div class="calendar-nav">
@@ -4029,6 +4369,10 @@
     </div>
     <div class="calendar-weekdays" id="calendar-weekdays">
       <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+    </div>
+    <div style="padding: 8px 20px 4px; border-bottom: 1px solid var(--border);">
+      <p class="ui-hint">Наведите и остановите мышку на ячейке на 2 секунды, чтобы увеличить её и увидеть все события</p>
+      <p class="ui-hint">Нажмите на ячейку, чтобы создать новое событие</p>
     </div>
     <div class="calendar-body">
       <div class="calendar-days" id="calendar-days">
@@ -4053,8 +4397,6 @@
 
   <div class="posts-container" id="posts-container">
     <div class="empty-state" id="empty-state">
-      <span class="empty-title">Выберите объект из списка выше</span>
-      <span>или создайте новый, либо откройте dashboard для сводки</span>
       <div class="empty-actions">
         <a href="#" id="empty-add-object" class="full-mode-only">+ Создать объект</a>
         <a href="#" id="empty-show-dashboard">Dashboard</a>
@@ -4074,6 +4416,7 @@
       { id: 'dashboard', title: 'Сводка (Dashboard)', keywords: 'сводка дашборд' },
       { id: 'roadmap', title: 'Дорожная карта', keywords: 'дорожная карта' },
       { id: 'data', title: 'Справочная информация', keywords: 'справочник справочная данные' },
+      { id: 'documents', title: 'Документы', keywords: 'документы файлы загрузка' },
       { id: 'subcontractors', title: 'Субподрядчики', keywords: 'субподрядчик подрядчик' },
       { id: 'contractors', title: 'Подрядчики', keywords: 'подрядчик подрядчики' },
       { id: 'calendar', title: 'Календарь', keywords: 'календарь' },
@@ -4104,6 +4447,14 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+    /** Нормализация для поиска: ё→е, чтобы «Еременко» находило «Ерёменко» и наоборот */
+    function normalizeForSearch(str) {
+      if (str == null || typeof str !== 'string') return '';
+      return str.toLowerCase().replace(/ё/g, 'е');
+    }
+    function searchIncludes(haystack, needle) {
+      return normalizeForSearch(haystack).includes(normalizeForSearch(needle));
     }
 
     function formatDateRu(iso) {
@@ -4270,6 +4621,8 @@
           if (empty) empty.style.display = 'none';
           if (contractorsContainer) contractorsContainer.style.display = 'none';
           if (dat) dat.style.display = 'none';
+          const documentsContainerEl = document.getElementById('documents-container');
+          if (documentsContainerEl) documentsContainerEl.style.display = 'none';
           ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = (el.id === (typ === 'managing' ? 'managing-container' : typ === 'service' ? 'service-container' : typ === 'fkr' ? 'fkr-container' : 'construction-control-container') ? 'block' : 'none');
@@ -4283,6 +4636,7 @@
         if (viewId === 'main') document.querySelector('[data-view="main"]')?.click?.();
         else if (viewId === 'roadmap') document.getElementById('show-roadmap')?.click?.();
         else if (viewId === 'data') document.getElementById('show-data')?.click?.();
+        else if (viewId === 'documents') document.getElementById('show-documents')?.click?.();
         else if (viewId === 'subcontractors') document.getElementById('show-subcontractors')?.click?.();
         else if (viewId === 'contractors') document.getElementById('show-contractors')?.click?.();
         else if (viewId === 'calendar') document.getElementById('show-calendar')?.click?.();
@@ -4298,20 +4652,20 @@
       let landingSearchFiltered = [];
 
       function filterLandingResults(q) {
-        const t = (q || '').trim().toLowerCase();
+        const t = (q || '').trim();
         if (!t) return LANDING_SECTIONS.slice();
         const results = [];
         LANDING_SECTIONS.forEach(s => {
-          const searchText = (s.title + ' ' + (s.keywords || '') + ' ' + s.id).toLowerCase();
-          if (searchText.includes(t))
+          const searchText = s.title + ' ' + (s.keywords || '') + ' ' + s.id;
+          if (searchIncludes(searchText, t))
             results.push({ id: s.id, title: s.title, type: 'section' });
         });
         if (typeof OBJECTS !== 'undefined') {
           OBJECTS.forEach(addr => {
-            if (addr.toLowerCase().includes(t))
+            if (searchIncludes(addr, t))
               results.push({ id: 'object:' + addr, title: addr, type: 'Объект' });
             const comment = (data[addr]?.comment || '').trim();
-            if (comment && comment.toLowerCase().includes(t))
+            if (comment && searchIncludes(comment, t))
               results.push({ id: 'object:' + addr, title: addr + ' — комментарий', type: 'Комментарий объекта' });
             const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []);
             const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []);
@@ -4320,9 +4674,9 @@
               const type = idx < mainList.length ? 'main' : 'extra';
               const localIdx = idx < mainList.length ? idx : idx - mainList.length;
               const docComment = (state[type]?.[localIdx]?.comment || '').trim();
-              if (doc.toLowerCase().includes(t))
+              if (searchIncludes(doc, t))
                 results.push({ id: 'object:' + addr, title: doc.substring(0, 50) + (doc.length > 50 ? '…' : '') + ' (' + addr + ')', type: 'Документ' });
-              if (docComment && docComment.toLowerCase().includes(t))
+              if (docComment && searchIncludes(docComment, t))
                 results.push({ id: 'object:' + addr, title: 'Комментарий к документу — ' + addr, type: 'Комментарий документа' });
             });
             const rowData = (typeof personsData !== 'undefined' && personsData[addr]) || {};
@@ -4332,7 +4686,7 @@
               const r = rowData[row.id] || {};
               cols.forEach(col => {
                 const val = (r[col.id] || '').toString().trim();
-                if (val && val.toLowerCase().includes(t)) {
+                if (val && searchIncludes(val, t)) {
                   const label = (row.name || '') + ': ' + val.substring(0, 40) + (val.length > 40 ? '…' : '');
                   results.push({ id: 'data:' + addr, title: label + ' — ' + addr, type: 'Справочная информация' });
                 }
@@ -4342,34 +4696,21 @@
         }
         const subList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
         subList.forEach((item, index) => {
-          const company = (item.company || '').toLowerCase();
-          const installer = (item.installer || '').toLowerCase();
-          const inn = (item.inn || '').toLowerCase();
-          const ogrn = (item.ogrn || '').toLowerCase();
-          const order = (item.order || '').toLowerCase();
-          const objIds = (item.objectIds || []).join(' ').toLowerCase();
-          const searchable = company + ' ' + installer + ' ' + inn + ' ' + ogrn + ' ' + order + ' ' + objIds;
-          if (searchable && searchable.includes(t))
+          const company = (item.company || '') + ' ' + (item.installer || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.order || '') + ' ' + (item.objectIds || []).join(' ');
+          if (searchIncludes(company, t))
             results.push({ id: 'subcontractor:' + index, title: (item.company || 'Субподрядчик') + (item.inn ? ' · ИНН ' + item.inn : ''), type: 'Субподрядчик' });
         });
         const contractorsListLanding = JSON.parse(localStorage.getItem('contractorsList') || '[]');
         contractorsListLanding.forEach((item, index) => {
-          const company = (item.company || '').toLowerCase();
-          const inn = (item.inn || '').toLowerCase();
-          const ogrn = (item.ogrn || '').toLowerCase();
-          const objIds = (item.objectIds || []).join(' ').toLowerCase();
-          const searchable = company + ' ' + inn + ' ' + ogrn + ' ' + objIds;
-          if (searchable && searchable.includes(t))
+          const searchable = (item.company || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.objectIds || []).join(' ');
+          if (searchIncludes(searchable, t))
             results.push({ id: 'contractor:' + index, title: (item.company || 'Подрядчик') + (item.inn ? ' · ИНН ' + item.inn : ''), type: 'Подрядчик' });
         });
         function searchDataEntityList(listKey, typeId, typeLabel) {
           const list = JSON.parse(localStorage.getItem(listKey) || '[]');
           list.forEach((item, index) => {
-            const company = (item.company || '').toLowerCase();
-            const responsible = (item.responsible || '').toLowerCase();
-            const objIds = (item.objectIds || []).join(' ').toLowerCase();
-            const searchable = company + ' ' + responsible + ' ' + objIds;
-            if (searchable && searchable.includes(t))
+            const searchable = (item.company || '') + ' ' + (item.responsible || '') + ' ' + (item.objectIds || []).join(' ');
+            if (searchIncludes(searchable, t))
               results.push({ id: typeId + ':' + index, title: (item.company || typeLabel) + ' — ' + (item.responsible || ''), type: typeLabel });
           });
         }
@@ -4523,7 +4864,7 @@
 
       let data = JSON.parse(localStorage.getItem('registryData')) || {};
       let calendarData = JSON.parse(localStorage.getItem('calendarData')) || {};
-      let history = JSON.parse(localStorage.getItem('historyLog')) || [];
+      let historyLog = JSON.parse(localStorage.getItem('historyLog')) || [];
       let personsData = JSON.parse(localStorage.getItem('personsData')) || {};
       let stickyNotes = JSON.parse(localStorage.getItem('stickyNotes')) || [];
       let roadmapData = JSON.parse(localStorage.getItem('roadmapData')) || {};
@@ -4742,7 +5083,8 @@
         '№1 Ответственный за выполнение работ',
         '№2 Ответственный за выполнение работ',
         'Ответственный за строительный контроль',
-        'Представитель подрядчика'
+        'Представитель подрядчика',
+        'Количество лифтов'
       ];
       const DATA_COLS = ['fio', 'dolzhnost', 'osnovanie', 'kontakt', 'comment'];
       const DATA_COL_NAMES = { fio: 'ФИО', dolzhnost: 'Должность', osnovanie: 'Основание', kontakt: 'Контакт', comment: 'Организация' };
@@ -4784,7 +5126,11 @@
         localStorage.setItem('dataRows', JSON.stringify(dataRows));
       }
       dataRows = dataRows.filter(r => r.id !== 'docCount');
-      localStorage.setItem('dataRows', JSON.stringify(dataRows));
+      if (!dataRows.some(r => (r.name || '').trim() === 'Количество лифтов')) {
+        const maxOrder = dataRows.length ? Math.max(...dataRows.map(r => r.order ?? 0), -1) : -1;
+        dataRows.push({ id: 'row_elevators', name: 'Количество лифтов', order: maxOrder + 1 });
+        localStorage.setItem('dataRows', JSON.stringify(dataRows));
+      }
       function ensureSubcontractorExtraRows(count) {
         if (count <= 0) return;
         const maxOrder = dataRows.length ? Math.max(...dataRows.map(r => r.order ?? 0), -1) : -1;
@@ -4805,7 +5151,6 @@
       const dataTableWrap = document.getElementById('data-table-wrap');
       const dataTable = document.getElementById('data-table');
       const dataTableBody = document.getElementById('data-table-body');
-      const dataEmptyHint = document.getElementById('data-empty-hint');
 
       const roadmapContainer = document.getElementById('roadmap-container');
       const subcontractorsContainer = document.getElementById('subcontractors-container');
@@ -5277,7 +5622,8 @@
               dataContainer.style.display = 'none';
               roadmapContainer.style.display = 'none';
               subcontractorsContainer.style.display = 'none';
-        if (contractorsContainer) contractorsContainer.style.display = 'none';
+              if (contractorsContainer) contractorsContainer.style.display = 'none';
+              ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
               responsibleConnectionsContainer.style.display = 'none';
               container.style.display = 'block';
               emptyState.style.display = 'none';
@@ -5292,7 +5638,7 @@
         });
         if (searchInput) {
           searchInput.addEventListener('input', () => {
-            const q = (searchInput.value || '').trim().toLowerCase();
+            const q = (searchInput.value || '').trim();
             let lastVisibleLabel = null;
             optionsWrap.querySelectorAll('.selector-option').forEach(el => {
               const addr = el.dataset.addr;
@@ -5300,7 +5646,7 @@
                 el.style.display = q ? 'none' : '';
                 lastVisibleLabel = el;
               } else if (addr) {
-                const show = !q || addr.toLowerCase().includes(q);
+                const show = !q || searchIncludes(addr, q);
                 el.style.display = show ? '' : 'none';
                 if (show && lastVisibleLabel) { lastVisibleLabel.style.display = ''; lastVisibleLabel = null; }
               }
@@ -5781,6 +6127,7 @@
         { id: 'subcontractors', title: 'Субподрядчики', keywords: 'субподрядчик субподрядчики подрядчик' },
         { id: 'contractors', title: 'Подрядчики', keywords: 'подрядчик подрядчики' },
         { id: 'data', title: 'Справочная информация', keywords: 'справочник справочная данные' },
+        { id: 'documents', title: 'Документы', keywords: 'документы файлы загрузка' },
         { id: 'roadmap', title: 'Дорожная карта', keywords: 'дорожная карта' },
         { id: 'dashboard', title: 'Сводка', keywords: 'сводка дашборд' },
         { id: 'calendar', title: 'Календарь', keywords: 'календарь' },
@@ -5789,7 +6136,7 @@
         { id: 'comments', title: 'Комментарии', keywords: 'комментарий' }
       ];
       function performSearch(q) {
-        const query = (q || '').trim().toLowerCase();
+        const query = (q || '').trim();
         if (!query) {
           searchResults.innerHTML = '';
           searchResults.classList.remove('show');
@@ -5797,16 +6144,16 @@
         }
         const results = [];
         SEARCH_SECTIONS.forEach(s => {
-          const searchText = (s.title + ' ' + (s.keywords || '')).toLowerCase();
-          if (searchText.includes(query))
+          const searchText = s.title + ' ' + (s.keywords || '');
+          if (searchIncludes(searchText, query))
             results.push({ type: 'Раздел', sectionId: s.id, title: s.title, text: s.title, openToData: false });
         });
         OBJECTS.forEach(addr => {
-          if (addr.toLowerCase().includes(query)) {
+          if (searchIncludes(addr, query)) {
             results.push({ type: 'Объект', addr, text: addr, openToData: false });
           }
           const comment = (data[addr]?.comment || '').trim();
-          if (comment && comment.toLowerCase().includes(query)) {
+          if (comment && searchIncludes(comment, query)) {
             results.push({ type: 'Комментарий объекта', addr, text: comment.substring(0, 80) + (comment.length > 80 ? '…' : ''), openToData: false });
           }
           const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
@@ -5816,10 +6163,10 @@
             const type = idx < mainList.length ? 'main' : 'extra';
             const localIdx = idx < mainList.length ? idx : idx - mainList.length;
             const comment = (state[type]?.[localIdx]?.comment || '').trim();
-            if (doc.toLowerCase().includes(query)) {
+            if (searchIncludes(doc, query)) {
               results.push({ type: 'Документ', addr, text: doc.substring(0, 60) + (doc.length > 60 ? '…' : ''), openToData: false });
             }
-            if (comment && comment.toLowerCase().includes(query)) {
+            if (comment && searchIncludes(comment, query)) {
               results.push({ type: 'Комментарий документа', addr, text: comment.substring(0, 60) + (comment.length > 60 ? '…' : ''), openToData: false });
             }
           });
@@ -5830,7 +6177,7 @@
             const r = rowData[row.id] || {};
             cols.forEach(col => {
               const val = (r[col.id] || '').toString().trim();
-              if (val && val.toLowerCase().includes(query)) {
+              if (val && searchIncludes(val, query)) {
                 results.push({ type: 'Справочная информация', addr, text: (row.name || '') + ': ' + val.substring(0, 50) + (val.length > 50 ? '…' : ''), openToData: true });
               }
             });
@@ -5838,34 +6185,21 @@
         });
         const subList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
         subList.forEach((item, index) => {
-          const company = (item.company || '').toLowerCase();
-          const installer = (item.installer || '').toLowerCase();
-          const inn = (item.inn || '').toLowerCase();
-          const ogrn = (item.ogrn || '').toLowerCase();
-          const order = (item.order || '').toLowerCase();
-          const objIds = (item.objectIds || []).join(' ').toLowerCase();
-          const searchable = company + ' ' + installer + ' ' + inn + ' ' + ogrn + ' ' + order + ' ' + objIds;
-          if (searchable && searchable.includes(query))
+          const searchable = (item.company || '') + ' ' + (item.installer || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.order || '') + ' ' + (item.objectIds || []).join(' ');
+          if (searchIncludes(searchable, query))
             results.push({ type: 'Субподрядчик', subcontractorIndex: index, text: (item.company || '—') + (item.inn ? ' · ИНН ' + item.inn : ''), openToData: false });
         });
         const contractorsListSearch = JSON.parse(localStorage.getItem('contractorsList') || '[]');
         contractorsListSearch.forEach((item, index) => {
-          const company = (item.company || '').toLowerCase();
-          const inn = (item.inn || '').toLowerCase();
-          const ogrn = (item.ogrn || '').toLowerCase();
-          const objIds = (item.objectIds || []).join(' ').toLowerCase();
-          const searchable = company + ' ' + inn + ' ' + ogrn + ' ' + objIds;
-          if (searchable && searchable.includes(query))
+          const searchable = (item.company || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.objectIds || []).join(' ');
+          if (searchIncludes(searchable, query))
             results.push({ type: 'Подрядчик', contractorIndex: index, text: (item.company || '—') + (item.inn ? ' · ИНН ' + item.inn : ''), openToData: false });
         });
         function searchEntityList(listKey, typeLabel, resultKey, resultIndex) {
           const list = JSON.parse(localStorage.getItem(listKey) || '[]');
           list.forEach((item, index) => {
-            const company = (item.company || '').toLowerCase();
-            const responsible = (item.responsible || '').toLowerCase();
-            const objIds = (item.objectIds || []).join(' ').toLowerCase();
-            const searchable = company + ' ' + responsible + ' ' + objIds;
-            if (searchable && searchable.includes(query))
+            const searchable = (item.company || '') + ' ' + (item.responsible || '') + ' ' + (item.objectIds || []).join(' ');
+            if (searchIncludes(searchable, query))
               results.push({ type: typeLabel, [resultKey]: index, text: (item.company || '—') + (item.responsible ? ' · ' + item.responsible : ''), openToData: false });
           });
         }
@@ -5887,7 +6221,7 @@
           item.innerHTML = `<div class="search-result-type">${escapeHtml(r.type)}</div>${displayText}`;
           item.addEventListener('click', () => {
             if (r.sectionId) {
-              const sectionBtnIds = { subcontractors: 'show-subcontractors', contractors: 'show-contractors', data: 'show-data', roadmap: 'show-roadmap', dashboard: 'show-dashboard-sidebar', calendar: 'show-calendar', thoughts: 'show-thoughts', reminders: 'show-reminders', comments: 'btn-comments' };
+              const sectionBtnIds = { subcontractors: 'show-subcontractors', contractors: 'show-contractors', data: 'show-data', documents: 'show-documents', roadmap: 'show-roadmap', dashboard: 'show-dashboard-sidebar', calendar: 'show-calendar', thoughts: 'show-thoughts', reminders: 'show-reminders', comments: 'btn-comments' };
               const bid = sectionBtnIds[r.sectionId] || ('show-' + r.sectionId);
               document.getElementById(bid)?.click();
             } else if (r.subcontractorIndex !== undefined) {
@@ -6678,11 +7012,11 @@
         }
 
         if (action) {
-          history.push({
+          historyLog.push({
             time: timestamp,
             action: `${addr} > ${type === 'main' ? 'Основные' : 'Дополнительные'} (${idx + 1}): ${action}`
           });
-          localStorage.setItem('historyLog', JSON.stringify(history));
+          localStorage.setItem('historyLog', JSON.stringify(historyLog));
         }
 
         showToast();
@@ -6835,6 +7169,30 @@
             });
             eventsWrap.appendChild(row);
           });
+          
+          // Обработчик увеличения ячейки при удержании мыши 2 секунды
+          let expandTimer = null;
+          
+          dayEl.addEventListener('mouseenter', (e) => {
+            if (dayEl.classList.contains('empty')) return;
+            if (expandTimer) clearTimeout(expandTimer);
+            expandTimer = setTimeout(() => {
+              dayEl.classList.add('expanded');
+            }, 2000);
+          });
+          
+          dayEl.addEventListener('mouseleave', (e) => {
+            // Проверяем, что мышь действительно покинула ячейку (не перешла на дочерний элемент)
+            const relatedTarget = e.relatedTarget;
+            if (relatedTarget && dayEl.contains(relatedTarget)) {
+              return; // Мышь перешла на дочерний элемент, не закрываем
+            }
+            if (expandTimer) {
+              clearTimeout(expandTimer);
+              expandTimer = null;
+            }
+            dayEl.classList.remove('expanded');
+          });
 
           calendarDays.appendChild(dayEl);
         }
@@ -6951,17 +7309,11 @@
 
         textInput.focus();
 
-        // Позиционирование под ячейкой
-        const dayEl = document.querySelector(`.calendar-day[data-date="${dateKey}"]`);
-        let popupLeft, popupTop;
-        if (dayEl) {
-          const rect = dayEl.getBoundingClientRect();
-          popupLeft = rect.left + (window.pageXOffset || document.documentElement.scrollLeft);
-          popupTop = rect.bottom + (window.pageYOffset || document.documentElement.scrollTop) + 4;
-        } else {
-          popupLeft = Math.max(20, (window.innerWidth - 320) / 2);
-          popupTop = 80;
-        }
+        // Позиционирование в центре экрана
+        const popupWidth = 320;
+        const popupHeight = 200;
+        const popupLeft = (window.innerWidth - popupWidth) / 2 + (window.pageXOffset || document.documentElement.scrollLeft);
+        const popupTop = (window.innerHeight - popupHeight) / 2 + (window.pageYOffset || document.documentElement.scrollTop);
         popup.style.left = popupLeft + 'px';
         popup.style.top = popupTop + 'px';
         popup.classList.add('active');
@@ -7024,13 +7376,18 @@
         calendarContainer.style.display = 'block';
         dataContainer.style.display = 'none';
         roadmapContainer.style.display = 'none';
+        const documentsContainerEl = document.getElementById('documents-container');
+        if (documentsContainerEl) documentsContainerEl.style.display = 'none';
         subcontractorsContainer.style.display = 'none';
         if (contractorsContainer) contractorsContainer.style.display = 'none';
         responsibleConnectionsContainer.style.display = 'none';
+        ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         container.style.display = 'none';
         emptyState.style.display = 'none';
         renderCalendar();
         if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('calendar', null);
+        if (typeof sidebar !== 'undefined' && sidebar) sidebar.classList.remove('open');
+        window.scrollTo(0, 0);
       });
 
       // === Дорожная карта объектов ===
@@ -7098,13 +7455,25 @@
           const row = document.createElement('tr');
           const objCell = document.createElement('td');
           objCell.className = 'roadmap-cell-object';
-          objCell.textContent = `${index + 1}. ${addr}`;
+          const objLabel = document.createElement('div');
+          objLabel.className = 'roadmap-cell-object-name';
+          objLabel.textContent = `${index + 1}. ${addr}`;
+          objCell.appendChild(objLabel);
+          const objComment = (data[addr] && (data[addr].comment || '').trim()) || '';
+          if (objComment) {
+            const commentEl = document.createElement('div');
+            commentEl.className = 'roadmap-cell-object-comment';
+            commentEl.textContent = objComment;
+            commentEl.title = objComment;
+            objCell.appendChild(commentEl);
+          }
           row.appendChild(objCell);
           cols.forEach((col, colIdx) => {
             const colId = col.id;
             const td = document.createElement('td');
             td.dataset.addr = addr;
             td.dataset.colId = colId;
+            td.dataset.colName = col.name || '';
             const done = !!roadmapData[addr][colId];
             const note = (roadmapNotes[addr][colId] || '').trim();
             if (done && !roadmapEditMode) td.classList.add('roadmap-done');
@@ -7182,6 +7551,7 @@
         e.preventDefault();
         calendarContainer.style.display = 'none';
         dataContainer.style.display = 'none';
+        if (documentsContainer) documentsContainer.style.display = 'none';
         subcontractorsContainer.style.display = 'none';
         if (contractorsContainer) contractorsContainer.style.display = 'none';
         responsibleConnectionsContainer.style.display = 'none';
@@ -7270,8 +7640,8 @@
       function fillDataObjectDropdown(filter) {
         if (!dataObjectDropdown) return;
         const list = getActiveObjects().slice().sort((a, b) => a.localeCompare(b));
-        const q = (filter || '').trim().toLowerCase();
-        const filtered = q ? list.filter(addr => addr.toLowerCase().includes(q)) : list;
+        const q = (filter || '').trim();
+        const filtered = q ? list.filter(addr => searchIncludes(addr, q)) : list;
         dataObjectDropdown.innerHTML = filtered.length === 0
           ? '<div class="data-object-dropdown-option" style="color:var(--text-muted);cursor:default;">Ничего не найдено</div>'
           : filtered.map(addr => '<div class="data-object-dropdown-option" data-addr="' + escapeHtml(addr) + '">' + escapeHtml(addr) + '</div>').join('');
@@ -7303,6 +7673,38 @@
             dataObjectDropdown.classList.remove('open');
         });
       }
+      const dataObjectPrevBtn = document.getElementById('data-object-prev-btn');
+      const dataObjectNextBtn = document.getElementById('data-object-next-btn');
+      
+      if (dataObjectPrevBtn && dataObjectSelect) {
+        dataObjectPrevBtn.addEventListener('click', () => {
+          const list = getActiveObjects().slice().sort((a, b) => a.localeCompare(b));
+          if (list.length === 0) return;
+          const current = (dataObjectSelect.value || '').trim();
+          const idx = current ? list.indexOf(current) : -1;
+          const prevIdx = idx < 0 ? list.length - 1 : (idx - 1 + list.length) % list.length;
+          const prevAddr = list[prevIdx];
+          dataObjectSelect.value = prevAddr;
+          if (dataObjectSearchInput) dataObjectSearchInput.value = prevAddr;
+          if (dataObjectDropdown) dataObjectDropdown.classList.remove('open');
+          renderDataTable(prevAddr);
+        });
+      }
+      
+      if (dataObjectNextBtn && dataObjectSelect) {
+        dataObjectNextBtn.addEventListener('click', () => {
+          const list = getActiveObjects().slice().sort((a, b) => a.localeCompare(b));
+          if (list.length === 0) return;
+          const current = (dataObjectSelect.value || '').trim();
+          const idx = current ? list.indexOf(current) : -1;
+          const nextIdx = idx < 0 ? 0 : (idx + 1) % list.length;
+          const nextAddr = list[nextIdx];
+          dataObjectSelect.value = nextAddr;
+          if (dataObjectSearchInput) dataObjectSearchInput.value = nextAddr;
+          if (dataObjectDropdown) dataObjectDropdown.classList.remove('open');
+          renderDataTable(nextAddr);
+        });
+      }
 
       const dataTheadRow = document.getElementById('data-thead-row');
       const dataEditBtn = document.getElementById('data-edit-btn');
@@ -7324,7 +7726,7 @@
       }
       function runGlobalSearchInReference(query) {
         if (!dataGlobalSearchResultsEl || !query || query.length < 1) return;
-        const q = query.trim().toLowerCase();
+        const q = query.trim();
         if (!q) { dataGlobalSearchResultsEl.style.display = 'none'; return; }
         const rows = (dataRows || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         const cols = (dataColumns || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -7337,7 +7739,7 @@
             if (!cell || typeof cell !== 'object') return;
             cols.forEach(col => {
               const val = (cell[col.id] || '').trim();
-              if (val && val.toLowerCase().indexOf(q) !== -1) matches.push({ addr, rowName: row.name || '', colName: col.name || '', value: val });
+              if (val && searchIncludes(val, q)) matches.push({ addr, rowName: row.name || '', colName: col.name || '', value: val });
             });
           });
         });
@@ -7385,12 +7787,10 @@
 
       function renderDataTable(addr) {
         if (!addr) {
-          dataEmptyHint.style.display = 'block';
           dataTable.style.display = 'none';
           return;
         }
         migratePersonsDataToRowColId(addr);
-        dataEmptyHint.style.display = 'none';
         dataTable.style.display = 'table';
         if (!personsData[addr]) personsData[addr] = {};
         const rowData = personsData[addr];
@@ -7472,6 +7872,7 @@
           const tr = document.createElement('tr');
           const labelTd = document.createElement('td');
           labelTd.className = 'data-cell-label';
+          labelTd.dataset.label = 'Категория';
           if (dataEditMode) {
             const canDeleteRow = rows.length > 1;
             labelTd.innerHTML = '<div class="row-header-cell"><input type="text" class="row-name-input" value="' + (row.name || '').replace(/"/g, '&quot;') + '" data-row-id="' + row.id + '" placeholder="Строка"><div class="col-move"><button type="button" class="row-move-up" data-row-id="' + row.id + '">▲</button><button type="button" class="row-move-down" data-row-id="' + row.id + '">▼</button></div>' + (canDeleteRow ? '<button type="button" class="row-delete-btn" data-row-id="' + row.id + '" title="Удалить строку">×</button>' : '') + '</div>';
@@ -7482,6 +7883,7 @@
           if (!rowData[row.id]) rowData[row.id] = {};
           cols.forEach((col) => {
             const td = document.createElement('td');
+            td.dataset.label = col.name || '';
             const val = (rowData[row.id][col.id] || '').trim();
             const el = document.createElement('input');
             el.type = 'text';
@@ -7602,6 +8004,8 @@
         responsibleConnectionsContainer.style.display = 'none';
         container.style.display = 'none';
         emptyState.style.display = 'none';
+        const documentsContainer = document.getElementById('documents-container');
+        if (documentsContainer) documentsContainer.style.display = 'none';
         dataContainer.style.display = 'block';
         populateDataSelector();
         const currentAddr = dataObjectSelect.value;
@@ -7609,11 +8013,283 @@
         if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('data', currentAddr || null);
       });
 
+      // === Документы ===
+      let documentsList = JSON.parse(localStorage.getItem('documentsList') || '[]');
+      let documentsSearchQuery = '';
+      const documentsContainer = document.getElementById('documents-container');
+      const documentsListEl = document.getElementById('documents-list');
+      const documentsEmptyEl = document.getElementById('documents-empty');
+      const documentsFileInput = document.getElementById('documents-file-input');
+      const documentsUploadBtn = document.getElementById('documents-upload-btn');
+      const documentsSearchInput = document.getElementById('documents-search-input');
+
+      function saveDocumentsList() {
+        localStorage.setItem('documentsList', JSON.stringify(documentsList));
+        showToast();
+      }
+
+      async function uploadFileToSupabase(file) {
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+          throw new Error('Supabase не настроен');
+        }
+        const fileName = file.name;
+        const filePath = `${Date.now()}_${fileName}`;
+        
+        // Загружаем файл в Supabase Storage используя FormData
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${encodeURIComponent(filePath)}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Ошибка загрузки: ${response.status} ${error}`);
+        }
+
+        return filePath;
+      }
+
+      function getFileUrlFromSupabase(filePath) {
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+        // filePath уже содержит только имя файла без префикса "documents/"
+        return `${SUPABASE_URL}/storage/v1/object/public/documents/${encodeURIComponent(filePath)}`;
+      }
+
+      async function deleteFileFromSupabase(filePath) {
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+          throw new Error('Supabase не настроен');
+        }
+        // filePath уже содержит только имя файла без префикса "documents/"
+        const response = await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${encodeURIComponent(filePath)}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY
+          }
+        });
+        if (!response.ok && response.status !== 404) {
+          throw new Error(`Ошибка удаления: ${response.status}`);
+        }
+      }
+
+      function renderDocuments() {
+        if (!documentsListEl) return;
+        documentsListEl.innerHTML = '';
+        
+        // Фильтруем документы по поисковому запросу
+        const filteredDocs = documentsSearchQuery 
+          ? documentsList.filter(doc => searchIncludes(doc.name, documentsSearchQuery))
+          : documentsList;
+        
+        // Обновляем счетчик документов
+        const documentsCountEl = document.getElementById('documents-count');
+        if (documentsCountEl) {
+          if (documentsList.length === 0) {
+            documentsCountEl.textContent = '';
+          } else if (documentsSearchQuery && filteredDocs.length !== documentsList.length) {
+            documentsCountEl.textContent = `Найдено: ${filteredDocs.length} из ${documentsList.length}`;
+          } else {
+            documentsCountEl.textContent = `Всего: ${documentsList.length}`;
+          }
+        }
+        
+        if (filteredDocs.length === 0) {
+          if (documentsEmptyEl) {
+            documentsEmptyEl.style.display = 'block';
+            documentsEmptyEl.textContent = documentsSearchQuery 
+              ? 'Ничего не найдено по запросу "' + escapeHtml(documentsSearchQuery) + '"'
+              : 'Нет загруженных документов. Нажмите «Загрузить файлы» для добавления.';
+          }
+          return;
+        }
+        
+        if (documentsEmptyEl) documentsEmptyEl.style.display = 'none';
+        
+        filteredDocs.forEach((doc, filteredIndex) => {
+          // Находим оригинальный индекс в documentsList для правильной работы кнопок
+          const originalIndex = documentsList.findIndex(d => d.path === doc.path);
+          if (originalIndex === -1) return;
+          const card = document.createElement('div');
+          card.className = 'document-card';
+          const fileSize = doc.size ? formatFileSize(doc.size) : '—';
+          const uploadDate = doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+          card.innerHTML = `
+            <div class="document-card-header">
+              <div class="document-card-name" title="${escapeHtml(doc.name)}">${escapeHtml(doc.name)}</div>
+              <div class="document-card-actions">
+                <button type="button" class="document-card-btn" data-action="download" data-index="${originalIndex}" title="Скачать">Скачать</button>
+                <button type="button" class="document-card-btn full-mode-only" data-action="delete" data-index="${originalIndex}" title="Удалить">Удалить</button>
+              </div>
+            </div>
+            <div class="document-card-info">
+              <div>Размер: ${fileSize}</div>
+              <div>Загружен: ${uploadDate}</div>
+              ${doc.folder ? `<div>Папка: ${escapeHtml(doc.folder)}</div>` : ''}
+            </div>
+          `;
+          documentsListEl.appendChild(card);
+        });
+
+        documentsListEl.querySelectorAll('[data-action="download"]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const index = parseInt(btn.dataset.index, 10);
+            const doc = documentsList[index];
+            if (!doc) return;
+            
+            try {
+              const url = getFileUrlFromSupabase(doc.path);
+              if (!url) {
+                showAlert('Не удалось получить URL файла. Проверьте настройки Supabase.', 'Ошибка');
+                return;
+              }
+              
+              const response = await fetch(url);
+              if (!response.ok) throw new Error('Файл не найден');
+              
+              const blob = await response.blob();
+              const downloadUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = downloadUrl;
+              a.download = doc.name;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(downloadUrl);
+            } catch (e) {
+              showAlert('Ошибка при скачивании файла: ' + (e.message || e), 'Ошибка');
+            }
+          });
+        });
+
+        documentsListEl.querySelectorAll('[data-action="delete"]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const index = parseInt(btn.dataset.index, 10);
+            const doc = documentsList[index];
+            if (!doc) return;
+            
+            const confirmed = await showConfirm(`Удалить файл "${doc.name}"?`, 'Подтверждение удаления');
+            if (!confirmed) return;
+            
+            try {
+              await deleteFileFromSupabase(doc.path);
+              documentsList.splice(index, 1);
+              saveDocumentsList();
+              renderDocuments();
+              if (typeof saveToSupabase === 'function') saveToSupabase();
+              showToast();
+            } catch (e) {
+              showAlert('Ошибка при удалении файла: ' + (e.message || e), 'Ошибка');
+            }
+          });
+        });
+      }
+
+      function formatFileSize(bytes) {
+        if (!bytes || bytes === 0) return '0 Б';
+        const k = 1024;
+        const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+      }
+
+      if (documentsUploadBtn) {
+        documentsUploadBtn.addEventListener('click', () => {
+          if (documentsFileInput) documentsFileInput.click();
+        });
+      }
+
+      if (documentsFileInput) {
+        documentsFileInput.addEventListener('change', async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+          
+          e.target.value = '';
+          
+          for (const file of files) {
+            try {
+              showToast('Загрузка ' + file.name + '...');
+              const filePath = await uploadFileToSupabase(file);
+              
+              documentsList.push({
+                name: file.name,
+                path: filePath,
+                size: file.size,
+                type: file.type,
+                uploadDate: new Date().toISOString(),
+                folder: null
+              });
+              
+              saveDocumentsList();
+              renderDocuments();
+              if (typeof saveToSupabase === 'function') saveToSupabase();
+            } catch (error) {
+              showAlert('Ошибка при загрузке файла "' + file.name + '": ' + (error.message || error), 'Ошибка');
+            }
+          }
+          
+          showToast('Загрузка завершена');
+        });
+      }
+
+      if (documentsSearchInput) {
+        documentsSearchInput.addEventListener('input', (e) => {
+          documentsSearchQuery = (e.target.value || '').trim();
+          renderDocuments();
+        });
+        documentsSearchInput.addEventListener('focus', () => {
+          documentsSearchInput.style.borderColor = 'var(--accent)';
+        });
+        documentsSearchInput.addEventListener('blur', () => {
+          documentsSearchInput.style.borderColor = 'var(--border)';
+        });
+      }
+
+      document.getElementById('show-documents')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        calendarContainer.style.display = 'none';
+        roadmapContainer.style.display = 'none';
+        dataContainer.style.display = 'none';
+        subcontractorsContainer.style.display = 'none';
+        if (contractorsContainer) contractorsContainer.style.display = 'none';
+        ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+        responsibleConnectionsContainer.style.display = 'none';
+        container.style.display = 'none';
+        emptyState.style.display = 'none';
+        if (documentsContainer) {
+          documentsContainer.style.display = 'block';
+          renderDocuments();
+          // Фокус на поле поиска при открытии
+          if (documentsSearchInput) {
+            setTimeout(() => documentsSearchInput.focus(), 100);
+          }
+        }
+        if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('documents', null);
+        sidebar.classList.remove('open');
+        window.scrollTo(0, 0);
+      });
+
+      // Инициализация при загрузке
+      if (documentsListEl) renderDocuments();
+
       // === Субподрядчики ===
       function countObjectsWithoutSubcontractor() {
         const active = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
-        const list = typeof subcontractorsList !== 'undefined' ? subcontractorsList : JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
-        return active.filter(addr => !list.some(s => Array.isArray(s.objectIds) && s.objectIds.indexOf(addr) !== -1)).length;
+        const subcontractors = typeof subcontractorsList !== 'undefined' ? subcontractorsList : JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
+        const contractors = typeof contractorsList !== 'undefined' ? contractorsList : JSON.parse(localStorage.getItem('contractorsList') || '[]');
+        return active.filter(addr => {
+          // Исключаем объекты, где есть субподрядчик
+          if (subcontractors.some(s => Array.isArray(s.objectIds) && s.objectIds.indexOf(addr) !== -1)) return false;
+          // Исключаем объекты, где подрядчик сам выполнил работы (есть ответственный)
+          if (contractors.some(c => Array.isArray(c.selfPerformedObjectIds) && c.selfPerformedObjectIds.indexOf(addr) !== -1 && c.selfPerformedResponsible)) return false;
+          return true;
+        }).length;
       }
       function updateSubcontractorsWarningBadge() {
         const n = countObjectsWithoutSubcontractor();
@@ -7647,8 +8323,10 @@
           const ogrn = escapeHtml(item.ogrn || '—');
           const dateFrom = item.dateFrom ? item.dateFrom : '—';
           const dateTo = item.dateTo ? item.dateTo : '—';
-          const contractSubcontract = escapeHtml((item.contractSubcontract || '').trim() || '');
-          const objectIds = Array.isArray(item.objectIds) ? item.objectIds : [];
+          const objectIds = Array.isArray(item.contracts) && item.contracts.length > 0
+            ? item.contracts.reduce((acc, c) => { (c.objectIds || []).forEach(addr => { if (acc.indexOf(addr) === -1) acc.push(addr); }); return acc; }, [])
+            : (Array.isArray(item.objectIds) ? item.objectIds : []);
+          const contractSubcontract = (item.contracts && item.contracts[0] && item.contracts[0].contract) ? escapeHtml(item.contracts[0].contract.trim()) : escapeHtml((item.contractSubcontract || '').trim() || '');
           const objectsHtml = objectIds.length
             ? '<div class="subcontractor-card-objects-wrap"><button type="button" class="subcontractor-objects-toggle" data-index="' + index + '">Объекты · ' + objectIds.length + ' <span class="arrow">▼</span></button><div class="subcontractor-objects-dropdown">' + objectIds.map(addr => '<span class="subcontractor-obj-badge" title="' + escapeHtml(addr) + '">' + escapeHtml(addr.length > 35 ? addr.slice(0, 32) + '…' : addr) + '</span>').join('') + '</div></div>'
             : '';
@@ -7720,6 +8398,7 @@
             if (typeof syncSubcontractorsToReference === 'function') syncSubcontractorsToReference();
             renderSubcontractors();
             if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+            if (typeof saveToSupabase === 'function') saveToSupabase();
           });
         });
       }
@@ -7856,7 +8535,6 @@
         document.getElementById('subcontractor-inn').value = item.inn || '';
         document.getElementById('subcontractor-ogrn').value = item.ogrn || '';
         document.getElementById('subcontractor-legal-address').value = item.legalAddress || '';
-        document.getElementById('subcontractor-contract').value = item.contractSubcontract || '';
         document.getElementById('subcontractor-order').value = item.order || '';
         document.getElementById('subcontractor-date-from').value = item.dateFrom || '';
         document.getElementById('subcontractor-date-to').value = item.dateTo || '';
@@ -7880,23 +8558,49 @@
           opt.value = fio;
           datalist.appendChild(opt);
         });
-        const objList = document.getElementById('subcontractor-objects-list');
-        objList.innerHTML = '';
-        const selectedIds = Array.isArray(item.objectIds) ? item.objectIds : [];
-        getActiveObjects().forEach(addr => {
-          const label = document.createElement('label');
-          const cb = document.createElement('input');
-          cb.type = 'checkbox';
-          cb.dataset.addr = addr;
-          if (selectedIds.indexOf(addr) !== -1) cb.checked = true;
-          label.appendChild(cb);
-          label.appendChild(document.createTextNode(addr));
-          objList.appendChild(label);
-        });
+        const contracts = Array.isArray(item.contracts) && item.contracts.length > 0
+          ? item.contracts
+          : [{ contract: (item.contractSubcontract || '').trim(), objectIds: Array.isArray(item.objectIds) ? item.objectIds : [] }];
+        renderSubcontractorContractsList(contracts);
         subcontractorExtraOrderFilesPending = {};
         renderSubcontractorExtraResponsiblesList(item.extraResponsibles || []);
         subcontractorModal.style.display = 'flex';
       }
+      function renderSubcontractorContractsList(contracts) {
+        const listEl = document.getElementById('subcontractor-contracts-list');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        (contracts || [{ contract: '', objectIds: [] }]).forEach((c, i) => {
+          const block = document.createElement('div');
+          block.className = 'subcontractor-contract-block';
+          const contractVal = (c.contract || '').trim();
+          const selectedIds = Array.isArray(c.objectIds) ? c.objectIds : [];
+          const objectsHtml = getActiveObjects().map(addr => {
+            const checked = selectedIds.indexOf(addr) !== -1 ? ' checked' : '';
+            return '<label><input type="checkbox" data-addr="' + escapeHtml(addr) + '"' + checked + '><span>' + escapeHtml(addr) + '</span></label>';
+          }).join('');
+          block.innerHTML = '<div class="contract-block-header"><input type="text" class="subcontractor-contract-input" placeholder="Номер и дата договора" value="' + escapeHtml(contractVal) + '" style="width:100%;padding:8px 10px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);font-size:13px;"><button type="button" class="btn-secondary subcontractor-remove-contract" style="padding:4px 8px;font-size:11px;flex-shrink:0;">Удалить</button></div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Объекты по этому договору</label><div class="contract-block-objects">' + objectsHtml + '</div>';
+          listEl.appendChild(block);
+        });
+        listEl.querySelectorAll('.subcontractor-remove-contract').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const block = btn.closest('.subcontractor-contract-block');
+            if (block && listEl.querySelectorAll('.subcontractor-contract-block').length > 1) block.remove();
+          });
+        });
+      }
+      document.getElementById('subcontractor-add-contract').addEventListener('click', () => {
+        const listEl = document.getElementById('subcontractor-contracts-list');
+        if (!listEl) return;
+        const block = document.createElement('div');
+        block.className = 'subcontractor-contract-block';
+        const objectsHtml = getActiveObjects().map(addr => '<label><input type="checkbox" data-addr="' + escapeHtml(addr) + '"><span>' + escapeHtml(addr) + '</span></label>').join('');
+        block.innerHTML = '<div class="contract-block-header"><input type="text" class="subcontractor-contract-input" placeholder="Номер и дата договора" style="width:100%;padding:8px 10px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);font-size:13px;"><button type="button" class="btn-secondary subcontractor-remove-contract" style="padding:4px 8px;font-size:11px;flex-shrink:0;">Удалить</button></div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Объекты по этому договору</label><div class="contract-block-objects">' + objectsHtml + '</div>';
+        listEl.appendChild(block);
+        block.querySelector('.subcontractor-remove-contract').addEventListener('click', () => {
+          if (listEl.querySelectorAll('.subcontractor-contract-block').length > 1) block.remove();
+        });
+      });
       function closeSubcontractorModal() {
         subcontractorModal.style.display = 'none';
       }
@@ -7904,10 +8608,10 @@
       subcontractorModalCancel.addEventListener('click', closeSubcontractorModal);
       subcontractorModal.addEventListener('click', (e) => { if (e.target === subcontractorModal) closeSubcontractorModal(); });
       document.getElementById('subcontractor-fill-from-list').addEventListener('click', () => {
-        const company = document.getElementById('subcontractor-company').value.trim().toLowerCase();
+        const company = document.getElementById('subcontractor-company').value.trim();
         if (!company) { showAlert('Введите название компании.', 'Подстановка из реестра'); return; }
         const list = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
-        const matches = list.filter(item => (item.company || '').toLowerCase().includes(company) || company.includes((item.company || '').toLowerCase()));
+        const matches = list.filter(item => searchIncludes(item.company || '', company) || searchIncludes(company, item.company || ''));
         if (matches.length === 0) { showAlert('В реестре нет субподрядчиков с таким названием.', 'Подстановка из реестра'); return; }
         const chosen = matches[0];
         document.getElementById('subcontractor-inn').value = chosen.inn || '';
@@ -8054,12 +8758,20 @@
         const order = document.getElementById('subcontractor-order').value.trim();
         const dateFrom = document.getElementById('subcontractor-date-from').value;
         const dateTo = document.getElementById('subcontractor-date-to').value;
-        const objectIds = [];
-        document.querySelectorAll('#subcontractor-objects-list input[type="checkbox"]:checked').forEach(cb => { objectIds.push(cb.dataset.addr); });
+        const contracts = [];
+        const allObjectIds = [];
+        document.querySelectorAll('#subcontractor-contracts-list .subcontractor-contract-block').forEach(block => {
+          const input = block.querySelector('.subcontractor-contract-input');
+          const contract = input ? input.value.trim() : '';
+          const objectIds = [];
+          block.querySelectorAll('.contract-block-objects input[type="checkbox"]:checked').forEach(cb => { objectIds.push(cb.dataset.addr); if (allObjectIds.indexOf(cb.dataset.addr) === -1) allObjectIds.push(cb.dataset.addr); });
+          contracts.push({ contract, objectIds });
+        });
+        const objectIds = allObjectIds;
         const existing = subcontractorEditIndex >= 0 ? subcontractorsList[subcontractorEditIndex] : {};
         const orderDocumentBase64 = subcontractorOrderFilePending ? subcontractorOrderFilePending.base64 : (existing.orderDocumentBase64 || '');
         const orderDocumentName = subcontractorOrderFilePending ? subcontractorOrderFilePending.name : (existing.orderDocumentName || '');
-        const contractSubcontract = (document.getElementById('subcontractor-contract') && document.getElementById('subcontractor-contract').value) ? document.getElementById('subcontractor-contract').value.trim() : '';
+        const contractSubcontract = (contracts[0] && contracts[0].contract) ? contracts[0].contract : '';
         const legalAddress = (document.getElementById('subcontractor-legal-address') && document.getElementById('subcontractor-legal-address').value) ? document.getElementById('subcontractor-legal-address').value.trim() : '';
         const extraBlocks = document.querySelectorAll('#subcontractor-extra-responsibles-list .subcontractor-extra-block');
         const extraResponsibles = Array.from(extraBlocks).map((block, i) => {
@@ -8075,7 +8787,7 @@
           };
         });
         const comment = (document.getElementById('subcontractor-comment') && document.getElementById('subcontractor-comment').value) ? document.getElementById('subcontractor-comment').value.trim() : '';
-        const item = { company: company || '—', installer, position, inn, ogrn, order, dateFrom, dateTo, objectIds, legalAddress: legalAddress || undefined, contractSubcontract: contractSubcontract || undefined, orderDocumentBase64: orderDocumentBase64 || undefined, orderDocumentName: orderDocumentName || undefined, extraResponsibles: extraResponsibles.length ? extraResponsibles : undefined, comment: comment || undefined };
+        const item = { company: company || '—', installer, position, inn, ogrn, order, dateFrom, dateTo, objectIds, contracts: contracts.length ? contracts : undefined, legalAddress: legalAddress || undefined, contractSubcontract: contractSubcontract || undefined, orderDocumentBase64: orderDocumentBase64 || undefined, orderDocumentName: orderDocumentName || undefined, extraResponsibles: extraResponsibles.length ? extraResponsibles : undefined, comment: comment || undefined };
         if (subcontractorEditIndex >= 0) {
           subcontractorsList[subcontractorEditIndex] = item;
         } else {
@@ -8087,6 +8799,7 @@
         syncSubcontractorsToReference();
         renderSubcontractors();
         if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+        if (typeof saveToSupabase === 'function') saveToSupabase();
         closeSubcontractorModal();
       });
       document.getElementById('show-subcontractors').addEventListener('click', (e) => {
@@ -8097,6 +8810,7 @@
         emptyState.style.display = 'none';
         responsibleConnectionsContainer.style.display = 'none';
         if (contractorsContainer) contractorsContainer.style.display = 'none';
+        if (documentsContainer) documentsContainer.style.display = 'none';
         ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         subcontractorsContainer.style.display = 'block';
         container.style.display = 'none';
@@ -8148,8 +8862,10 @@
       function syncContractorsToReference() {
         const rowRepName = 'Представитель подрядчика';
         const rowControlName = 'Ответственный за строительный контроль';
+        const row2Name = '№2 Ответственный за выполнение работ';
         const rowRep = (dataRows || []).find(r => (r.name || '').trim() === rowRepName);
         const rowControl = (dataRows || []).find(r => (r.name || '').trim() === rowControlName);
+        const row2 = (dataRows || []).find(r => (r.name || '').trim() === row2Name);
         if (!rowRep || !rowControl) return;
         const list = typeof contractorsList !== 'undefined' ? contractorsList : JSON.parse(localStorage.getItem('contractorsList') || '[]');
         const addrs = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
@@ -8175,6 +8891,32 @@
             personsData[addr][rowControl.id].osnovanie = (c.orderControl || c.order || '').trim();
             personsData[addr][rowControl.id].comment = orgStr;
             personsData[addr][rowControl.id].kontakt = (c.phoneControl || '').trim();
+          }
+          // Заполнение строки "№2 ответственный за выполнение работ" для объектов, где подрядчик сам выполнил работы
+          if (row2) {
+            if (!personsData[addr][row2.id]) personsData[addr][row2.id] = {};
+            // Проверяем, есть ли субподрядчик для этого объекта (субподрядчики имеют приоритет)
+            const subcontractors = typeof subcontractorsList !== 'undefined' ? subcontractorsList : JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
+            const hasSubcontractor = subcontractors.some(s => Array.isArray(s.objectIds) && s.objectIds.indexOf(addr) !== -1);
+            // Заполняем данные подрядчика только если нет субподрядчика
+            if (!hasSubcontractor) {
+              const contractorWithSelfWork = list.find(c => Array.isArray(c.selfPerformedObjectIds) && c.selfPerformedObjectIds.indexOf(addr) !== -1 && c.selfPerformedResponsible);
+              if (contractorWithSelfWork && contractorWithSelfWork.selfPerformedResponsible) {
+                const resp = contractorWithSelfWork.selfPerformedResponsible;
+                personsData[addr][row2.id].fio = (resp.fio || '').trim();
+                personsData[addr][row2.id].dolzhnost = (resp.position || '').trim();
+                personsData[addr][row2.id].osnovanie = (resp.order || '').trim();
+                personsData[addr][row2.id].kontakt = (resp.phone || '').trim();
+                const company = (contractorWithSelfWork.company || '').trim() || '—';
+                const inn = (contractorWithSelfWork.inn || '').trim() || '—';
+                const ogrn = (contractorWithSelfWork.ogrn || '').trim() || '—';
+                const legalAddr = (contractorWithSelfWork.legalAddress || '').trim() || '—';
+                personsData[addr][row2.id].comment = company + ', ИНН ' + inn + ', ОГРН ' + ogrn + ', Юридический адрес: ' + legalAddr;
+              } else {
+                // Очищаем данные, если подрядчик больше не выполняет работы сам на этом объекте
+                personsData[addr][row2.id] = {};
+              }
+            }
           }
         });
         localStorage.setItem('personsData', JSON.stringify(personsData));
@@ -8235,9 +8977,12 @@
             const idx = parseInt(btn.getAttribute('data-index'), 10);
             contractorsList.splice(idx, 1);
             saveContractors();
+            // Сначала синхронизируем субподрядчиков (они имеют приоритет для строки №2)
+            if (typeof syncSubcontractorsToReference === 'function') syncSubcontractorsToReference();
             if (typeof syncContractorsToReference === 'function') syncContractorsToReference();
             renderContractors();
             if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+            if (typeof saveToSupabase === 'function') saveToSupabase();
           });
         });
         const emptyEl = document.getElementById('contractors-empty');
@@ -8288,8 +9033,43 @@
           label.appendChild(document.createTextNode(addr));
           objList.appendChild(label);
         });
+        const selfList = document.getElementById('contractor-self-objects-list');
+        if (selfList) {
+          selfList.innerHTML = '';
+          const selfIds = Array.isArray(item.selfPerformedObjectIds) ? item.selfPerformedObjectIds : [];
+          getActiveObjects().forEach(addr => {
+            const label = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.dataset.addr = addr;
+            if (selfIds.indexOf(addr) !== -1) cb.checked = true;
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(addr));
+            selfList.appendChild(label);
+          });
+        }
+        const selfResp = item.selfPerformedResponsible || {};
+        const selfFioEl = document.getElementById('contractor-self-fio');
+        const selfPosEl = document.getElementById('contractor-self-position');
+        const selfOrderEl = document.getElementById('contractor-self-order');
+        const selfPhoneEl = document.getElementById('contractor-self-phone');
+        if (selfFioEl) selfFioEl.value = selfResp.fio || '';
+        if (selfPosEl) selfPosEl.value = selfResp.position || '';
+        if (selfOrderEl) selfOrderEl.value = selfResp.order || '';
+        if (selfPhoneEl) selfPhoneEl.value = selfResp.phone || '';
+        const selfBlock = document.getElementById('contractor-self-responsible-block');
+        if (selfBlock) selfBlock.style.display = (selfResp.fio || selfResp.position || selfResp.order || selfResp.phone) ? 'block' : 'none';
+        const selfDatalist = document.getElementById('contractor-self-fio-datalist');
+        if (selfDatalist) {
+          selfDatalist.innerHTML = '';
+          getAllFiosFromReference().forEach(fio => { const o = document.createElement('option'); o.value = fio; selfDatalist.appendChild(o); });
+        }
         document.getElementById('contractor-modal').style.display = 'flex';
       }
+      document.getElementById('contractor-self-responsible-btn').addEventListener('click', () => {
+        const block = document.getElementById('contractor-self-responsible-block');
+        if (block) block.style.display = block.style.display === 'none' ? 'block' : 'none';
+      });
       function closeContractorModal() {
         document.getElementById('contractor-modal').style.display = 'none';
       }
@@ -8297,10 +9077,10 @@
       document.getElementById('contractor-modal-cancel').addEventListener('click', closeContractorModal);
       document.getElementById('contractor-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('contractor-modal')) closeContractorModal(); });
       document.getElementById('contractor-fill-from-list').addEventListener('click', () => {
-        const company = document.getElementById('contractor-company').value.trim().toLowerCase();
+        const company = document.getElementById('contractor-company').value.trim();
         if (!company) { showAlert('Введите название компании.', 'Подстановка из реестра'); return; }
         const list = JSON.parse(localStorage.getItem('contractorsList') || '[]');
-        const matches = list.filter(item => (item.company || '').toLowerCase().includes(company) || company.includes((item.company || '').toLowerCase()));
+        const matches = list.filter(item => searchIncludes(item.company || '', company) || searchIncludes(company, item.company || ''));
         if (matches.length === 0) { showAlert('В реестре нет подрядчиков с таким названием.', 'Подстановка из реестра'); return; }
         const chosen = matches[0];
         document.getElementById('contractor-inn').value = chosen.inn || '';
@@ -8360,13 +9140,29 @@
         document.querySelectorAll('#contractor-objects-list input[type="checkbox"]:checked').forEach(cb => objectIds.push(cb.dataset.addr));
         const legalAddress = (document.getElementById('contractor-legal-address') && document.getElementById('contractor-legal-address').value) ? document.getElementById('contractor-legal-address').value.trim() : '';
         const comment = (document.getElementById('contractor-comment') && document.getElementById('contractor-comment').value) ? document.getElementById('contractor-comment').value.trim() : '';
-        const item = { company, responsibleRepresentative, positionRep, phoneRep, orderRep: orderRep || undefined, responsibleConstructionControl, positionControl, phoneControl, orderControl: orderControl || undefined, inn, ogrn, legalAddress: legalAddress || undefined, comment: comment || undefined, objectIds };
+        const selfPerformedObjectIds = [];
+        const selfListEl = document.getElementById('contractor-self-objects-list');
+        if (selfListEl) selfListEl.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => selfPerformedObjectIds.push(cb.dataset.addr));
+        const selfBlock = document.getElementById('contractor-self-responsible-block');
+        const selfFio = document.getElementById('contractor-self-fio') ? document.getElementById('contractor-self-fio').value.trim() : '';
+        const selfPos = document.getElementById('contractor-self-position') ? document.getElementById('contractor-self-position').value.trim() : '';
+        const selfOrd = document.getElementById('contractor-self-order') ? document.getElementById('contractor-self-order').value.trim() : '';
+        const selfPhone = document.getElementById('contractor-self-phone') ? document.getElementById('contractor-self-phone').value.trim() : '';
+        if (selfBlock && selfBlock.style.display !== 'none' && (selfFio || selfPos || selfOrd) && !selfPhone) {
+          showAlert('Пожалуйста, укажите телефон ответственного за выполнение работ.', 'Обязательное поле');
+          return;
+        }
+        const selfPerformedResponsible = (selfBlock && selfBlock.style.display !== 'none' && (selfFio || selfPos || selfOrd)) ? { fio: selfFio, position: selfPos, order: selfOrd, phone: selfPhone } : undefined;
+        const item = { company, responsibleRepresentative, positionRep, phoneRep, orderRep: orderRep || undefined, responsibleConstructionControl, positionControl, phoneControl, orderControl: orderControl || undefined, inn, ogrn, legalAddress: legalAddress || undefined, comment: comment || undefined, objectIds, selfPerformedObjectIds: selfPerformedObjectIds.length ? selfPerformedObjectIds : undefined, selfPerformedResponsible };
         if (contractorEditIndex >= 0) contractorsList[contractorEditIndex] = item;
         else contractorsList.push(item);
         saveContractors();
+        // Сначала синхронизируем субподрядчиков (они имеют приоритет для строки №2)
+        if (typeof syncSubcontractorsToReference === 'function') syncSubcontractorsToReference();
         syncContractorsToReference();
         renderContractors();
         if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+        if (typeof saveToSupabase === 'function') saveToSupabase();
         closeContractorModal();
       });
       document.getElementById('show-contractors').addEventListener('click', (e) => {
@@ -8377,6 +9173,7 @@
         emptyState.style.display = 'none';
         responsibleConnectionsContainer.style.display = 'none';
         subcontractorsContainer.style.display = 'none';
+        if (documentsContainer) documentsContainer.style.display = 'none';
         ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         if (contractorsContainer) contractorsContainer.style.display = 'block';
         container.style.display = 'none';
@@ -8418,6 +9215,25 @@
         localStorage.setItem(key, JSON.stringify(list));
         showToast();
       }
+      function getDataEntityOfficialsOrPersons(item, type) {
+        if (!item || typeof item !== 'object') {
+          return [{ responsible: '', fio: '', position: '', phone: '', order: '', objectIds: [], number: '' }];
+        }
+        if (type === 'fkr' && Array.isArray(item.officials) && item.officials.length > 0) return item.officials;
+        if (type === 'construction' && Array.isArray(item.persons) && item.persons.length > 0) return item.persons;
+        const single = {
+          responsible: item.responsible || '',
+          fio: item.responsible || '',
+          position: item.position || '',
+          phone: item.phone || '',
+          order: item.order || '',
+          orderDocumentBase64: item.orderDocumentBase64,
+          orderDocumentName: item.orderDocumentName,
+          objectIds: Array.isArray(item.objectIds) ? item.objectIds : []
+        };
+        if (type === 'construction') single.number = item.number || '';
+        return [single];
+      }
       function syncDataEntityToReference(type) {
         const cfg = DATA_ENTITY_CONFIG[type];
         const row = (dataRows || []).find(r => (r.name || '').trim() === cfg.rowName);
@@ -8427,28 +9243,131 @@
         addrs.forEach(addr => {
           if (!personsData[addr]) personsData[addr] = {};
           if (!personsData[addr][row.id]) personsData[addr][row.id] = {};
-          const first = list.find(x => Array.isArray(x.objectIds) && x.objectIds.indexOf(addr) !== -1);
-          if (first) {
-            personsData[addr][row.id].fio = (first.responsible || '').trim();
-            personsData[addr][row.id].dolzhnost = (first.position || '').trim();
-            personsData[addr][row.id].osnovanie = (first.order || '').trim();
-            personsData[addr][row.id].kontakt = (first.phone || '').trim();
+          let first = null;
+          let firstOfficial = null;
+          for (let i = 0; i < list.length; i++) {
+            const x = list[i];
+            const arr = getDataEntityOfficialsOrPersons(x, type);
+            firstOfficial = (arr || []).find(o => Array.isArray(o.objectIds) && o.objectIds.indexOf(addr) !== -1);
+            if (firstOfficial) { first = x; break; }
+          }
+          if (first && firstOfficial) {
+            const fio = (firstOfficial.responsible || firstOfficial.fio || '').trim();
+            personsData[addr][row.id].fio = fio;
+            personsData[addr][row.id].dolzhnost = (firstOfficial.position || '').trim();
+            personsData[addr][row.id].osnovanie = (firstOfficial.order || '').trim();
+            personsData[addr][row.id].kontakt = (firstOfficial.phone || '').trim();
             personsData[addr][row.id].comment = (first.company || '').trim() || '—';
           }
         });
         localStorage.setItem('personsData', JSON.stringify(personsData));
       }
+      function getObjectIdsForDataEntityItem(item, type) {
+        const arr = getDataEntityOfficialsOrPersons(item, type);
+        const set = new Set();
+        (arr || []).forEach(o => { (o.objectIds || []).forEach(addr => set.add(addr)); });
+        return Array.from(set);
+      }
       function updateDataEntityWarningBadge(type) {
         const cfg = DATA_ENTITY_CONFIG[type];
         const list = getDataEntityList(type);
         const addrs = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
-        const without = addrs.filter(addr => !list.some(x => Array.isArray(x.objectIds) && x.objectIds.indexOf(addr) !== -1)).length;
+        const without = addrs.filter(addr => !list.some(x => getObjectIdsForDataEntityItem(x, type).indexOf(addr) !== -1)).length;
         const badge = document.getElementById(cfg.badgeId);
         const badgePage = document.getElementById(cfg.badgePageId);
         const text = without > 0 ? without + ' без ' + (type === 'managing' ? 'УК' : type === 'service' ? 'обслуж.' : type === 'fkr' ? 'ФКР' : 'стр. контр.') : '';
         if (badge) { badge.textContent = text; badge.style.display = text ? 'inline' : 'none'; }
         if (badgePage) { badgePage.textContent = text; badgePage.style.display = text ? 'inline' : 'none'; }
       }
+      function exportEntityListToExcel(entityType) {
+        const thStyle = 'border:1px solid #000; padding:8px 10px; background:#4472C4; color:#fff; font-size:11pt; font-weight:bold;';
+        const tdStyle = 'border:1px solid #000; padding:6px 10px;';
+        const tdStyleAlt = 'border:1px solid #000; padding:6px 10px; background:#f5f5f5;';
+        function row(cells, isHeader) {
+          return '<tr>' + cells.map((c, i) => '<td style="' + (isHeader ? thStyle : (i === 0 ? tdStyleAlt : tdStyle)) + '">' + (typeof c === 'string' ? escapeHtml(c) : c) + '</td>').join('') + '</tr>';
+        }
+        let headers = [];
+        let rows = [];
+        let title = '';
+        let filename = '';
+        if (entityType === 'subcontractors') {
+          const list = typeof subcontractorsList !== 'undefined' ? subcontractorsList : JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
+          title = 'Субподрядчики';
+          filename = 'Субподрядчики_' + getExportTimestamp() + '.xls';
+          headers = ['Компания', 'Договоры субподряда', 'Ответственный', 'Должность', 'Приказ', 'ИНН', 'ОГРН', 'Объекты'];
+          list.forEach(item => {
+            const contracts = Array.isArray(item.contracts) && item.contracts.length > 0 ? item.contracts : [{ contract: item.contractSubcontract || '', objectIds: item.objectIds || [] }];
+            const contractStr = contracts.map(c => (c.contract || '').trim()).filter(Boolean).join('; ') || '—';
+            const objectIds = Array.isArray(item.contracts) && item.contracts.length > 0 ? item.contracts.reduce((acc, c) => { (c.objectIds || []).forEach(a => { if (acc.indexOf(a) === -1) acc.push(a); }); return acc; }, []) : (item.objectIds || []);
+            const objectsStr = objectIds.length ? objectIds.join('; ') : '—';
+            rows.push([item.company || '—', contractStr, item.installer || '—', item.position || '—', item.order || '—', item.inn || '—', item.ogrn || '—', objectsStr]);
+          });
+        } else if (entityType === 'contractors') {
+          const list = typeof contractorsList !== 'undefined' ? contractorsList : JSON.parse(localStorage.getItem('contractorsList') || '[]');
+          title = 'Подрядчики';
+          filename = 'Подрядчики_' + getExportTimestamp() + '.xls';
+          headers = ['Компания', 'Представитель', 'Должность', 'Телефон', 'ИНН', 'ОГРН', 'Объекты', 'Сам выполнял (объекты)', 'Ответственный (собств. работы)'];
+          list.forEach(item => {
+            const objectIds = item.objectIds || [];
+            const selfIds = item.selfPerformedObjectIds || [];
+            const selfResp = item.selfPerformedResponsible;
+            const selfStr = selfResp && (selfResp.fio || selfResp.position) ? (selfResp.fio || '') + (selfResp.position ? ', ' + selfResp.position : '') + (selfResp.phone ? ', тел. ' + selfResp.phone : '') : '—';
+            rows.push([item.company || '—', item.responsibleRepresentative || '—', item.positionRep || '—', item.phoneRep || '—', item.inn || '—', item.ogrn || '—', objectIds.length ? objectIds.join('; ') : '—', selfIds.length ? selfIds.join('; ') : '—', selfStr]);
+          });
+        } else if (entityType === 'managing' || entityType === 'service') {
+          const list = entityType === 'managing' ? managingCompaniesList : serviceOrgsList;
+          title = entityType === 'managing' ? 'Управляющие компании' : 'Обслуживающие организации';
+          filename = (entityType === 'managing' ? 'УК' : 'Обслуживающие') + '_' + getExportTimestamp() + '.xls';
+          headers = ['Компания', 'Ответственный', 'Должность', 'Телефон', 'Приказ', 'Объекты'];
+          (list || []).forEach(item => {
+            const objectIds = Array.isArray(item.objectIds) ? item.objectIds : [];
+            rows.push([item.company || '—', item.responsible || '—', item.position || '—', item.phone || '—', item.order || '—', objectIds.length ? objectIds.join('; ') : '—']);
+          });
+        } else if (entityType === 'fkr' || entityType === 'construction') {
+          const list = entityType === 'fkr' ? fkrList : constructionControlList;
+          title = entityType === 'fkr' ? 'Фонд капитального ремонта' : 'Строительный контроль';
+          filename = (entityType === 'fkr' ? 'ФКР' : 'Стройконтроль') + '_' + getExportTimestamp() + '.xls';
+          headers = entityType === 'construction' ? ['Компания', '№', 'ФИО', 'Должность', 'Телефон', 'Приказ', 'Объекты'] : ['Компания', 'ФИО', 'Должность', 'Телефон', 'Приказ', 'Объекты'];
+          (list || []).forEach(item => {
+            const officials = getDataEntityOfficialsOrPersons(item, entityType);
+            officials.forEach(off => {
+              const objectIds = off.objectIds || [];
+              const objStr = objectIds.length ? objectIds.join('; ') : '—';
+              if (entityType === 'construction') {
+                rows.push([item.company || '—', off.number || '—', (off.fio || off.responsible) || '—', off.position || '—', off.phone || '—', off.order || '—', objStr]);
+              } else {
+                rows.push([item.company || '—', (off.responsible || off.fio) || '—', off.position || '—', off.phone || '—', off.order || '—', objStr]);
+              }
+            });
+          });
+        }
+        let tableRows = row(headers, true);
+        rows.forEach(r => { tableRows += row(r, false); });
+        const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8"/><style>table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:10pt;}body{margin:12px;}</style></head>
+<body>
+  <h2 style="font-family:Arial;margin-bottom:12px;">${escapeHtml(title)}</h2>
+  <p style="font-family:Arial;color:#555;margin-bottom:16px;">Экспорт: ${new Date().toLocaleString('ru-RU')}. Объекты перечислены в соответствующем столбце.</p>
+  <table>${tableRows}</table>
+</body>
+</html>`;
+        const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        showToast();
+      }
+      document.getElementById('export-excel-subcontractors').addEventListener('click', () => exportEntityListToExcel('subcontractors'));
+      document.getElementById('export-excel-contractors').addEventListener('click', () => exportEntityListToExcel('contractors'));
+      document.getElementById('export-excel-managing').addEventListener('click', () => exportEntityListToExcel('managing'));
+      document.getElementById('export-excel-service').addEventListener('click', () => exportEntityListToExcel('service'));
+      document.getElementById('export-excel-fkr').addEventListener('click', () => exportEntityListToExcel('fkr'));
+      document.getElementById('export-excel-construction').addEventListener('click', () => exportEntityListToExcel('construction'));
       function renderDataEntityList(type) {
         const cfg = DATA_ENTITY_CONFIG[type];
         const listEl = document.getElementById(cfg.listId);
@@ -8459,13 +9378,56 @@
           const card = document.createElement('div');
           card.className = 'subcontractor-card';
           const company = (item.company || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          const responsible = (item.responsible || '—').replace(/</g, '&lt;');
-          const objectIds = Array.isArray(item.objectIds) ? item.objectIds : [];
-          const objectsHtml = objectIds.length ? '<div class="subcontractor-card-objects-wrap"><button type="button" class="subcontractor-objects-toggle" data-index="' + index + '">Объекты · ' + objectIds.length + ' <span class="arrow">▼</span></button><div class="subcontractor-objects-dropdown">' + objectIds.map(addr => '<span class="subcontractor-obj-badge">' + (addr.length > 35 ? addr.slice(0, 32) + '…' : addr) + '</span>').join('') + '</div></div>' : '';
-          card.innerHTML = '<div class="subcontractor-card-left"><div class="subcontractor-card-icon" aria-hidden="true"><span class="material-icons" style="font-size:20px">business</span></div><div class="subcontractor-card-company-wrap"><div class="subcontractor-card-company">' + company + '</div>' + objectsHtml + '</div></div><div class="subcontractor-card-fields"><div class="subcontractor-field"><span class="label">Ответственный</span><span class="value">' + responsible + '</span></div></div><div class="subcontractor-card-actions"><button type="button" class="data-entity-duplicate" data-type="' + type + '" data-index="' + index + '" title="Дублировать" aria-label="Дублировать"><span class="material-icons" style="font-size:18px">content_copy</span></button><button type="button" class="subcontractor-edit" data-index="' + index + '">Редактировать</button><button type="button" class="subcontractor-delete" data-index="' + index + '">Удалить</button>' + (item.orderDocumentBase64 ? '<button type="button" class="data-entity-download-order" data-type="' + type + '" data-index="' + index + '" title="Скачать приказ">Скачать приказ</button>' : '') + '</div>';
+          const officials = getDataEntityOfficialsOrPersons(item, type);
+          const objectIds = getObjectIdsForDataEntityItem(item, type);
+          const responsible = officials.length > 0 ? (officials[0].responsible || officials[0].fio || '—') : (item.responsible || '—');
+          const responsibleLabel = officials.length > 1 ? (responsible + ' · ещё ' + (officials.length - 1)) : responsible;
+          const hasOrderDoc = (type === 'fkr' && item.officials) ? item.officials.some(o => o.orderDocumentBase64) : (type === 'construction' && item.persons) ? item.persons.some(p => p.orderDocumentBase64) : !!item.orderDocumentBase64;
+          const objectsHtml = objectIds.length ? '<div class="subcontractor-card-objects-wrap"><button type="button" class="subcontractor-objects-toggle" data-index="' + index + '">Объекты · ' + objectIds.length + ' <span class="arrow">▼</span></button><div class="subcontractor-objects-dropdown">' + objectIds.map(addr => '<span class="subcontractor-obj-badge" data-addr="' + escapeHtml(addr) + '" title="' + escapeHtml(addr) + '">' + (addr.length > 35 ? addr.slice(0, 32) + '…' : addr) + '</span>').join('') + '</div></div>' : '';
+          card.innerHTML = '<div class="subcontractor-card-left"><div class="subcontractor-card-icon" aria-hidden="true"><span class="material-icons" style="font-size:20px">business</span></div><div class="subcontractor-card-company-wrap"><div class="subcontractor-card-company">' + company + '</div>' + objectsHtml + '</div></div><div class="subcontractor-card-fields"><div class="subcontractor-field"><span class="label">Ответственный</span><span class="value">' + escapeHtml(responsibleLabel) + '</span></div></div><div class="subcontractor-card-actions"><button type="button" class="data-entity-duplicate" data-type="' + type + '" data-index="' + index + '" title="Дублировать" aria-label="Дублировать"><span class="material-icons" style="font-size:18px">content_copy</span></button><button type="button" class="subcontractor-edit" data-index="' + index + '">Редактировать</button><button type="button" class="subcontractor-delete" data-index="' + index + '">Удалить</button>' + (hasOrderDoc ? '<button type="button" class="data-entity-download-order" data-type="' + type + '" data-index="' + index + '" title="Скачать приказ">Скачать приказ</button>' : '') + '</div>';
           listEl.appendChild(card);
         });
         listEl.querySelectorAll('.subcontractor-objects-toggle').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); const w = btn.closest('.subcontractor-card-objects-wrap'); if (w) w.classList.toggle('open'); }); });
+        listEl.querySelectorAll('.subcontractor-obj-badge').forEach(badge => {
+          badge.style.cursor = 'pointer';
+          badge.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const addr = badge.dataset.addr || badge.textContent.trim();
+            if (!addr) return;
+            // Закрываем все контейнеры разделов - сначала все контейнеры сущностей
+            const managingEl = document.getElementById('managing-container');
+            const serviceEl = document.getElementById('service-container');
+            const fkrEl = document.getElementById('fkr-container');
+            const constructionEl = document.getElementById('construction-control-container');
+            if (managingEl) managingEl.style.display = 'none';
+            if (serviceEl) serviceEl.style.display = 'none';
+            if (fkrEl) fkrEl.style.display = 'none';
+            if (constructionEl) constructionEl.style.display = 'none';
+            // Закрываем остальные контейнеры
+            calendarContainer.style.display = 'none';
+            roadmapContainer.style.display = 'none';
+            dataContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+            subcontractorsContainer.style.display = 'none';
+            if (contractorsContainer) contractorsContainer.style.display = 'none';
+            responsibleConnectionsContainer.style.display = 'none';
+            // Открываем объект
+            container.style.display = 'block';
+            emptyState.style.display = 'none';
+            if (selector) {
+              selector.value = addr;
+              if (typeof updateSelectorDisplay === 'function') updateSelectorDisplay();
+            }
+            if (typeof addToRecent === 'function') addToRecent(addr);
+            if (typeof renderObject === 'function') renderObject(addr);
+            if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', addr);
+            history.replaceState(null, '', location.pathname + location.search + '#object/' + encodeURIComponent(addr));
+            if (selector) selector.dispatchEvent(new Event('change', { bubbles: true }));
+            if (sidebar) sidebar.classList.remove('open');
+            window.scrollTo(0, 0);
+          });
+        });
         listEl.querySelectorAll('.data-entity-duplicate').forEach(btn => {
           btn.addEventListener('click', () => {
             const idx = parseInt(btn.getAttribute('data-index'), 10);
@@ -8484,6 +9446,7 @@
             renderDataEntityList(type);
             updateDataEntityWarningBadge(type);
             if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+            if (typeof saveToSupabase === 'function') saveToSupabase();
           });
         });
         listEl.querySelectorAll('.data-entity-download-order').forEach(btn => {
@@ -8492,9 +9455,18 @@
             const idx = parseInt(btn.getAttribute('data-index'), 10);
             const list = getDataEntityList(t);
             const item = list[idx];
-            if (!item || !item.orderDocumentBase64) return;
-            const name = item.orderDocumentName || 'приказ.pdf';
-            const bin = atob(item.orderDocumentBase64);
+            if (!item) return;
+            let base64 = item.orderDocumentBase64;
+            let name = item.orderDocumentName || 'приказ.pdf';
+            if (item.officials && item.officials.length > 0) {
+              const firstWithDoc = item.officials.find(o => o.orderDocumentBase64);
+              if (firstWithDoc) { base64 = firstWithDoc.orderDocumentBase64; name = firstWithDoc.orderDocumentName || 'приказ.pdf'; }
+            } else if (item.persons && item.persons.length > 0) {
+              const firstWithDoc = item.persons.find(p => p.orderDocumentBase64);
+              if (firstWithDoc) { base64 = firstWithDoc.orderDocumentBase64; name = firstWithDoc.orderDocumentName || 'приказ.pdf'; }
+            }
+            if (!base64) return;
+            const bin = atob(base64);
             const arr = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
             const a = document.createElement('a');
@@ -8507,8 +9479,91 @@
         const emptyEl = document.getElementById(cfg.emptyId);
         if (emptyEl) emptyEl.style.display = list.length === 0 ? 'block' : 'none';
       }
+      let dataEntityOfficialFilePending = {};
+      let dataEntityOfficialFileInput = null;
+      function renderDataEntityOfficialsList(officials, type) {
+        const listEl = document.getElementById('data-entity-officials-list');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        const isConstruction = type === 'construction';
+        (officials || []).forEach((off, i) => {
+          const block = document.createElement('div');
+          block.className = 'subcontractor-contract-block data-entity-official-block';
+          block.dataset.officialIndex = String(i);
+          const numHtml = isConstruction ? '<label style="font-size:11px;color:var(--text-muted);">№</label><input type="text" class="de-official-number" placeholder="№" value="' + escapeHtml(off.number || '') + '" style="width:50px;padding:6px 8px;margin-bottom:6px;margin-right:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">' : '';
+          const fioVal = (off.responsible || off.fio || '').trim();
+          const objIds = Array.isArray(off.objectIds) ? off.objectIds : [];
+          const objectsHtml = getActiveObjects().map(addr => {
+            const checked = objIds.indexOf(addr) !== -1 ? ' checked' : '';
+            return '<label><input type="checkbox" data-addr="' + escapeHtml(addr) + '"' + checked + '><span>' + escapeHtml(addr) + '</span></label>';
+          }).join('');
+          block.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;">' + numHtml + '<input type="text" class="de-official-fio" placeholder="ФИО" value="' + escapeHtml(fioVal) + '" style="flex:1;min-width:120px;padding:6px 8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><input type="text" class="de-official-position" placeholder="Должность" value="' + escapeHtml(off.position || '') + '" style="flex:1;min-width:100px;padding:6px 8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><button type="button" class="btn-secondary de-official-remove" style="padding:4px 8px;font-size:11px;">Удалить</button></div><input type="text" class="de-official-phone" placeholder="Телефон" value="' + escapeHtml(off.phone || '') + '" style="width:100%;padding:6px 8px;margin-bottom:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><input type="text" class="de-official-order" placeholder="Приказ" value="' + escapeHtml(off.order || '') + '" style="width:100%;padding:6px 8px;margin-bottom:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><div style="margin-bottom:6px;"><button type="button" class="btn-secondary de-official-file-btn" data-idx="' + i + '" style="padding:4px 8px;font-size:11px;">Загрузить документ</button> <span class="de-official-file-name" style="font-size:11px;color:var(--text-muted);">' + (off.orderDocumentName ? 'Файл: ' + escapeHtml(off.orderDocumentName) : '') + '</span></div><label style="font-size:11px;color:var(--text-muted);">Объекты</label><div class="contract-block-objects" style="max-height:80px;overflow-y:auto;">' + objectsHtml + '</div>';
+          listEl.appendChild(block);
+        });
+        listEl.querySelectorAll('.de-official-remove').forEach(btn => {
+          btn.addEventListener('click', () => { const b = btn.closest('.data-entity-official-block'); if (b && listEl.querySelectorAll('.data-entity-official-block').length > 1) b.remove(); });
+        });
+        listEl.querySelectorAll('.de-official-file-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (!dataEntityOfficialFileInput) {
+              dataEntityOfficialFileInput = document.createElement('input');
+              dataEntityOfficialFileInput.type = 'file';
+              dataEntityOfficialFileInput.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+              dataEntityOfficialFileInput.style.display = 'none';
+              dataEntityOfficialFileInput.addEventListener('change', function(e) {
+                const file = e.target.files && e.target.files[0];
+                e.target.value = '';
+                if (!file) return;
+                const idx = dataEntityOfficialFilePending.idx;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (!dataEntityOfficialFilePending[idx]) dataEntityOfficialFilePending[idx] = {};
+                  dataEntityOfficialFilePending[idx].base64 = (reader.result || '').split(',')[1] || '';
+                  dataEntityOfficialFilePending[idx].name = file.name;
+                  const blocks = listEl.querySelectorAll('.data-entity-official-block');
+                  const block = blocks[idx];
+                  if (block) { const span = block.querySelector('.de-official-file-name'); if (span) span.textContent = 'Файл: ' + file.name; }
+                };
+                reader.readAsDataURL(file);
+              });
+              document.body.appendChild(dataEntityOfficialFileInput);
+            }
+            const blocks = listEl.querySelectorAll('.data-entity-official-block');
+            const block = btn.closest('.data-entity-official-block');
+            dataEntityOfficialFilePending.idx = block ? Array.from(blocks).indexOf(block) : 0;
+            dataEntityOfficialFileInput.click();
+          });
+        });
+      }
       function openDataEntityModal(type, index, copyFromIndex) {
         dataEntityType = type;
+        const singleWrap = document.getElementById('data-entity-single-wrap');
+        const multiWrap = document.getElementById('data-entity-multi-wrap');
+        const isMulti = (type === 'fkr' || type === 'construction');
+        if (singleWrap) singleWrap.style.display = isMulti ? 'none' : 'flex';
+        if (multiWrap) { multiWrap.style.display = isMulti ? 'flex' : 'none'; multiWrap.style.flexDirection = 'column'; }
+        
+        // Показываем поля ИНН/ОГРН/Юридический адрес и кнопки поиска только для строительного контроля
+        const isConstruction = (type === 'construction');
+        const lookupRow = document.getElementById('data-entity-lookup-row');
+        const innWrap = document.getElementById('data-entity-inn-wrap');
+        const ogrnWrap = document.getElementById('data-entity-ogrn-wrap');
+        const legalAddressWrap = document.getElementById('data-entity-legal-address-wrap');
+        const lookupHint = document.getElementById('data-entity-lookup-hint');
+        if (lookupRow) lookupRow.style.display = isConstruction ? 'flex' : 'none';
+        if (innWrap) innWrap.style.display = isConstruction ? 'block' : 'none';
+        if (ogrnWrap) ogrnWrap.style.display = isConstruction ? 'block' : 'none';
+        if (legalAddressWrap) legalAddressWrap.style.display = isConstruction ? 'block' : 'none';
+        if (lookupHint) lookupHint.style.display = isConstruction ? 'block' : 'none';
+        if (!isConstruction) {
+          // Очищаем поля для других типов
+          const innEl = document.getElementById('data-entity-inn');
+          const ogrnEl = document.getElementById('data-entity-ogrn');
+          const legalAddressEl = document.getElementById('data-entity-legal-address');
+          if (innEl) innEl.value = '';
+          if (ogrnEl) ogrnEl.value = '';
+          if (legalAddressEl) legalAddressEl.value = '';
+        }
         if (copyFromIndex >= 0) {
           dataEntityEditIndex = -1;
           document.getElementById('data-entity-modal-title').textContent = 'Добавить (копия)';
@@ -8519,39 +9574,150 @@
         const cfg = DATA_ENTITY_CONFIG[type];
         const list = getDataEntityList(type);
         const item = copyFromIndex >= 0 ? list[copyFromIndex] : (dataEntityEditIndex >= 0 ? list[dataEntityEditIndex] : {});
-        document.getElementById('data-entity-company').value = item.company || '';
-        document.getElementById('data-entity-responsible').value = item.responsible || '';
-        document.getElementById('data-entity-position').value = item.position || '';
-        document.getElementById('data-entity-phone').value = item.phone || '';
-        document.getElementById('data-entity-order').value = item.order || '';
-        document.getElementById('data-entity-comment').value = item.comment || '';
-        dataEntityOrderFilePending = null;
-        const fn = document.getElementById('data-entity-order-file-name');
-        const dl = document.getElementById('data-entity-order-download-link');
-        document.getElementById('data-entity-order-file').value = '';
-        if (item.orderDocumentBase64 || item.orderDocumentName) { fn.textContent = 'Файл: ' + (item.orderDocumentName || 'документ'); dl.style.display = 'inline'; } else { fn.textContent = ''; dl.style.display = 'none'; }
-        const objList = document.getElementById('data-entity-objects-list');
-        objList.innerHTML = '';
-        const selectedIds = Array.isArray(item.objectIds) ? item.objectIds : [];
-        getActiveObjects().forEach(addr => {
-          const label = document.createElement('label');
-          const cb = document.createElement('input');
-          cb.type = 'checkbox';
-          cb.dataset.addr = addr;
-          if (selectedIds.indexOf(addr) !== -1) cb.checked = true;
-          label.appendChild(cb);
-          label.appendChild(document.createTextNode(addr));
-          objList.appendChild(label);
-        });
+        if (isMulti) {
+          document.getElementById('data-entity-multi-company').value = item.company || '';
+          const officials = getDataEntityOfficialsOrPersons(item, type);
+          if (officials.length === 0) renderDataEntityOfficialsList([{ responsible: '', position: '', phone: '', order: '', objectIds: [], number: '' }], type);
+          else renderDataEntityOfficialsList(officials, type);
+          dataEntityOfficialFilePending = {};
+          // Загружаем ИНН/ОГРН/Юридический адрес для строительного контроля
+          if (isConstruction) {
+            const innEl = document.getElementById('data-entity-inn');
+            const ogrnEl = document.getElementById('data-entity-ogrn');
+            const legalAddressEl = document.getElementById('data-entity-legal-address');
+            if (innEl) innEl.value = item.inn || '';
+            if (ogrnEl) ogrnEl.value = item.ogrn || '';
+            if (legalAddressEl) legalAddressEl.value = item.legalAddress || '';
+          }
+        } else {
+          document.getElementById('data-entity-company').value = item.company || '';
+          document.getElementById('data-entity-responsible').value = item.responsible || '';
+          document.getElementById('data-entity-position').value = item.position || '';
+          document.getElementById('data-entity-phone').value = item.phone || '';
+          document.getElementById('data-entity-order').value = item.order || '';
+          document.getElementById('data-entity-comment').value = item.comment || '';
+          dataEntityOrderFilePending = null;
+          const fn = document.getElementById('data-entity-order-file-name');
+          const dl = document.getElementById('data-entity-order-download-link');
+          document.getElementById('data-entity-order-file').value = '';
+          if (item.orderDocumentBase64 || item.orderDocumentName) { fn.textContent = 'Файл: ' + (item.orderDocumentName || 'документ'); dl.style.display = 'inline'; } else { fn.textContent = ''; dl.style.display = 'none'; }
+          const objList = document.getElementById('data-entity-objects-list');
+          objList.innerHTML = '';
+          const selectedIds = Array.isArray(item.objectIds) ? item.objectIds : [];
+          getActiveObjects().forEach(addr => {
+            const label = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.dataset.addr = addr;
+            if (selectedIds.indexOf(addr) !== -1) cb.checked = true;
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(addr));
+            objList.appendChild(label);
+          });
+        }
         document.getElementById('data-entity-modal').style.display = 'flex';
       }
       function closeDataEntityModal() {
         document.getElementById('data-entity-modal').style.display = 'none';
       }
+      document.getElementById('data-entity-add-official').addEventListener('click', () => {
+        const listEl = document.getElementById('data-entity-officials-list');
+        if (!listEl || !dataEntityType) return;
+        const isConstruction = dataEntityType === 'construction';
+        const block = document.createElement('div');
+        block.className = 'subcontractor-contract-block data-entity-official-block';
+        block.dataset.officialIndex = String(listEl.querySelectorAll('.data-entity-official-block').length);
+        const numHtml = isConstruction ? '<label style="font-size:11px;color:var(--text-muted);">№</label><input type="text" class="de-official-number" placeholder="№" style="width:50px;padding:6px 8px;margin-bottom:6px;margin-right:8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">' : '';
+        const objectsHtml = getActiveObjects().map(addr => '<label><input type="checkbox" data-addr="' + escapeHtml(addr) + '"><span>' + escapeHtml(addr) + '</span></label>').join('');
+        block.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;">' + numHtml + '<input type="text" class="de-official-fio" placeholder="ФИО" style="flex:1;min-width:120px;padding:6px 8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><input type="text" class="de-official-position" placeholder="Должность" style="flex:1;min-width:100px;padding:6px 8px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><button type="button" class="btn-secondary de-official-remove" style="padding:4px 8px;font-size:11px;">Удалить</button></div><input type="text" class="de-official-phone" placeholder="Телефон" style="width:100%;padding:6px 8px;margin-bottom:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><input type="text" class="de-official-order" placeholder="Приказ" style="width:100%;padding:6px 8px;margin-bottom:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);"><div style="margin-bottom:6px;"><button type="button" class="btn-secondary de-official-file-btn" style="padding:4px 8px;font-size:11px;">Загрузить документ</button> <span class="de-official-file-name" style="font-size:11px;color:var(--text-muted);"></span></div><label style="font-size:11px;color:var(--text-muted);">Объекты</label><div class="contract-block-objects" style="max-height:80px;overflow-y:auto;">' + objectsHtml + '</div>';
+        listEl.appendChild(block);
+        block.querySelector('.de-official-remove').addEventListener('click', () => { if (listEl.querySelectorAll('.data-entity-official-block').length > 1) block.remove(); });
+        block.querySelector('.de-official-file-btn').addEventListener('click', () => {
+          if (!dataEntityOfficialFileInput) {
+            dataEntityOfficialFileInput = document.createElement('input');
+            dataEntityOfficialFileInput.type = 'file';
+            dataEntityOfficialFileInput.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+            dataEntityOfficialFileInput.style.display = 'none';
+            dataEntityOfficialFileInput.addEventListener('change', function(e) {
+              const file = e.target.files && e.target.files[0];
+              e.target.value = '';
+              if (!file) return;
+              const idx = dataEntityOfficialFilePending.idx;
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (!dataEntityOfficialFilePending[idx]) dataEntityOfficialFilePending[idx] = {};
+                dataEntityOfficialFilePending[idx].base64 = (reader.result || '').split(',')[1] || '';
+                dataEntityOfficialFilePending[idx].name = file.name;
+                const blocks = listEl.querySelectorAll('.data-entity-official-block');
+                if (blocks[idx]) { const span = blocks[idx].querySelector('.de-official-file-name'); if (span) span.textContent = 'Файл: ' + file.name; }
+              };
+              reader.readAsDataURL(file);
+            });
+            document.body.appendChild(dataEntityOfficialFileInput);
+          }
+          const blocks = listEl.querySelectorAll('.data-entity-official-block');
+          dataEntityOfficialFilePending.idx = Array.from(blocks).indexOf(block);
+          dataEntityOfficialFileInput.click();
+        });
+      });
       document.getElementById('data-entity-modal-close').addEventListener('click', closeDataEntityModal);
       document.getElementById('data-entity-modal-cancel').addEventListener('click', closeDataEntityModal);
       document.getElementById('data-entity-modal').addEventListener('click', function(e) { if (e.target === this) closeDataEntityModal(); });
       document.getElementById('data-entity-order-file-btn').addEventListener('click', () => document.getElementById('data-entity-order-file').click());
+      
+      // Обработчики для кнопок поиска (только для строительного контроля)
+      document.getElementById('data-entity-fill-from-list').addEventListener('click', () => {
+        if (dataEntityType !== 'construction') return;
+        const company = (document.getElementById('data-entity-multi-company').value || '').trim();
+        if (!company) { showAlert('Введите название организации.', 'Подстановка из реестра'); return; }
+        const list = JSON.parse(localStorage.getItem('constructionControlList') || '[]');
+        const matches = list.filter(item => searchIncludes(item.company || '', company) || searchIncludes(company, item.company || ''));
+        if (matches.length === 0) { showAlert('В реестре нет организаций с таким названием.', 'Подстановка из реестра'); return; }
+        const chosen = matches[0];
+        document.getElementById('data-entity-inn').value = chosen.inn || '';
+        document.getElementById('data-entity-ogrn').value = chosen.ogrn || '';
+        document.getElementById('data-entity-legal-address').value = chosen.legalAddress || '';
+        showToast();
+      });
+      
+      document.getElementById('data-entity-search-egrul').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (dataEntityType !== 'construction') return;
+        const company = (document.getElementById('data-entity-multi-company').value || '').trim();
+        const url = 'https://checko.ru/search?query=' + encodeURIComponent(company);
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+      
+      document.getElementById('data-entity-paste-checko-exp').addEventListener('click', async () => {
+        if (dataEntityType !== 'construction') return;
+        let text = '';
+        try {
+          text = await navigator.clipboard.readText();
+        } catch (e) {
+          const popup = document.createElement('div');
+          popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2500;';
+          popup.innerHTML = '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px;max-width:420px;width:90%;"><p style="margin:0 0 10px;font-size:13px;color:var(--text-muted);">Вставьте сюда текст со страницы Checko (Ctrl+V), затем нажмите «Извлечь».</p><textarea id="checko-paste-area" rows="6" style="width:100%;padding:10px;margin-bottom:12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;resize:vertical;"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;"><button type="button" class="btn-secondary" id="checko-paste-cancel">Отмена</button><button type="button" class="btn-primary" id="checko-paste-ok">Извлечь</button></div></div>';
+          document.body.appendChild(popup);
+          const ta = popup.querySelector('#checko-paste-area');
+          ta.focus();
+          popup.querySelector('#checko-paste-cancel').onclick = () => popup.remove();
+          popup.querySelector('#checko-paste-ok').onclick = () => {
+            text = ta.value;
+            popup.remove();
+            const { inn, ogrn, legalAddress } = parseInnOgrnFromText(text);
+            if (inn) document.getElementById('data-entity-inn').value = inn;
+            if (ogrn) document.getElementById('data-entity-ogrn').value = ogrn;
+            if (legalAddress) document.getElementById('data-entity-legal-address').value = legalAddress;
+            if (inn || ogrn || legalAddress) showToast(); else showAlert('В тексте не найдены ИНН (10/12 цифр), ОГРН (13/15 цифр) или юридический адрес. Проверьте, что скопировали блок с реквизитами.', 'Подставить с Checko (эксп.)');
+          };
+          return;
+        }
+        const { inn, ogrn, legalAddress } = parseInnOgrnFromText(text);
+        if (inn) document.getElementById('data-entity-inn').value = inn;
+        if (ogrn) document.getElementById('data-entity-ogrn').value = ogrn;
+        if (legalAddress) document.getElementById('data-entity-legal-address').value = legalAddress;
+        if (inn || ogrn || legalAddress) showToast(); else showAlert('В буфере не найдены ИНН (10/12 цифр), ОГРН (13/15 цифр) или юридический адрес. Скопируйте блок с реквизитами на Checko или нажмите кнопку снова и вставьте текст вручную.', 'Подставить с Checko (эксп.)');
+      });
       document.getElementById('data-entity-order-file').addEventListener('change', function(e) {
         const file = e.target.files && e.target.files[0];
         e.target.value = '';
@@ -8586,28 +9752,84 @@
       });
       document.getElementById('data-entity-modal-save').addEventListener('click', () => {
         if (!dataEntityType) return;
-        const company = document.getElementById('data-entity-company').value.trim() || '—';
-        const responsible = document.getElementById('data-entity-responsible').value.trim();
-        const position = document.getElementById('data-entity-position').value.trim();
-        const phone = document.getElementById('data-entity-phone').value.trim();
-        const order = document.getElementById('data-entity-order').value.trim();
-        const comment = document.getElementById('data-entity-comment').value.trim();
-        const objectIds = [];
-        document.querySelectorAll('#data-entity-objects-list input[type="checkbox"]:checked').forEach(cb => objectIds.push(cb.dataset.addr));
-        const existing = dataEntityEditIndex >= 0 ? getDataEntityList(dataEntityType)[dataEntityEditIndex] : {};
-        const orderDocumentBase64 = dataEntityOrderFilePending ? dataEntityOrderFilePending.base64 : (existing.orderDocumentBase64 || '');
-        const orderDocumentName = dataEntityOrderFilePending ? dataEntityOrderFilePending.name : (existing.orderDocumentName || '');
-        const item = { company, responsible, position, phone, order: order || undefined, comment: comment || undefined, objectIds, orderDocumentBase64: orderDocumentBase64 || undefined, orderDocumentName: orderDocumentName || undefined };
         const list = getDataEntityList(dataEntityType).slice();
-        if (dataEntityEditIndex >= 0) list[dataEntityEditIndex] = item;
-        else list.push(item);
+        const isMulti = (dataEntityType === 'fkr' || dataEntityType === 'construction');
+        if (isMulti) {
+          const companyEl = document.getElementById('data-entity-multi-company');
+          const company = companyEl ? companyEl.value.trim() : '';
+          if (!company) {
+            showAlert('Введите название организации.', 'Ошибка');
+            return;
+          }
+          const officialsListEl = document.getElementById('data-entity-officials-list');
+          const blocks = officialsListEl ? officialsListEl.querySelectorAll('.data-entity-official-block') : [];
+          if (blocks.length === 0) {
+            showAlert('Добавьте хотя бы одно должностное лицо.', 'Ошибка');
+            return;
+          }
+          const officials = [];
+          const existingItem = dataEntityEditIndex >= 0 ? getDataEntityList(dataEntityType)[dataEntityEditIndex] : null;
+          const existingOfficials = existingItem ? getDataEntityOfficialsOrPersons(existingItem, dataEntityType) : [];
+          blocks.forEach((block, i) => {
+            const fioEl = block.querySelector('.de-official-fio');
+            const numEl = block.querySelector('.de-official-number');
+            const positionEl = block.querySelector('.de-official-position');
+            const phoneEl = block.querySelector('.de-official-phone');
+            const orderEl = block.querySelector('.de-official-order');
+            const objectIds = [];
+            block.querySelectorAll('.contract-block-objects input[type="checkbox"]:checked').forEach(cb => objectIds.push(cb.dataset.addr));
+            const existing = existingOfficials[i] || {};
+            const filePending = dataEntityOfficialFilePending[i];
+            const base64 = filePending && filePending.base64 ? filePending.base64 : (existing.orderDocumentBase64 || '');
+            const name = filePending && filePending.name ? filePending.name : (existing.orderDocumentName || '');
+            if (dataEntityType === 'construction') {
+              officials.push({ number: numEl ? numEl.value.trim() : '', fio: fioEl ? fioEl.value.trim() : '', position: positionEl ? positionEl.value.trim() : '', phone: phoneEl ? phoneEl.value.trim() : '', order: orderEl ? orderEl.value.trim() : '', orderDocumentBase64: base64 || undefined, orderDocumentName: name || undefined, objectIds });
+            } else {
+              officials.push({ responsible: fioEl ? fioEl.value.trim() : '', position: positionEl ? positionEl.value.trim() : '', phone: phoneEl ? phoneEl.value.trim() : '', order: orderEl ? orderEl.value.trim() : '', orderDocumentBase64: base64 || undefined, orderDocumentName: name || undefined, objectIds });
+            }
+          });
+          let item;
+          if (dataEntityType === 'construction') {
+            const inn = document.getElementById('data-entity-inn') ? document.getElementById('data-entity-inn').value.trim() : '';
+            const ogrn = document.getElementById('data-entity-ogrn') ? document.getElementById('data-entity-ogrn').value.trim() : '';
+            const legalAddress = document.getElementById('data-entity-legal-address') ? document.getElementById('data-entity-legal-address').value.trim() : '';
+            item = { company: company || '—', persons: officials, inn: inn || undefined, ogrn: ogrn || undefined, legalAddress: legalAddress || undefined };
+          } else {
+            item = { company: company || '—', officials };
+          }
+          if (dataEntityEditIndex >= 0) list[dataEntityEditIndex] = item;
+          else list.push(item);
+        } else {
+          const company = document.getElementById('data-entity-company').value.trim() || '—';
+          const responsible = document.getElementById('data-entity-responsible').value.trim();
+          const position = document.getElementById('data-entity-position').value.trim();
+          const phone = document.getElementById('data-entity-phone').value.trim();
+          const order = document.getElementById('data-entity-order').value.trim();
+          const comment = document.getElementById('data-entity-comment').value.trim();
+          const objectIds = [];
+          document.querySelectorAll('#data-entity-objects-list input[type="checkbox"]:checked').forEach(cb => objectIds.push(cb.dataset.addr));
+          const existing = dataEntityEditIndex >= 0 ? list[dataEntityEditIndex] : {};
+          const orderDocumentBase64 = dataEntityOrderFilePending ? dataEntityOrderFilePending.base64 : (existing.orderDocumentBase64 || '');
+          const orderDocumentName = dataEntityOrderFilePending ? dataEntityOrderFilePending.name : (existing.orderDocumentName || '');
+          const item = { company, responsible, position, phone, order: order || undefined, comment: comment || undefined, objectIds, orderDocumentBase64: orderDocumentBase64 || undefined, orderDocumentName: orderDocumentName || undefined };
+          if (dataEntityEditIndex >= 0) list[dataEntityEditIndex] = item;
+          else list.push(item);
+        }
+        try {
         setDataEntityList(dataEntityType, list);
         saveDataEntityList(dataEntityType);
         syncDataEntityToReference(dataEntityType);
         renderDataEntityList(dataEntityType);
         updateDataEntityWarningBadge(dataEntityType);
         if (dataObjectSelect && dataObjectSelect.value) renderDataTable(dataObjectSelect.value);
+        if (typeof saveToSupabase === 'function') saveToSupabase();
+        if (isMulti) dataEntityOfficialFilePending = {};
+        else dataEntityOrderFilePending = null;
         closeDataEntityModal();
+        } catch (e) {
+          console.error('Ошибка при сохранении:', e);
+          showAlert('Ошибка при сохранении: ' + (e.message || 'Неизвестная ошибка'), 'Ошибка');
+        }
       });
       ['managing', 'service', 'fkr', 'construction'].forEach(type => {
         const cfg = DATA_ENTITY_CONFIG[type];
@@ -8664,7 +9886,6 @@
         const addr = actsSigningObject.value;
         actsSigningList.innerHTML = '';
         if (!addr) {
-          actsSigningList.innerHTML = '<p style="color:var(--text-muted);padding:24px;text-align:center;">Выберите объект выше</p>';
           return;
         }
         if (!actSigners[addr]) actSigners[addr] = {};
@@ -9085,17 +10306,62 @@
         }).length;
         const commissionCol = roadmapColumns.find(c => c.name === 'Комиссия');
         const commissionCount = commissionCol ? OBJECTS.filter(addr => roadmapData[addr] && roadmapData[addr][commissionCol.id]).length : 0;
+        
+        // Подсчет статистики по организациям
+        const managingList = JSON.parse(localStorage.getItem('managingCompaniesList') || '[]');
+        const serviceList = JSON.parse(localStorage.getItem('serviceOrgsList') || '[]');
+        const fkrListData = JSON.parse(localStorage.getItem('fkrList') || '[]');
+        const constructionList = JSON.parse(localStorage.getItem('constructionControlList') || '[]');
+        
+        function getObjectsForEntityList(list, type) {
+          const objectsSet = new Set();
+          list.forEach(item => {
+            if (type === 'managing' || type === 'service') {
+              // Для УК и Обслуживающих - используем objectIds напрямую
+              (item.objectIds || []).forEach(addr => objectsSet.add(addr));
+            } else {
+              // Для ФКР и Строительного контроля - используем объекты из officials/persons
+              const arr = (type === 'fkr' && Array.isArray(item.officials)) ? item.officials 
+                : (type === 'construction' && Array.isArray(item.persons)) ? item.persons 
+                : [];
+              arr.forEach(o => {
+                (o.objectIds || []).forEach(addr => objectsSet.add(addr));
+              });
+            }
+          });
+          return objectsSet;
+        }
+        
+        const managingObjects = getObjectsForEntityList(managingList, 'managing');
+        const serviceObjects = getObjectsForEntityList(serviceList, 'service');
+        const fkrObjects = getObjectsForEntityList(fkrListData, 'fkr');
+        const constructionObjects = getObjectsForEntityList(constructionList, 'construction');
+        
         let html = '<div class="dashboard-stats">';
         html += `<div class="dashboard-stat-card priority"><div class="number">${priorityCount}</div><div class="label">Приоритет</div></div>`;
         html += `<div class="dashboard-stat-card overdue"><div class="number">${overdueCount}</div><div class="label">Просрочено</div></div>`;
         html += `<div class="dashboard-stat-card commission"><div class="number">${commissionCount}</div><div class="label">На этапе Комиссия</div></div>`;
         html += `<div class="dashboard-stat-card total"><div class="number">${OBJECTS.length}</div><div class="label">Всего объектов</div></div>`;
+        html += `<div class="dashboard-stat-card managing"><div class="number">${managingList.length}</div><div class="label">УК</div></div>`;
+        html += `<div class="dashboard-stat-card service"><div class="number">${serviceList.length}</div><div class="label">Обслуживающие</div></div>`;
+        html += `<div class="dashboard-stat-card fkr"><div class="number">${fkrListData.length}</div><div class="label">ФКР</div></div>`;
+        html += `<div class="dashboard-stat-card construction"><div class="number">${constructionList.length}</div><div class="label">СтройКонтроль</div></div>`;
         html += '</div>';
         const subList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
-        const objectsWithSub = new Set();
-        subList.forEach(item => { (item.objectIds || []).forEach(addr => objectsWithSub.add(addr)); });
+        const contractorsListForDashboard = JSON.parse(localStorage.getItem('contractorsList') || '[]');
+        const objectsWithContractor = new Set();
+        // Учитываем объекты с субподрядчиками
+        subList.forEach(item => { (item.objectIds || []).forEach(addr => objectsWithContractor.add(addr)); });
+        // Учитываем объекты с подрядчиками (в objectIds)
+        contractorsListForDashboard.forEach(item => { (item.objectIds || []).forEach(addr => objectsWithContractor.add(addr)); });
+        // Учитываем объекты, где подрядчик сам выполнил работы (есть ответственный)
+        contractorsListForDashboard.forEach(item => {
+          if (item.selfPerformedResponsible && Array.isArray(item.selfPerformedObjectIds)) {
+            item.selfPerformedObjectIds.forEach(addr => objectsWithContractor.add(addr));
+          }
+        });
         const activeObjs = getActiveObjects();
-        const objectsWithoutSub = activeObjs.filter(a => !objectsWithSub.has(a)).length;
+        const objectsWithoutContractor = activeObjs.filter(a => !objectsWithContractor.has(a)).length;
         let totalDocSlots = 0, totalDocChecked = 0;
         activeObjs.forEach(addr => {
           const objData = data[addr] || {};
@@ -9108,10 +10374,24 @@
         const docsWithoutCheck = totalDocSlots - totalDocChecked;
         html += '<div class="dashboard-funnel"><div class="dashboard-section-title">Воронка: подрядчик → объект → документы</div>';
         html += '<div class="funnel-steps"><div class="funnel-step"><span class="funnel-num">' + subList.length + '</span> субподрядчиков</div>';
-        html += '<div class="funnel-step"><span class="funnel-num">' + (activeObjs.length - objectsWithoutSub) + '</span> объектов с подрядчиком</div>';
-        html += '<div class="funnel-step funnel-warn"><span class="funnel-num">' + objectsWithoutSub + '</span> объектов без подрядчика</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + contractorsListForDashboard.length + '</span> подрядчиков</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + (activeObjs.length - objectsWithoutContractor) + '</span> объектов с подрядчиком</div>';
+        html += '<div class="funnel-step funnel-warn"><span class="funnel-num">' + objectsWithoutContractor + '</span> объектов без подрядчика</div>';
         html += '<div class="funnel-step"><span class="funnel-num">' + totalDocChecked + '</span> документов отмечено</div>';
         html += '<div class="funnel-step funnel-warn"><span class="funnel-num">' + docsWithoutCheck + '</span> документов без отметки</div></div></div>';
+        
+        html += '<div class="dashboard-funnel" style="margin-top:24px;"><div class="dashboard-section-title">Организации и объекты</div>';
+        html += '<div class="funnel-steps">';
+        html += '<div class="funnel-step"><span class="funnel-num">' + managingList.length + '</span> управляющих компаний</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + managingObjects.size + '</span> объектов с УК</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + serviceList.length + '</span> обслуживающих организаций</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + serviceObjects.size + '</span> объектов с обслуживающей</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + fkrListData.length + '</span> организаций ФКР</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + fkrObjects.size + '</span> объектов с ФКР</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + constructionList.length + '</span> организаций стройконтроля</div>';
+        html += '<div class="funnel-step"><span class="funnel-num">' + constructionObjects.size + '</span> объектов со стройконтролем</div>';
+        html += '</div></div>';
+        
         html += '<div class="dashboard-section-title">Объекты и документы</div><div class="dashboard-objects-list">';
         getActiveObjects().forEach(addr => {
           const objData = data[addr] || { main: [], extra: [] };
@@ -9127,11 +10407,12 @@
           const tag = objData.tag || '';
           const tagCls = tag === 'Приоритет' ? 'tag-priority' : tag === 'Завершён' ? 'tag-done' : '';
           html += `<div class="dashboard-object-row" data-addr="${escapeHtml(addr)}">`;
+          html += `<span class="obj-expand-arrow">▶</span>`;
           html += `<div class="obj-name">${escapeHtml(addr)}${tag ? `<span class="obj-tag ${tagCls}">${escapeHtml(tag)}</span>` : ''}</div>`;
           html += `<div class="obj-progress"><div>${checked}/${total}</div><div class="obj-progress-bar"><div class="fill ${pct === 100 ? '' : pct > 0 ? 'partial' : 'empty'}" style="width:${pct}%"></div></div></div>`;
           html += `<div style="font-size:12px;color:var(--text-muted);">${pct}%</div>`;
           html += `</div>`;
-          html += `<div class="dashboard-package-section">`;
+          html += `<div class="dashboard-package-section" data-addr="${escapeHtml(addr)}">`;
           html += `<div class="dashboard-package-title">${escapeHtml(addr)}</div>`;
           html += `<div class="dashboard-doc-grid">`;
           allDocs.forEach((doc, i) => {
@@ -9143,10 +10424,61 @@
         html += '</div>';
         statsContent.innerHTML = html;
         statsContent.querySelectorAll('.dashboard-object-row').forEach(row => {
-          row.addEventListener('click', () => {
+          row.addEventListener('click', (e) => {
+            // Если клик был на кнопку или ссылку внутри карточки документа, не раскрываем
+            if (e.target.closest('.dashboard-doc-card')) return;
+            
             const a = row.dataset.addr;
-            if (a && selector) { selector.value = a; updateSelectorDisplay(); renderObject(a); addToRecent(a); responsibleConnectionsContainer.style.display = 'none'; subcontractorsContainer.style.display = 'none';
-        if (contractorsContainer) contractorsContainer.style.display = 'none'; ['managing-container','service-container','fkr-container','construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); container.style.display = 'block'; emptyState.style.display = 'none'; calendarContainer.style.display = 'none'; dataContainer.style.display = 'none'; roadmapContainer.style.display = 'none'; updateBreadcrumbs('main', a); dashboardModal.style.display = 'none'; }
+            if (!a) return;
+            
+            // Переключаем раскрытие секции с документами
+            const section = statsContent.querySelector(`.dashboard-package-section[data-addr="${escapeHtml(a)}"]`);
+            if (section) {
+              const isExpanded = section.classList.contains('expanded');
+              if (isExpanded) {
+                section.classList.remove('expanded');
+                row.classList.remove('expanded');
+              } else {
+                // Закрываем все другие секции
+                statsContent.querySelectorAll('.dashboard-package-section.expanded').forEach(s => {
+                  s.classList.remove('expanded');
+                  const otherRow = statsContent.querySelector(`.dashboard-object-row[data-addr="${s.dataset.addr}"]`);
+                  if (otherRow) otherRow.classList.remove('expanded');
+                });
+                section.classList.add('expanded');
+                row.classList.add('expanded');
+              }
+            }
+          });
+        });
+        
+        // Обработчик клика на карточку документа для открытия объекта
+        statsContent.querySelectorAll('.dashboard-doc-card').forEach(card => {
+          card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const section = card.closest('.dashboard-package-section');
+            if (!section) return;
+            const a = section.dataset.addr;
+            if (a && selector) {
+              selector.value = a;
+              updateSelectorDisplay();
+              renderObject(a);
+              addToRecent(a);
+              responsibleConnectionsContainer.style.display = 'none';
+              subcontractorsContainer.style.display = 'none';
+              if (contractorsContainer) contractorsContainer.style.display = 'none';
+              ['managing-container','service-container','fkr-container','construction-control-container'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+              });
+              container.style.display = 'block';
+              emptyState.style.display = 'none';
+              calendarContainer.style.display = 'none';
+              dataContainer.style.display = 'none';
+              roadmapContainer.style.display = 'none';
+              if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', a);
+              dashboardModal.style.display = 'none';
+            }
           });
         });
       }
@@ -9168,12 +10500,12 @@
 
       function renderHistory() {
         const list = document.getElementById('history-list');
-        if (history.length === 0) {
+        if (historyLog.length === 0) {
           list.innerHTML = '<div class="history-entry">Нет изменений</div>';
           return;
         }
         let html = '';
-        history.slice().reverse().forEach(entry => {
+        historyLog.slice().reverse().forEach(entry => {
           html += `<div class="history-entry">
             <div class="history-time">${entry.time}</div>
             <div>${entry.action}</div>
@@ -9406,6 +10738,11 @@
           if (imported.registry) data = imported.registry;
           if (imported.calendar) calendarData = imported.calendar;
           if (imported.history) history = imported.history;
+          if (imported.documentsList && Array.isArray(imported.documentsList)) {
+            documentsList = imported.documentsList;
+            localStorage.setItem('documentsList', JSON.stringify(documentsList));
+            if (documentsListEl) renderDocuments();
+          }
           if (imported.objects && Array.isArray(imported.objects)) {
             OBJECTS = imported.objects;
             localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
@@ -9525,7 +10862,7 @@
           renderDeadlineReminders();
           localStorage.setItem('registryData', JSON.stringify(data));
           localStorage.setItem('calendarData', JSON.stringify(calendarData));
-          localStorage.setItem('historyLog', JSON.stringify(history));
+          localStorage.setItem('historyLog', JSON.stringify(historyLog));
           showToast();
           if (calendarContainer.style.display === 'block') renderCalendar();
           if (selector && selector.value) renderObject(selector.value);
@@ -9541,6 +10878,7 @@
           registry: data,
           calendar: calendarData,
           history: history,
+          documentsList: documentsList || [],
           objects: OBJECTS,
           personsData: personsData,
           stickyNotes: stickyNotes,
@@ -9693,6 +11031,17 @@
       // В Supabase: SQL Editor → New query → выполнить:
       // create table registry_store ( id int primary key default 1, data jsonb not null default '{}', updated_at timestamptz default now() );
       // insert into registry_store (id, data) values (1, '{}') on conflict (id) do nothing;
+      // 
+      // Для работы с документами нужно создать Storage bucket:
+      // 1. Перейти в Storage → Create a new bucket
+      // 2. Название: "documents"
+      // 3. Public bucket: включить (чтобы файлы были доступны для скачивания)
+      // 4. File size limit: установить нужный лимит (по умолчанию 50MB)
+      // 5. Allowed MIME types: оставить пустым (разрешить все типы файлов)
+      // 
+      // Ограничения бесплатного тарифа Supabase:
+      // - Хранилище: 1 GB
+      // - Пропускная способность: 10 GB (5 GB кэшированных + 5 GB некэшированных)
       const SUPABASE_URL = 'https://onlupkyiecahpfqapalj.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubHVwa3lpZWNhaHBmcWFwYWxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjg3MjcsImV4cCI6MjA4NTgwNDcyN30.LlXuTaZx_2gJOmT2KBtkIFqBJ1zDA5Bs1NKCLCnzhrE';
       let supabaseSaveIntervalId = null;
@@ -9779,6 +11128,9 @@
           localStorage.removeItem('dataRows');
           localStorage.removeItem('thoughtsBoard');
           localStorage.removeItem('smartReminders');
+          localStorage.removeItem('documentsList');
+          documentsList = [];
+          if (documentsListEl) renderDocuments();
           localStorage.removeItem('lastSelectedObject');
           localStorage.removeItem('recentObjectIds');
           localStorage.removeItem('customTags');
