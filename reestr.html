@@ -3756,7 +3756,6 @@
       <li><a href="#" id="show-acts-signing" title="Связи ответственных по документам">Связи ответственных</a></li>
       <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
       <li><a href="#" id="show-thoughts" title="Доска для заметок и связей">Доска мыслей</a></li>
-      <li><a href="#" id="show-batch-edit" class="full-mode-only" title="Изменить тег/срок у нескольких объектов">Массовое изменение</a></li>
     </ul>
     <h3 class="collapsible" id="data-section-toggle">Данные <span class="arrow">▶</span></h3>
     <ul class="collapsible-content" id="data-section-menu" style="display:none;">
@@ -3767,7 +3766,7 @@
       <li><a href="#" id="show-fkr" title="Фонд капитального ремонта">Фонд капитального ремонта</a><span class="subcontractors-warning-badge" id="fkr-warning-badge" style="display:none;"></span></li>
       <li><a href="#" id="show-construction-control" title="Строительный контроль">Строительный контроль</a><span class="subcontractors-warning-badge" id="construction-control-warning-badge" style="display:none;"></span></li>
     </ul>
-    <h3 class="collapsible" id="system-toggle">Система <span class="arrow">▶</span></h3>
+    <h3 class="collapsible" id="system-toggle">Настройки <span class="arrow">▶</span></h3>
     <ul class="collapsible-content" id="system-menu" style="display: none;">
       <li><a href="#" class="full-mode-only" id="btn-export">Экспорт в TXT</a></li>
       <li><a href="#" class="full-mode-only" id="btn-import">Импорт из TXT</a></li>
@@ -3776,6 +3775,7 @@
       <li><a href="#" id="btn-toggle-theme">Тема: как в системе</a></li>
       <li><a href="#" id="btn-history">История изменений</a></li>
       <li><a href="#" class="full-mode-only" id="btn-reset">Сбросить всё</a></li>
+      <li><a href="#" id="show-batch-edit" class="full-mode-only" title="Изменить тег/срок у нескольких объектов">Массовое изменение</a></li>
       <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
         <label style="font-size:12px;color:var(--text-muted);display:block;">URL данных (автозагрузка при открытии)</label>
         <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
@@ -5160,16 +5160,27 @@
       const roadmapTable = document.getElementById('roadmap-table');
       const roadmapEditBtn = document.getElementById('roadmap-edit-btn');
 
-      // === Кнопка РЕЕСТР ===
-      function goToMainScreen() {
+      // Скрыть все панели (Документы, УК, ОК, Сводка и т.д.) и показать основной контент
+      function hideAllPanelsShowMain() {
         calendarContainer.style.display = 'none';
         dataContainer.style.display = 'none';
         roadmapContainer.style.display = 'none';
         subcontractorsContainer.style.display = 'none';
         if (contractorsContainer) contractorsContainer.style.display = 'none';
         responsibleConnectionsContainer.style.display = 'none';
+        const documentsContainerEl = document.getElementById('documents-container');
+        if (documentsContainerEl) documentsContainerEl.style.display = 'none';
+        ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
         container.style.display = 'block';
         emptyState.style.display = 'block';
+      }
+
+      // === Кнопка РЕЕСТР ===
+      function goToMainScreen() {
+        hideAllPanelsShowMain();
         selector.value = '';
         updateSelectorDisplay();
         renderObject(null);
@@ -5433,7 +5444,7 @@
         });
       }
 
-      // === Сворачиваемая секция "Система" ===
+      // === Сворачиваемая секция "Настройки" ===
       const systemToggle = document.getElementById('system-toggle');
       const systemMenu = document.getElementById('system-menu');
       systemToggle.addEventListener('click', () => {
@@ -6336,6 +6347,9 @@
           emptyState.style.display = 'block';
           return;
         }
+        // При открытии объекта — закрыть все панели (Документы, УК, ОК и т.д.) и показать только карточку объекта
+        hideAllPanelsShowMain();
+        emptyState.style.display = 'none';
 
         const card = document.createElement('div');
         card.className = 'post';
