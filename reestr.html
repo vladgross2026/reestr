@@ -1137,6 +1137,44 @@
       transform: translateY(0);
     }
 
+    .toast .toast-action-btn { margin-left: 10px; padding: 4px 12px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; }
+    .toast .toast-action-btn:hover { opacity: 0.9; }
+
+    .robot-suggestions {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(59, 130, 246, 0.06) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+    }
+    .robot-suggestions:empty { display: none; }
+    .robot-suggestions .robot-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; display: inline-flex; align-items: center; gap: 6px; }
+    .robot-suggestions .robot-label::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: robot-pulse 1.5s ease-in-out infinite; }
+    @keyframes robot-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .robot-suggestions .robot-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .robot-suggestions .robot-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .robot-suggestions .robot-btn.robot-btn-danger:hover { background: var(--danger); border-color: var(--danger); }
+
+    .recent-robot-hint { font-size: 10px; margin-left: 6px; padding: 2px 6px; border-radius: 4px; background: var(--hover); color: var(--text-muted); }
+    .recent-robot-overdue { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .recent-robot-soon { background: rgba(59, 130, 246, 0.15); color: var(--accent); }
+    .recent-robot-notag { background: rgba(234, 179, 8, 0.15); color: var(--warning); }
+    .selector-option.overdue .selector-obj-name::after { content: ' (просрочено)'; font-size: 11px; color: var(--danger); }
+    .selector-option.no-tag:not(.overdue) .selector-obj-name::after { content: ' (без метки)'; font-size: 11px; color: var(--text-muted); }
+
     /* === Дорожная карта объектов === */
     .roadmap-container {
       background: var(--bg-card);
@@ -3174,6 +3212,13 @@
     }
     .doc-progress-text { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+    /* === Подсказка «Следующий документ» (эксперимент) === */
+    .next-doc-hint-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); }
+    .next-doc-goto-btn { padding: 4px 10px; font-size: 11px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+    .next-doc-goto-btn:hover { opacity: 0.9; }
+    .doc-item.doc-item-highlight { animation: doc-highlight 2s ease; }
+    @keyframes doc-highlight { 0% { background: rgba(99, 102, 241, 0.35); } 100% { background: transparent; } }
+
     /* === Кнопка быстрого напоминания === */
     .quick-reminder-btn {
       padding: 4px 10px; font-size: 12px; background: transparent; border: 1px solid var(--border);
@@ -3689,13 +3734,13 @@
       <h1 class="landing-title"><a href="#" class="landing-title-link" id="landing-title-link">Реестр по объектам капитального ремонта</a></h1>
       <div class="landing-search-wrap">
         <div class="landing-search-inner">
-          <input type="text" id="landing-search-input" placeholder="Поиск по разделам, объектам, документам, субподрядчикам, ФИО…" autocomplete="off">
+          <input type="text" id="landing-search-input" placeholder="Поиск или команда для ИИ: например «Добавь объект ул. Ленина 5»" autocomplete="off">
           <button type="button" class="landing-search-clear" id="landing-search-clear" aria-label="Очистить">×</button>
         </div>
         <div class="landing-search-results" id="landing-search-results"></div>
       </div>
-      <p class="landing-search-hint">Начните вводить или выберите раздел ниже</p>
-      <p class="landing-search-hint" style="margin-top: -16px; margin-bottom: 16px; font-size: 11px;">↑↓ — выбор, Enter — открыть, Esc — закрыть</p>
+      <p class="landing-search-hint">Поиск по разделам и объектам, или напишите команду для ИИ (например: «Добавь объект ул. Ленина 5»)</p>
+      <p class="landing-search-hint" style="margin-top: -16px; margin-bottom: 16px; font-size: 11px;">↑↓ — выбор, Enter — открыть или выполнить, Esc — закрыть. ИИ: по умолчанию Ollama (локально), либо OpenAI — в Настройках.</p>
     </div>
     </div>
   </div>
@@ -3740,6 +3785,7 @@
   </div>
   <div class="recent-objects" id="recent-objects"></div>
   <div class="deadline-reminders" id="deadline-reminders"></div>
+  <div class="robot-suggestions" id="robot-suggestions"></div>
 
   <div class="sidebar" id="sidebar" role="navigation" aria-label="Боковое меню">
     <div class="sidebar-close" id="sidebar-close">&times;</div>
@@ -3776,6 +3822,28 @@
       <li><a href="#" id="btn-history">История изменений</a></li>
       <li><a href="#" class="full-mode-only" id="btn-reset">Сбросить всё</a></li>
       <li><a href="#" id="show-batch-edit" class="full-mode-only" title="Изменить тег/срок у нескольких объектов">Массовое изменение</a></li>
+      <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text);">
+          <input type="checkbox" id="auto-complete-tag-100" style="width:18px;height:18px;">
+          <span>Автоматически ставить метку «Завершён» при 100% документов</span>
+        </label>
+      </li>
+      <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
+        <label style="font-size:12px;color:var(--text-muted);display:block;">ИИ для команд в поиске</label>
+        <select id="ai-provider" style="width:100%;margin-top:6px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;">
+          <option value="ollama">Ollama (локально, бесплатно)</option>
+          <option value="openai">OpenAI (облако, нужен ключ)</option>
+        </select>
+        <div id="ai-ollama-wrap" style="margin-top:8px;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;">URL Ollama</label>
+          <input type="text" id="ollama-url" placeholder="http://localhost:11434" style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;">
+        </div>
+        <div id="ai-openai-wrap" style="margin-top:8px;display:none;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;">API ключ OpenAI</label>
+          <input type="password" id="openai-api-key" placeholder="sk-..." style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;" autocomplete="off">
+        </div>
+        <button type="button" id="save-openai-key-btn" style="margin-top:6px;padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Сохранить</button>
+      </li>
       <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
         <label style="font-size:12px;color:var(--text-muted);display:block;">URL данных (автозагрузка при открытии)</label>
         <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
@@ -3852,7 +3920,8 @@
       <span class="close-modal" id="close-batch-edit">&times;</span>
       <h2>Массовое изменение</h2>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Выберите объекты и укажите новые значения:</p>
-      <div id="batch-objects-list" style="max-height:200px;overflow-y:auto;margin-bottom:16px;"></div>
+      <div id="batch-objects-list" style="max-height:200px;overflow-y:auto;margin-bottom:8px;"></div>
+      <p style="margin-bottom:12px;"><button type="button" id="batch-select-no-deadline" class="btn-secondary" style="padding:6px 12px;font-size:12px;">Робот: выбрать все без срока</button></p>
       <div style="margin-bottom:16px;">
         <label style="font-size:12px;color:var(--text-muted);">Метка:</label>
         <select id="batch-tag" style="width:100%;padding:8px 12px;margin-top:4px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
@@ -3940,6 +4009,7 @@
         <button type="button" class="btn-secondary" id="data-object-next-btn" title="Следующий объект по списку" style="padding:6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:4px;">Далее <span style="font-size:14px;">→</span></button>
         <p class="ui-hint" style="margin:0;margin-left:8px;">Используйте кнопки "Назад" и "Далее" для быстрой навигации между объектами</p>
         <div class="data-header-actions">
+          <button type="button" class="btn-secondary" id="data-copy-from-object-btn" style="padding:6px 10px;font-size:12px;" title="Скопировать справочную информацию с другого объекта">Скопировать с объекта</button>
           <button type="button" class="btn-secondary" id="data-global-search-toggle" style="padding:6px 10px;font-size:12px;" title="При включении ввод в ячейке ищет совпадения по всем объектам">Вкл общий поиск</button>
           <button type="button" class="data-edit-btn" id="data-edit-btn" title="Режим редактирования столбцов и строк"><span class="material-icons" style="font-size:18px">edit</span></button>
           <button type="button" class="data-add-col-btn" id="data-add-column" style="display:none;">Добавить столбец</button>
@@ -4399,6 +4469,7 @@
     <div class="empty-state" id="empty-state">
       <div class="empty-actions">
         <a href="#" id="empty-add-object" class="full-mode-only">+ Создать объект</a>
+        <a href="#" id="empty-add-bulk" class="full-mode-only" title="Вставьте список адресов (каждый с новой строки)">+ Добавить несколько объектов</a>
         <a href="#" id="empty-show-dashboard">Dashboard</a>
         <a href="#" id="empty-show-roadmap" class="btn-outline">Дорожная карта</a>
       </div>
@@ -4504,6 +4575,11 @@
         mainApp.style.display = 'block';
         mainBody.classList.remove('landing-visible');
         if (!viewId) return;
+        if (viewId.startsWith('ai:')) {
+          const prompt = decodeURIComponent(viewId.slice(3));
+          document.dispatchEvent(new CustomEvent('ai-command', { detail: { prompt } }));
+          return;
+        }
         if (viewId.startsWith('object:')) {
           const addr = viewId.slice(7);
           const sel = document.getElementById('object-selector');
@@ -4655,6 +4731,11 @@
         const t = (q || '').trim();
         if (!t) return LANDING_SECTIONS.slice();
         const results = [];
+        // Первый вариант — выполнить команду через ИИ (если введено хотя бы 3 символа)
+        if (t.length >= 3) {
+          const shortTitle = t.length > 45 ? t.slice(0, 42) + '…' : t;
+          results.push({ id: 'ai', title: '✨ Выполнить команду: «' + shortTitle + '»', type: 'ИИ' });
+        }
         LANDING_SECTIONS.forEach(s => {
           const searchText = s.title + ' ' + (s.keywords || '') + ' ' + s.id;
           if (searchIncludes(searchText, t))
@@ -4738,7 +4819,12 @@
         landingSearchResults.querySelectorAll('.result-item').forEach((el, i) => {
           el.classList.toggle('selected', i === 0);
           el.addEventListener('click', () => {
-            const v = el.dataset.view;
+            let v = el.dataset.view;
+            if (v === 'ai') {
+              const prompt = landingSearchInput.value.trim();
+              if (!prompt) return;
+              v = 'ai:' + encodeURIComponent(prompt);
+            }
             hideLandingAndGoTo(v);
             landingSearchInput.value = '';
             landingSearchClear.classList.remove('show');
@@ -4768,7 +4854,18 @@
         else if (e.key === 'Enter') {
           e.preventDefault();
           const s = landingSearchFiltered[landingSearchIndex];
-          if (s) { hideLandingAndGoTo(s.id); landingSearchInput.value = ''; landingSearchClear.classList.remove('show'); landingSearchResults.classList.remove('show'); }
+          if (s) {
+            let viewId = s.id;
+            if (viewId === 'ai') {
+              const prompt = landingSearchInput.value.trim();
+              if (!prompt) return;
+              viewId = 'ai:' + encodeURIComponent(prompt);
+            }
+            hideLandingAndGoTo(viewId);
+            landingSearchInput.value = '';
+            landingSearchClear.classList.remove('show');
+            landingSearchResults.classList.remove('show');
+          }
         }
         landingSearchResults.querySelectorAll('.result-item').forEach((el, i) => el.classList.toggle('selected', i === landingSearchIndex));
         landingSearchResults.querySelector('.result-item.selected')?.scrollIntoView({ block: 'nearest' });
@@ -4898,6 +4995,26 @@
       const undoStack = [];
       const UNDO_MAX = 50;
       function getActiveObjects() { return OBJECTS.filter(o => !archivedObjects.includes(o)); }
+      /** Робот: порядок «сначала требуют внимания» — просрочено, на этой неделе, без метки, закреплённые, остальные */
+      function getObjectsSortedByAttention() {
+        const today = new Date().toISOString().slice(0, 10);
+        const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+        const list = getActiveObjects().slice();
+        return list.sort((a, b) => {
+          const dA = data[a]?.deadline || '', dB = data[b]?.deadline || '';
+          const overdueA = dA && dA < today ? 1 : 0, overdueB = dB && dB < today ? 1 : 0;
+          if (overdueA !== overdueB) return overdueB - overdueA;
+          const weekA = dA && dA >= today && dA <= weekEnd ? 1 : 0, weekB = dB && dB >= today && dB <= weekEnd ? 1 : 0;
+          if (weekA !== weekB) return weekB - weekA;
+          const noTagA = !(data[a]?.tag || '').trim() ? 1 : 0, noTagB = !(data[b]?.tag || '').trim() ? 1 : 0;
+          if (noTagA !== noTagB) return noTagB - noTagA;
+          const pinA = pinnedObjectIds.indexOf(a), pinB = pinnedObjectIds.indexOf(b);
+          if (pinA >= 0 && pinB < 0) return -1;
+          if (pinA < 0 && pinB >= 0) return 1;
+          if (pinA >= 0 && pinB >= 0) return pinA - pinB;
+          return a.localeCompare(b);
+        });
+      }
       function savePinned() { localStorage.setItem('pinnedObjectIds', JSON.stringify(pinnedObjectIds)); }
       function saveArchived() { localStorage.setItem('archivedObjects', JSON.stringify(archivedObjects)); }
 
@@ -5571,7 +5688,7 @@
       }
       function syncSelectorNativeOptions() {
         const current = selector.value;
-        const list = getActiveObjects();
+        const list = getObjectsSortedByAttention();
         selector.innerHTML = '<option value="">Выберите объект...</option>';
         list.forEach(obj => {
           const opt = document.createElement('option');
@@ -5585,15 +5702,7 @@
 
       function fillSelectorList() {
         syncSelectorNativeOptions();
-        const list = getActiveObjects().slice();
-        list.sort((a, b) => {
-          const pinA = pinnedObjectIds.indexOf(a);
-          const pinB = pinnedObjectIds.indexOf(b);
-          if (pinA >= 0 && pinB < 0) return -1;
-          if (pinA < 0 && pinB >= 0) return 1;
-          if (pinA >= 0 && pinB >= 0) return pinA - pinB;
-          return a.localeCompare(b);
-        });
+        const list = getObjectsSortedByAttention();
         const byCity = {};
         list.forEach(obj => { const c = extractCity(obj); if (!byCity[c]) byCity[c] = []; byCity[c].push(obj); });
         const cities = Object.keys(byCity).sort();
@@ -5620,8 +5729,12 @@
           byCity[city].forEach(obj => {
             const tag = data[obj]?.tag || '';
             const isPinned = pinnedObjectIds.includes(obj);
+            const today = new Date().toISOString().slice(0, 10);
+            const dl = data[obj]?.deadline || '';
+            const overdue = dl && dl < today;
+            const noTag = !(tag || '').trim();
             const opt = document.createElement('div');
-            opt.className = 'selector-option';
+            opt.className = 'selector-option' + (overdue ? ' overdue' : '') + (noTag && !overdue ? ' no-tag' : '');
             opt.dataset.addr = obj;
             opt.innerHTML = '<span class="selector-obj-name">' + escapeHtml(obj) + '</span>' + (isPinned ? '<span class="pinned-badge"><span class="material-icons" style="font-size:14px">push_pin</span></span>' : '') + getSelectorTagHtml(tag);
             opt.addEventListener('click', () => {
@@ -5689,7 +5802,7 @@
       // === Заполнить селектор (нативный select для значения) ===
       function populateSelector() {
         selector.innerHTML = '<option value="">Выберите объект...</option>';
-        getActiveObjects().forEach(obj => {
+        getObjectsSortedByAttention().forEach(obj => {
           const opt = document.createElement('option');
           opt.value = obj;
           opt.textContent = obj;
@@ -5868,11 +5981,15 @@
             else if (tagStyle && tagStyle.type === 'custom') tagHtml = `<span class="obj-tag" style="background:${escapeHtml(tagStyle.color)};color:#fff">${escapeHtml(objTag)}</span>`;
             else tagHtml = `<span class="obj-tag" style="background:var(--text-muted);color:var(--bg)">${escapeHtml(objTag)}</span>`;
           }
+          let robotHint = '';
+          if (objDeadline && deadlineClass === 'overdue') robotHint = '<span class="recent-robot-hint recent-robot-overdue">просрочено</span>';
+          else if (objDeadline && deadlineClass === 'soon') robotHint = '<span class="recent-robot-hint recent-robot-soon">на неделе</span>';
+          else if (!objTag && !objDeadline) robotHint = '<span class="recent-robot-hint recent-robot-notag">без метки</span>';
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'recent-object-btn';
           btn.innerHTML = escapeHtml(addr) + (pinnedObjectIds.includes(addr) ? '<span class="pinned-badge"><span class="material-icons" style="font-size:14px">push_pin</span></span>' : '') + tagHtml +
-            (objDeadline ? `<span class="obj-deadline ${deadlineClass}">${formatDateRu(objDeadline)}</span>` : '');
+            (objDeadline ? `<span class="obj-deadline ${deadlineClass}">${formatDateRu(objDeadline)}</span>` : '') + robotHint;
           btn.addEventListener('click', () => {
             calendarContainer.style.display = 'none';
             dataContainer.style.display = 'none';
@@ -6040,6 +6157,72 @@
         wrap.appendChild(timelineWrap);
         updateHeaderOverdue();
         updateSidebarCounts();
+        renderRobotSuggestions();
+      }
+      function renderRobotSuggestions() {
+        const wrap = document.getElementById('robot-suggestions');
+        if (!wrap) return;
+        const today = new Date().toISOString().slice(0, 10);
+        const activeObjs = getActiveObjects();
+        const overdue = activeObjs.filter(addr => data[addr]?.deadline && data[addr].deadline < today);
+        const noTag = activeObjs.filter(addr => !(data[addr]?.tag || '').trim());
+        wrap.innerHTML = '';
+        const label = document.createElement('span');
+        label.className = 'robot-label';
+        label.textContent = 'Робот рекомендует';
+        wrap.appendChild(label);
+        if (overdue.length > 0) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'robot-btn robot-btn-danger';
+          btn.textContent = 'Просрочено: ' + overdue.length + ' → открыть первый';
+          btn.addEventListener('click', () => {
+            selector.value = overdue[0];
+            updateSelectorDisplay();
+            hideAllPanelsShowMain();
+            emptyState.style.display = 'none';
+            renderObject(overdue[0]);
+            addToRecent(overdue[0]);
+          });
+          wrap.appendChild(btn);
+        }
+        if (noTag.length > 0) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'robot-btn';
+          btn.textContent = 'Без метки: ' + noTag.length + ' → массовое изменение';
+          btn.addEventListener('click', () => document.getElementById('show-batch-edit')?.click());
+          wrap.appendChild(btn);
+        }
+        const noDeadline = activeObjs.filter(addr => !(data[addr]?.deadline || '').trim());
+        if (noDeadline.length > 0) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'robot-btn';
+          btn.textContent = 'Без срока: ' + noDeadline.length + ' → указать срок';
+          btn.addEventListener('click', () => {
+            if (typeof openSetDeadlineAllModal === 'function') openSetDeadlineAllModal(noDeadline);
+          });
+          wrap.appendChild(btn);
+        }
+        const bulkBtn = document.createElement('button');
+        bulkBtn.type = 'button';
+        bulkBtn.className = 'robot-btn';
+        bulkBtn.textContent = '+ Несколько объектов';
+        bulkBtn.title = 'Вставьте список адресов (каждый с новой строки)';
+        bulkBtn.addEventListener('click', () => { if (typeof openBulkAddModal === 'function') openBulkAddModal(); });
+        wrap.appendChild(bulkBtn);
+        const aiBtn = document.createElement('button');
+        aiBtn.type = 'button';
+        aiBtn.className = 'robot-btn';
+        aiBtn.textContent = '✨ Команда для ИИ';
+        aiBtn.title = 'Нажмите и введите команду в поиске на начальном экране или используйте поиск Ctrl+K';
+        aiBtn.addEventListener('click', () => {
+          searchInput.focus();
+          searchInput.placeholder = 'Введите команду для ИИ, например: Добавь объект ул. Ленина 5';
+          searchInput.addEventListener('blur', function restorePlaceholder() { searchInput.placeholder = 'Поиск...'; searchInput.removeEventListener('blur', restorePlaceholder); }, { once: true });
+        });
+        wrap.appendChild(aiBtn);
       }
       function updateHeaderOverdue() {
         const badge = document.getElementById('header-overdue-badge');
@@ -6154,6 +6337,9 @@
           return;
         }
         const results = [];
+        if (query.length >= 3) {
+          results.push({ type: 'ИИ', id: 'ai', text: 'Выполнить команду: «' + (query.length > 40 ? query.slice(0, 37) + '…' : query) + '»', prompt: query });
+        }
         SEARCH_SECTIONS.forEach(s => {
           const searchText = s.title + ' ' + (s.keywords || '');
           if (searchIncludes(searchText, query))
@@ -6231,6 +6417,12 @@
           const displayText = r.sectionId ? escapeHtml(r.text || r.title) : (r.subcontractorIndex !== undefined || r.contractorIndex !== undefined || r.managingIndex !== undefined || r.serviceIndex !== undefined || r.fkrIndex !== undefined || r.constructionIndex !== undefined ? escapeHtml(r.text) : (escapeHtml(r.addr) + ' — ' + escapeHtml(r.text)));
           item.innerHTML = `<div class="search-result-type">${escapeHtml(r.type)}</div>${displayText}`;
           item.addEventListener('click', () => {
+            if (r.id === 'ai' && r.prompt) {
+              document.dispatchEvent(new CustomEvent('ai-command', { detail: { prompt: r.prompt } }));
+              searchResults.classList.remove('show');
+              searchInput.value = '';
+              return;
+            }
             if (r.sectionId) {
               const sectionBtnIds = { subcontractors: 'show-subcontractors', contractors: 'show-contractors', data: 'show-data', documents: 'show-documents', roadmap: 'show-roadmap', dashboard: 'show-dashboard-sidebar', calendar: 'show-calendar', thoughts: 'show-thoughts', reminders: 'show-reminders', comments: 'btn-comments' };
               const bid = sectionBtnIds[r.sectionId] || ('show-' + r.sectionId);
@@ -6408,6 +6600,10 @@
               <button type="button" class="quick-reminder-btn object-export-pdf-btn" data-addr="${escapeHtml(addr)}" title="Печать / PDF объекта">PDF</button>
               <div class="object-meta" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
               <div>${progressBar}</div>
+                <div class="next-doc-hint-wrap" style="display:none;" data-addr="${escapeHtml(addr)}">
+                  <span class="next-doc-hint-text"></span>
+                  <button type="button" class="next-doc-goto-btn">Перейти</button>
+                </div>
                 <div class="tag-select-wrap">
                   <label>Метка:</label>
                   <select class="object-tag-select" id="tag-${addr}">
@@ -6653,6 +6849,27 @@
         if (mainDiv) renderDocs(mainDiv, mainDocsList, addr, 'main', data);
         if (extraDiv) renderDocs(extraDiv, extraDocsList, addr, 'extra', data);
 
+        const nextDocWrap = card.querySelector('.next-doc-hint-wrap');
+        if (nextDocWrap) {
+          nextDocWrap.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('next-doc-goto-btn')) return;
+            const type = nextDocWrap.dataset.nextType;
+            const idx = parseInt(nextDocWrap.dataset.nextIdx, 10);
+            if (type === undefined || isNaN(idx)) return;
+            const targetDiv = type === 'main' ? card.querySelector('.docs-main') : card.querySelector('.docs-extra');
+            if (!targetDiv) return;
+            const block = targetDiv.closest('.collapsible-block');
+            if (block) block.classList.remove('collapsed');
+            const item = targetDiv.querySelectorAll('.doc-item')[idx];
+            if (item) {
+              item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              item.classList.add('doc-item-highlight');
+              setTimeout(() => item.classList.remove('doc-item-highlight'), 2000);
+            }
+          });
+          updateNextDocHint(addr);
+        }
+
         // Сохранение комментария к объекту
         const textarea = card.querySelector('.object-comment textarea');
         textarea.addEventListener('blur', () => {
@@ -6742,6 +6959,26 @@
             localStorage.setItem('registryData', JSON.stringify(data));
             renderDeadlineReminders();
             showToast();
+            if (deadlineInput.value) {
+              const existing = (smartReminders || []).find(r => r.addr === addr && r.date === deadlineInput.value && (r.label || '').toLowerCase().includes('срок'));
+              if (!existing) {
+                const toastEl = document.getElementById('toast');
+                if (toastEl && !toastEl.querySelector('.toast-action-btn')) {
+                  toastEl.innerHTML = 'Создать напоминание на ' + deadlineInput.value + '? <button type="button" class="toast-action-btn" id="toast-btn-rem">Да</button>';
+                  toastEl.classList.remove('toast-error');
+                  toastEl.classList.add('show');
+                  toastEl.querySelector('#toast-btn-rem').addEventListener('click', function once() {
+                    smartReminders = smartReminders || [];
+                    smartReminders.push({ id: 'rm_' + Date.now(), addr: addr, date: deadlineInput.value, label: 'Срок по объекту' });
+                    saveSmartReminders();
+                    renderDeadlineReminders();
+                    toastEl.innerHTML = '';
+                    toastEl.classList.remove('show');
+                    showToast();
+                  }, { once: true });
+                }
+              }
+            }
           });
         }
         const exportDocsBtn = card.querySelector('.object-export-docs-btn');
@@ -6997,6 +7234,40 @@
           barWrap.title = checkedCount + '/' + totalDocs + ' документов';
         }
         if (textEl) textEl.textContent = checkedCount + '/' + totalDocs;
+        updateNextDocHint(addr);
+      }
+
+      /** Эксперимент: подсказка «Следующий документ» — первый неотмеченный в основном, затем в дополнительном пакете */
+      function updateNextDocHint(addr) {
+        const card = container.querySelector('.post');
+        if (!card) return;
+        const wrap = card.querySelector('.next-doc-hint-wrap');
+        if (!wrap) return;
+        const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+        const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+        const mainState = data[addr]?.main || [];
+        const extraState = data[addr]?.extra || [];
+        let docName = '';
+        let nextType = '';
+        let nextIdx = -1;
+        for (let i = 0; i < mainList.length; i++) {
+          if (!mainState[i]?.checked) { docName = mainList[i]; nextType = 'main'; nextIdx = i; break; }
+        }
+        if (nextIdx < 0) {
+          for (let i = 0; i < extraList.length; i++) {
+            if (!extraState[i]?.checked) { docName = extraList[i]; nextType = 'extra'; nextIdx = i; break; }
+          }
+        }
+        const textEl = wrap.querySelector('.next-doc-hint-text');
+        if (docName && nextType && nextIdx >= 0) {
+          if (textEl) textEl.textContent = 'Следующий: ' + docName;
+          wrap.style.display = 'flex';
+          wrap.dataset.nextType = nextType;
+          wrap.dataset.nextIdx = String(nextIdx);
+        } else {
+          wrap.style.display = 'none';
+          if (textEl) textEl.textContent = '';
+        }
       }
 
       function updateData(addr, type, idx, checked, comment, wasChecked = null, isComment = false) {
@@ -7015,6 +7286,42 @@
         localStorage.setItem('registryData', JSON.stringify(data));
 
         updateProgressBarInCard(addr);
+
+        // Робот: при 100% документов — авто-метка «Завершён» или предложение
+        if (wasChecked !== null && checked === true) {
+          const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+          const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+          const mainState = data[addr]?.main || [];
+          const extraState = data[addr]?.extra || [];
+          const totalDocs = mainList.length + extraList.length;
+          const checkedCount = [...mainList.map((_, i) => mainState[i]?.checked), ...extraList.map((_, i) => extraState[i]?.checked)].filter(Boolean).length;
+          if (totalDocs && checkedCount === totalDocs && data[addr].tag !== 'Завершён') {
+            if (localStorage.getItem('autoCompleteTagOn100') === '1') {
+              data[addr].tag = 'Завершён';
+              localStorage.setItem('registryData', JSON.stringify(data));
+              if (typeof populateSelector === 'function') populateSelector();
+              renderObject(addr);
+              const t = document.getElementById('toast');
+              if (t) { t.textContent = 'Робот поставил метку «Завершён»'; t.classList.remove('toast-error'); t.classList.add('show'); }
+            } else {
+              const toastEl = document.getElementById('toast');
+              if (toastEl && !toastEl.querySelector('.toast-action-btn')) {
+                toastEl.innerHTML = 'Все документы отмечены. Поставить метку «Завершён»? <button type="button" class="toast-action-btn" id="toast-btn-done">Да</button>';
+                toastEl.classList.remove('toast-error');
+                toastEl.classList.add('show');
+                toastEl.querySelector('#toast-btn-done').addEventListener('click', function once() {
+                  data[addr].tag = 'Завершён';
+                  localStorage.setItem('registryData', JSON.stringify(data));
+                  if (typeof populateSelector === 'function') populateSelector();
+                  renderObject(addr);
+                  toastEl.innerHTML = '';
+                  toastEl.classList.remove('show');
+                  showToast();
+                }, { once: true });
+              }
+            }
+          }
+        }
 
         // Логирование
         const timestamp = new Date().toLocaleString('ru-RU');
@@ -7720,6 +8027,32 @@
         });
       }
 
+      document.getElementById('data-copy-from-object-btn')?.addEventListener('click', () => {
+        const current = (dataObjectSelect && dataObjectSelect.value || '').trim();
+        if (!current) { showAlert('Сначала выберите объект, в который копировать.', 'Справочник'); return; }
+        const others = getActiveObjects().filter(a => a !== current);
+        if (others.length === 0) { showAlert('Нет других объектов для копирования.', 'Справочник'); return; }
+        modalTitle.textContent = 'Скопировать справочник с объекта';
+        modalMsg.innerHTML = '<label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Выберите объект, с которого скопировать данные:</label><select id="data-copy-source-select" style="width:100%;padding:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;">' + others.map(addr => '<option value="' + escapeHtml(addr) + '">' + escapeHtml(addr) + '</option>').join('') + '</select>';
+        modalMsg.style.display = 'block';
+        modalInput.style.display = 'none';
+        modalBtns.innerHTML = '<button type="button" class="btn-secondary" id="modal-cancel-copy">Отмена</button><button type="button" class="btn-primary" id="modal-ok-copy">Скопировать</button>';
+        overlay.classList.add('show');
+        overlay.querySelector('#modal-cancel-copy').onclick = () => { overlay.classList.remove('show'); };
+        overlay.querySelector('#modal-ok-copy').onclick = () => {
+          const source = document.getElementById('data-copy-source-select').value;
+          if (!source) return;
+          personsData[current] = JSON.parse(JSON.stringify(personsData[source] || {}));
+          localStorage.setItem('personsData', JSON.stringify(personsData));
+          renderDataTable(current);
+          overlay.classList.remove('show');
+          showToast();
+          const t = document.getElementById('toast');
+          if (t) t.textContent = 'Справочник скопирован с «' + source + '»';
+          t && t.classList.add('show');
+        };
+      });
+
       const dataTheadRow = document.getElementById('data-thead-row');
       const dataEditBtn = document.getElementById('data-edit-btn');
       const dataAddColumnBtn = document.getElementById('data-add-column');
@@ -8042,6 +8375,49 @@
         showToast();
       }
 
+      const DOCUMENTS_DB_NAME = 'fkr_documents';
+      const DOCUMENTS_STORE = 'documentFiles';
+      function openDocumentsDB() {
+        return new Promise((resolve, reject) => {
+          const r = indexedDB.open(DOCUMENTS_DB_NAME, 1);
+          r.onerror = () => reject(r.error);
+          r.onsuccess = () => resolve(r.result);
+          r.onupgradeneeded = (e) => { e.target.result.createObjectStore(DOCUMENTS_STORE, { keyPath: 'path' }); };
+        });
+      }
+      async function saveFileToLocal(path, file) {
+        const buffer = await file.arrayBuffer();
+        const db = await openDocumentsDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(DOCUMENTS_STORE, 'readwrite');
+          tx.objectStore(DOCUMENTS_STORE).put({ path, buffer, type: file.type || '' });
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+      async function getFileFromLocal(path) {
+        const db = await openDocumentsDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(DOCUMENTS_STORE, 'readonly');
+          const req = tx.objectStore(DOCUMENTS_STORE).get(path);
+          req.onsuccess = () => {
+            const row = req.result;
+            if (!row || !row.buffer) { resolve(null); return; }
+            resolve(new Blob([row.buffer], { type: row.type || '' }));
+          };
+          req.onerror = () => reject(req.error);
+        });
+      }
+      async function deleteFileFromLocal(path) {
+        const db = await openDocumentsDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(DOCUMENTS_STORE, 'readwrite');
+          tx.objectStore(DOCUMENTS_STORE).delete(path);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+
       async function uploadFileToSupabase(file) {
         if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
           throw new Error('Supabase не настроен');
@@ -8145,6 +8521,7 @@
             <div class="document-card-info">
               <div>Размер: ${fileSize}</div>
               <div>Загружен: ${uploadDate}</div>
+              ${doc.local ? '<div style="color:var(--text-muted);font-size:11px;">Хранится в этом браузере (Supabase недоступен)</div>' : ''}
               ${doc.folder ? `<div>Папка: ${escapeHtml(doc.folder)}</div>` : ''}
             </div>
           `;
@@ -8158,15 +8535,26 @@
             if (!doc) return;
             
             try {
+              if (doc.local) {
+                const blob = await getFileFromLocal(doc.path);
+                if (!blob) throw new Error('Файл не найден в локальном хранилище');
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = doc.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+                return;
+              }
               const url = getFileUrlFromSupabase(doc.path);
               if (!url) {
                 showAlert('Не удалось получить URL файла. Проверьте настройки Supabase.', 'Ошибка');
                 return;
               }
-              
               const response = await fetch(url);
               if (!response.ok) throw new Error('Файл не найден');
-              
               const blob = await response.blob();
               const downloadUrl = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -8192,7 +8580,11 @@
             if (!confirmed) return;
             
             try {
-              await deleteFileFromSupabase(doc.path);
+              if (doc.local) {
+                await deleteFileFromLocal(doc.path);
+              } else {
+                await deleteFileFromSupabase(doc.path);
+              }
               documentsList.splice(index, 1);
               saveDocumentsList();
               renderDocuments();
@@ -8229,17 +8621,24 @@
           for (const file of files) {
             try {
               showToast('Загрузка ' + file.name + '...');
-              const filePath = await uploadFileToSupabase(file);
-              
+              let filePath;
+              let isLocal = false;
+              try {
+                filePath = await uploadFileToSupabase(file);
+              } catch (supabaseError) {
+                filePath = 'local_' + Date.now() + '_' + (file.name || 'file');
+                await saveFileToLocal(filePath, file);
+                isLocal = true;
+              }
               documentsList.push({
                 name: file.name,
                 path: filePath,
                 size: file.size,
                 type: file.type,
                 uploadDate: new Date().toISOString(),
-                folder: null
+                folder: null,
+                local: isLocal
               });
-              
               saveDocumentsList();
               renderDocuments();
               if (typeof saveToSupabase === 'function') saveToSupabase();
@@ -10407,7 +10806,7 @@
         html += '</div></div>';
         
         html += '<div class="dashboard-section-title">Объекты и документы</div><div class="dashboard-objects-list">';
-        getActiveObjects().forEach(addr => {
+        getObjectsSortedByAttention().forEach(addr => {
           const objData = data[addr] || { main: [], extra: [] };
           const mainList = Array.isArray(objData?.mainDocs) ? objData.mainDocs : MAIN_DOCS;
           const extraList = Array.isArray(objData?.extraDocs) ? objData.extraDocs : EXTRA_DOCS;
@@ -10979,6 +11378,14 @@
         sidebar.classList.remove('open');
         hamburger.classList.remove('open');
       });
+      document.getElementById('batch-select-no-deadline')?.addEventListener('click', () => {
+        document.querySelectorAll('#batch-objects-list input[data-addr]').forEach(cb => {
+          const addr = cb.dataset.addr;
+          cb.checked = !(data[addr]?.deadline || '').trim();
+        });
+        const n = document.querySelectorAll('#batch-objects-list input:checked').length;
+        if (document.getElementById('toast')) { document.getElementById('toast').textContent = 'Выбрано ' + n + ' объектов без срока'; document.getElementById('toast').classList.add('show'); }
+      });
       document.getElementById('close-batch-edit')?.addEventListener('click', () => { batchEditModal.style.display = 'none'; });
       batchEditModal?.addEventListener('click', e => { if (e.target === batchEditModal) batchEditModal.style.display = 'none'; });
       document.getElementById('batch-apply')?.addEventListener('click', () => {
@@ -11000,6 +11407,113 @@
         batchEditModal.style.display = 'none';
         showToast();
       });
+
+      // === ИИ: выполнение команд из поиска на начальном экране ===
+      document.addEventListener('ai-command', async (e) => {
+        const prompt = (e.detail && e.detail.prompt) || '';
+        if (!prompt.trim()) return;
+        const provider = localStorage.getItem('aiProvider') || 'ollama';
+        const apiKey = localStorage.getItem('openaiApiKey') || '';
+        const ollamaUrl = (localStorage.getItem('ollamaUrl') || 'http://localhost:11434').replace(/\/$/, '');
+        if (provider === 'openai' && !apiKey.trim()) {
+          await showAlert('Выбран OpenAI. Укажите API ключ в Настройках (меню → Настройки → ИИ для команд).', 'ИИ');
+          return;
+        }
+        const toastEl = document.getElementById('toast');
+        if (toastEl) { toastEl.textContent = 'ИИ выполняет команду…'; toastEl.classList.remove('toast-error'); toastEl.classList.add('show'); }
+        const objectList = (typeof OBJECTS !== 'undefined' && Array.isArray(OBJECTS)) ? OBJECTS : Object.keys(data || {});
+        const context = 'Текущие объекты в реестре (адреса): ' + objectList.slice(0, 100).join('; ') + (objectList.length > 100 ? '…' : '');
+        const systemPrompt = `Ты — помощник для реестра объектов капитального ремонта. Пользователь даёт команду на русском. Ответь ТОЛЬКО валидным JSON без markdown и пояснений, в формате: {"actions":[{"type":"add_object","address":"адрес"},{"type":"set_tag","address":"адрес","tag":"Приоритет|Завершён или свой"},{"type":"set_deadline","address":"адрес","deadline":"YYYY-MM-DD"},{"type":"set_comment","address":"адрес","comment":"текст"}]}. Допустимые type: add_object (создать объект по адресу), set_tag (метка: Приоритет, Завершён или свой текст), set_deadline (срок в формате ГГГГ-ММ-ДД), set_comment (комментарий к объекту). Адрес — строка, например "ул. Ленина, 5". Если по запросу нечего делать — верни {"actions":[]}.`;
+        let content = '';
+        try {
+          if (provider === 'ollama') {
+            const res = await fetch(ollamaUrl + '/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: 'llama3.2',
+                messages: [
+                  { role: 'system', content: systemPrompt + '\n\n' + context },
+                  { role: 'user', content: prompt }
+                ],
+                stream: false,
+                options: { temperature: 0.2, num_predict: 1500 }
+              })
+            });
+            if (!res.ok) {
+              const err = await res.text();
+              throw new Error('Ollama: ' + res.status + ' — убедитесь, что Ollama запущена (ollama serve) и модель установлена: ollama run llama3.2');
+            }
+            const json = await res.json();
+            content = (json.message && json.message.content) || '';
+          } else {
+            const res = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  { role: 'system', content: systemPrompt + '\n\n' + context },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.2,
+                max_tokens: 1500
+              })
+            });
+            if (!res.ok) {
+              const err = await res.text();
+              throw new Error(res.status + ' ' + err);
+            }
+            const json = await res.json();
+            content = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '';
+          }
+          let raw = content.trim();
+          const jsonMatch = raw.match(/\{[\s\S]*\}/);
+          if (jsonMatch) raw = jsonMatch[0];
+          const parsed = JSON.parse(raw);
+          const actions = Array.isArray(parsed.actions) ? parsed.actions : [];
+          let firstAddr = null;
+          for (const a of actions) {
+            if (a.type === 'add_object' && a.address) {
+              const addr = String(a.address).trim();
+              if (!data[addr]) {
+                data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+                if (typeof OBJECTS !== 'undefined' && Array.isArray(OBJECTS) && OBJECTS.indexOf(addr) === -1) { OBJECTS.push(addr); localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS)); }
+                if (!firstAddr) firstAddr = addr;
+              }
+            } else if (a.type === 'set_tag' && a.address) {
+              const addr = String(a.address).trim();
+              if (!data[addr]) data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+              data[addr].tag = (a.tag != null) ? String(a.tag) : '';
+              if (!firstAddr) firstAddr = addr;
+            } else if (a.type === 'set_deadline' && a.address) {
+              const addr = String(a.address).trim();
+              if (!data[addr]) data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+              data[addr].deadline = (a.deadline != null) ? String(a.deadline) : '';
+              if (!firstAddr) firstAddr = addr;
+            } else if (a.type === 'set_comment' && a.address) {
+              const addr = String(a.address).trim();
+              if (!data[addr]) data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+              data[addr].comment = (a.comment != null) ? String(a.comment) : '';
+              if (!firstAddr) firstAddr = addr;
+            }
+          }
+          localStorage.setItem('registryData', JSON.stringify(data));
+          if (typeof populateSelector === 'function') populateSelector();
+          if (typeof renderDeadlineReminders === 'function') renderDeadlineReminders();
+          if (typeof renderRecentObjects === 'function') renderRecentObjects();
+          if (firstAddr && typeof hideAllPanelsShowMain === 'function') {
+            hideAllPanelsShowMain();
+            if (selector) { selector.value = firstAddr; if (typeof updateSelectorDisplay === 'function') updateSelectorDisplay(); }
+            if (typeof renderObject === 'function') renderObject(firstAddr);
+            if (typeof addToRecent === 'function') addToRecent(firstAddr);
+          }
+          if (toastEl) { toastEl.textContent = actions.length ? 'Готово: выполнено действий ' + actions.length : 'ИИ не выполнил изменений'; toastEl.classList.add('show'); }
+        } catch (err) {
+          if (toastEl) { toastEl.textContent = 'Ошибка ИИ: ' + (err.message || err); toastEl.classList.add('toast-error', 'show'); }
+        }
+      });
+
       importModal.addEventListener('click', (e) => {
         if (e.target === importModal) importModal.style.display = 'none';
       });
@@ -11109,6 +11623,40 @@
           localStorage.removeItem('registryDataUrl');
         }
       });
+      const aiProviderSelect = document.getElementById('ai-provider');
+      const aiOllamaWrap = document.getElementById('ai-ollama-wrap');
+      const aiOpenaiWrap = document.getElementById('ai-openai-wrap');
+      const ollamaUrlInput = document.getElementById('ollama-url');
+      const openaiApiKeyInput = document.getElementById('openai-api-key');
+      if (aiProviderSelect) aiProviderSelect.value = localStorage.getItem('aiProvider') || 'ollama';
+      if (ollamaUrlInput) ollamaUrlInput.value = localStorage.getItem('ollamaUrl') || 'http://localhost:11434';
+      if (openaiApiKeyInput) openaiApiKeyInput.value = localStorage.getItem('openaiApiKey') || '';
+      function toggleAiProviderFields() {
+        const v = aiProviderSelect ? aiProviderSelect.value : 'ollama';
+        if (aiOllamaWrap) aiOllamaWrap.style.display = v === 'ollama' ? 'block' : 'none';
+        if (aiOpenaiWrap) aiOpenaiWrap.style.display = v === 'openai' ? 'block' : 'none';
+      }
+      toggleAiProviderFields();
+      aiProviderSelect?.addEventListener('change', toggleAiProviderFields);
+      const autoCompleteTag100Checkbox = document.getElementById('auto-complete-tag-100');
+      if (autoCompleteTag100Checkbox) autoCompleteTag100Checkbox.checked = localStorage.getItem('autoCompleteTagOn100') === '1';
+      autoCompleteTag100Checkbox?.addEventListener('change', () => {
+        localStorage.setItem('autoCompleteTagOn100', autoCompleteTag100Checkbox.checked ? '1' : '0');
+        showToast('Сохранено');
+      });
+      document.getElementById('save-openai-key-btn')?.addEventListener('click', () => {
+        const provider = aiProviderSelect && aiProviderSelect.value ? aiProviderSelect.value : 'ollama';
+        localStorage.setItem('aiProvider', provider);
+        if (provider === 'ollama' && ollamaUrlInput) {
+          const url = (ollamaUrlInput.value || '').trim() || 'http://localhost:11434';
+          localStorage.setItem('ollamaUrl', url);
+        }
+        if (provider === 'openai' && openaiApiKeyInput) {
+          const key = openaiApiKeyInput.value.trim();
+          if (key) localStorage.setItem('openaiApiKey', key); else localStorage.removeItem('openaiApiKey');
+        }
+        showToast('Настройки ИИ сохранены');
+      });
 
       // === Автозагрузка: сначала URL (если задан), иначе — из Supabase ===
       const savedDataUrl = localStorage.getItem('registryDataUrl');
@@ -11214,6 +11762,12 @@
           e.preventDefault();
           const r = currentSearchResults[searchResultIndex];
           if (!r) return;
+          if (r.id === 'ai' && r.prompt) {
+            document.dispatchEvent(new CustomEvent('ai-command', { detail: { prompt: r.prompt } }));
+            searchResults.classList.remove('show');
+            searchInput.value = '';
+            return;
+          }
           if (r.subcontractorIndex !== undefined) {
             calendarContainer.style.display = 'none';
             dataContainer.style.display = 'none';
@@ -11343,8 +11897,82 @@
         if (overlay && overlay.classList.contains('show')) e.preventDefault();
       });
 
+      // === Робот: автообновление панели и напоминаний раз в минуту (когда вкладка видима) ===
+      setInterval(() => {
+        if (document.visibilityState === 'visible' && typeof renderDeadlineReminders === 'function') {
+          renderDeadlineReminders();
+          if (typeof renderRobotSuggestions === 'function') renderRobotSuggestions();
+        }
+      }, 60000);
+
       // === Empty state actions ===
       document.getElementById('empty-add-object')?.addEventListener('click', (e) => { e.preventDefault(); addObjectBtn?.click(); });
+      function openBulkAddModal() {
+        modalTitle.textContent = 'Добавить несколько объектов';
+        modalMsg.innerHTML = '<label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Вставьте адреса — каждый с новой строки (пустые строки игнорируются):</label><textarea id="bulk-addresses-ta" rows="10" placeholder="ул. Ленина, 1&#10;ул. Пушкина, 5&#10;г. Ростов, пр. Мира, 10" style="width:100%;padding:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-family:inherit;font-size:14px;resize:vertical;"></textarea>';
+        modalMsg.style.display = 'block';
+        modalInput.style.display = 'none';
+        modalBtns.innerHTML = '<button type="button" class="btn-secondary" id="modal-cancel-bulk">Отмена</button><button type="button" class="btn-primary" id="modal-ok-bulk">Создать объекты</button>';
+        overlay.classList.add('show');
+        const ta = document.getElementById('bulk-addresses-ta');
+        if (ta) { ta.value = ''; ta.focus(); }
+        overlay.querySelector('#modal-cancel-bulk').onclick = () => { overlay.classList.remove('show'); };
+        overlay.querySelector('#modal-ok-bulk').onclick = () => {
+          const raw = (ta && ta.value || '').trim();
+          const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+          const toAdd = lines.filter(addr => !OBJECTS.includes(addr));
+          const skipped = lines.length - toAdd.length;
+          toAdd.forEach(addr => {
+            if (!data[addr]) {
+              data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+              OBJECTS.push(addr);
+            }
+          });
+          localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
+          localStorage.setItem('registryData', JSON.stringify(data));
+          populateSelector();
+          if (typeof renderRobotSuggestions === 'function') renderRobotSuggestions();
+          if (typeof renderDeadlineReminders === 'function') renderDeadlineReminders();
+          overlay.classList.remove('show');
+          showToast();
+          const t = document.getElementById('toast');
+          if (t) t.textContent = 'Создано: ' + toAdd.length + (skipped ? ', пропущено (уже есть): ' + skipped : '');
+          t && t.classList.add('show');
+        };
+      }
+      function openSetDeadlineAllModal(addrList) {
+        if (!addrList || addrList.length === 0) return;
+        const defaultDate = new Date();
+        defaultDate.setMonth(defaultDate.getMonth() + 3);
+        const defaultStr = defaultDate.toISOString().slice(0, 10);
+        modalTitle.textContent = 'Всем без срока — указать срок';
+        modalMsg.innerHTML = '<label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Будет применено к ' + addrList.length + ' объектам. Укажите дату:</label><input type="date" id="robot-deadline-all-input" value="' + defaultStr + '" style="width:100%;padding:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;">';
+        modalMsg.style.display = 'block';
+        modalInput.style.display = 'none';
+        modalBtns.innerHTML = '<button type="button" class="btn-secondary" id="modal-cancel-dl">Отмена</button><button type="button" class="btn-primary" id="modal-ok-dl">Применить</button>';
+        overlay.classList.add('show');
+        const inputEl = document.getElementById('robot-deadline-all-input');
+        if (inputEl) inputEl.focus();
+        overlay.querySelector('#modal-cancel-dl').onclick = () => { overlay.classList.remove('show'); };
+        overlay.querySelector('#modal-ok-dl').onclick = () => {
+          const date = inputEl && inputEl.value ? inputEl.value.trim() : '';
+          if (!date) return;
+          addrList.forEach(addr => {
+            if (!data[addr]) data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
+            data[addr].deadline = date;
+          });
+          localStorage.setItem('registryData', JSON.stringify(data));
+          if (typeof renderDeadlineReminders === 'function') renderDeadlineReminders();
+          if (typeof renderRobotSuggestions === 'function') renderRobotSuggestions();
+          if (typeof populateSelector === 'function') populateSelector();
+          overlay.classList.remove('show');
+          showToast();
+          const t = document.getElementById('toast');
+          if (t) t.textContent = 'Робот проставил срок ' + date + ' для ' + addrList.length + ' объектов';
+          t && t.classList.add('show');
+        };
+      }
+      document.getElementById('empty-add-bulk')?.addEventListener('click', (e) => { e.preventDefault(); openBulkAddModal(); });
       document.getElementById('empty-show-dashboard')?.addEventListener('click', (e) => { e.preventDefault(); showDashboard?.click(); });
       document.getElementById('empty-show-roadmap')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('show-roadmap')?.click(); });
     });
