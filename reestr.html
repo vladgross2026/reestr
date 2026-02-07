@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0a0c0f;
@@ -3484,6 +3486,49 @@
       .delete-mode-controls { flex-wrap: wrap; gap: 8px; }
       .subcontractors-container .subcontractor-card,
       .contractors-container .subcontractor-card { min-width: 0; }
+      /* Размер текста и переносы */
+      .calendar-toolbar { padding: 10px 12px; gap: 8px; }
+      .calendar-btn { padding: 10px 12px; font-size: 13px; min-height: 44px; }
+      .calendar-title-btn { min-width: 100px; font-size: 13px; }
+      .calendar-events-count { font-size: 11px; }
+      .calendar-weekdays { padding: 8px 12px 4px; font-size: 10px; }
+      .calendar-weekdays span { overflow: hidden; text-overflow: ellipsis; }
+      .calendar-day .num { font-size: 12px; }
+      .calendar-day .event-row .event-time { font-size: 9px; }
+      .calendar-day .event-row .event-text { font-size: 10px; }
+      .calendar-sidebar-title { font-size: 13px; }
+      .calendar-upcoming-item .upcoming-text { font-size: 12px; word-break: break-word; overflow-wrap: break-word; }
+      .calendar-upcoming-item .upcoming-date, .calendar-upcoming-item .upcoming-time { font-size: 11px; }
+      .calendar-legend-items { font-size: 11px; }
+      .subcontractors-container h2 { font-size: 18px; }
+      .subcontractor-card { padding: 14px 12px; gap: 12px 16px; }
+      .subcontractor-card-company { font-size: 15px; word-break: break-word; overflow-wrap: break-word; max-width: 100%; }
+      .subcontractor-card-meta { font-size: 12px; word-break: break-word; }
+      .subcontractor-field .value { font-size: 12px; word-break: break-word; min-width: 0; }
+      .subcontractor-field .label { font-size: 11px; }
+      .subcontractor-obj-badge { max-width: 100%; font-size: 10px; }
+      .subcontractor-card-fields { gap: 12px 16px; font-size: 12px; }
+      .subcontractors-add-btn, .subcontractors-fab { min-height: 44px; font-size: 13px; }
+      .data-table tbody td.data-cell-label { font-size: 13px; }
+      .data-table tbody td:not(.data-cell-label)::before { font-size: 10px; }
+      .roadmap-table tbody td.roadmap-cell-object { font-size: 13px; }
+      .roadmap-table tbody td:not(.roadmap-cell-object)::before { font-size: 10px; }
+      .doc-item { font-size: 13px; }
+      .post-header { font-size: 13px; }
+      .section-title { font-size: 14px; }
+      .landing-reminders-container, .landing-today-reminders, .landing-tomorrow-reminders { font-size: 13px; }
+      .calendar-day:not(.empty) .day-events:empty::after { opacity: 0.85; font-size: 10px; }
+      .calendar-day:not(.empty) { min-height: 52px; }
+      .calendar-container .ui-hint { font-size: 10px; word-break: break-word; }
+      .rc-header h2 { font-size: 18px; }
+      .rc-desc { font-size: 12px; word-break: break-word; }
+      .rc-object-select { font-size: 13px; }
+      .dashboard-modal .modal-content { font-size: 14px; }
+      .dashboard-object-row { font-size: 13px; }
+      .dashboard-object-row .obj-addr { word-break: break-word; }
+      .modal-content, .history-content, .comments-content { font-size: 14px; }
+      .modal-content h2, .history-content h2 { font-size: 18px; word-break: break-word; }
+      .ui-hint { font-size: 11px; word-break: break-word; }
     }
     @media (max-width: 480px) {
       body { padding: 8px; padding-left: max(8px, env(safe-area-inset-left)); padding-right: max(8px, env(safe-area-inset-right)); }
@@ -3505,6 +3550,46 @@
       .history-modal.show .history-content { width: 100%; }
       .event-popup { max-width: calc(100vw - 24px); left: 12px !important; right: 12px; }
       .deadline-input-wrap input, .tag-select-wrap select { min-height: 44px; }
+      .calendar-toolbar { padding: 8px 10px; }
+      .calendar-title-btn { min-width: 80px; font-size: 12px; }
+      .calendar-select { font-size: 12px; padding: 10px; min-height: 44px; }
+      .subcontractor-card-company { font-size: 14px; }
+      .subcontractors-container h2 { font-size: 16px; }
+      .modal-content h2, .history-content h2 { font-size: 18px; }
+    }
+    /* Попап события на мобильных: нижняя панель, крупные поля */
+    @media (max-width: 768px) {
+      .event-popup {
+        left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+        width: 100% !important; max-width: 100% !important; margin: 0 !important;
+        border-radius: 16px 16px 0 0; padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+        max-height: 85vh; overflow-y: auto; box-shadow: 0 -8px 32px rgba(0,0,0,0.25);
+      }
+      .event-popup .close { top: 16px; right: 16px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+      .event-popup input[type="text"] { font-size: 16px; padding: 14px 16px; min-height: 48px; margin-bottom: 14px; }
+      .event-popup .event-popup-row { flex-wrap: wrap; margin-bottom: 14px; }
+      .event-popup .event-popup-row label { font-size: 14px; width: 100%; margin-bottom: 4px; }
+      .event-popup .event-time-inp { width: 100%; min-height: 48px; padding: 14px 16px; font-size: 16px; }
+      .event-popup .event-popup-colors { margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+      .event-popup .event-popup-colors span { font-size: 14px; width: 100%; }
+      .event-popup .color-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+      .event-popup .event-popup-actions { flex-direction: column; gap: 12px; }
+      .event-popup .event-popup-actions button { width: 100%; min-height: 48px; font-size: 16px; padding: 14px; }
+      .event-popup .event-popup-drag { padding: 12px 16px; margin: -20px -16px 16px -16px; }
+      .event-popup .event-popup-drag span { font-size: 14px; }
+    }
+    /* Кнопка «Добавить событие» в календаре — только на мобильных */
+    .calendar-add-event-fab { display: none; }
+    @media (max-width: 768px) {
+      .calendar-container { position: relative; padding-bottom: 80px; }
+      .calendar-add-event-fab {
+        display: flex; position: absolute; bottom: 16px; right: 16px; z-index: 10;
+        width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #fff;
+        border: none; font-size: 24px; cursor: pointer; align-items: center; justify-content: center;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+      }
+      .calendar-add-event-fab:hover { background: var(--accent-hover); }
+      .calendar-add-event-fab:focus { outline: none; }
     }
     /* Посадочный экран на мобильных */
     @media (max-width: 768px) {
@@ -3684,6 +3769,49 @@
       background: rgba(255,255,255,0.9); border-color: #d0d4d9; color: #1a1a1f;
     }
     body.light-theme #landing-screen .landing-hamburger:hover { background: rgba(0, 120, 212, 0.12); }
+
+    /* === Плавающий чат ИИ (Grok/Groq) === */
+    #ai-chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: inherit; }
+    #ai-chat-toggle {
+      width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #ai-chat-toggle:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45); }
+    #ai-chat-toggle svg { width: 24px; height: 24px; }
+    #ai-chat-panel {
+      display: none; position: absolute; bottom: 60px; right: 0; width: 360px; max-width: calc(100vw - 40px); max-height: 420px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      flex-direction: column; overflow: hidden;
+    }
+    #ai-chat-panel.open { display: flex; }
+    #ai-chat-header {
+      padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg-input); font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #ai-chat-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; line-height: 1; font-size: 18px; }
+    #ai-chat-close:hover { color: var(--text); }
+    #ai-chat-messages {
+      flex: 1; overflow-y: auto; padding: 12px; min-height: 180px; max-height: 280px; display: flex; flex-direction: column; gap: 10px;
+    }
+    #ai-chat-messages .ai-msg { font-size: 13px; line-height: 1.5; padding: 8px 12px; border-radius: 8px; max-width: 92%; white-space: pre-wrap; word-break: break-word; }
+    #ai-chat-messages .ai-msg.user { background: var(--accent); color: #fff; align-self: flex-end; }
+    #ai-chat-messages .ai-msg.assistant { background: var(--bg-input); border: 1px solid var(--border); align-self: flex-start; }
+    #ai-chat-messages .ai-msg.loading { color: var(--text-muted); font-style: italic; }
+    #ai-chat-input-wrap { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+    #ai-chat-input {
+      flex: 1; padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; font-size: 13px; font-family: inherit; resize: none; min-height: 44px; max-height: 100px;
+    }
+    #ai-chat-input:focus { outline: none; border-color: var(--accent); }
+    #ai-chat-input::placeholder { color: var(--text-muted); }
+    #ai-chat-send {
+      padding: 10px 14px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; flex-shrink: 0;
+    }
+    #ai-chat-send:hover { background: var(--accent-hover); }
+    #ai-chat-send:disabled { opacity: 0.6; cursor: not-allowed; }
+    #ai-chat-hint { font-size: 10px; color: var(--text-muted); padding: 0 12px 8px; }
+    body.light-theme #ai-chat-panel { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
   </style>
 </head>
 <body id="main-body">
@@ -3740,7 +3868,7 @@
         <div class="landing-search-results" id="landing-search-results"></div>
       </div>
       <p class="landing-search-hint">Поиск по разделам и объектам, или напишите команду для ИИ (например: «Добавь объект ул. Ленина 5»)</p>
-      <p class="landing-search-hint" style="margin-top: -16px; margin-bottom: 16px; font-size: 11px;">↑↓ — выбор, Enter — открыть или выполнить, Esc — закрыть. ИИ: по умолчанию Ollama (локально), либо OpenAI — в Настройках.</p>
+      <p class="landing-search-hint" style="margin-top: -16px; margin-bottom: 16px; font-size: 11px;">↑↓ — выбор, Enter — открыть или выполнить, Esc — закрыть. ИИ: Groq/Gemini (бесплатно) или OpenAI — в Настройках.</p>
     </div>
     </div>
   </div>
@@ -3792,8 +3920,11 @@
     <h3 class="sidebar-reestr" id="sidebar-reestr" style="cursor:pointer;margin-top:0;">Реестр</h3>
     <h3>Действия</h3>
     <ul>
+      <li><a href="#" id="show-favorites" title="Избранные объекты">Избранные объекты <span class="sidebar-count" id="sidebar-favorites-count"></span></a></li>
+      <li><a href="#" id="show-templates" title="Шаблоны объектов для быстрого создания">Шаблоны объектов</a></li>
       <li><a href="#" id="btn-comments" title="Все комментарии к объектам">Комментарии</a></li>
       <li><a href="#" id="show-calendar" title="Календарь событий">Календарь <span class="sidebar-count" id="sidebar-calendar-count"></span></a></li>
+      <li><a href="#" id="btn-download-report" title="Скачать отчет с комментариями">Скачать отчет</a></li>
       <li><a href="#" id="show-reminders" title="Умные напоминания">Создать напоминание <span class="sidebar-count" id="sidebar-reminders-count"></span></a></li>
       <li><a href="#" id="create-note" title="Создать стикер-заметку">Создать заметку</a></li>
       <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap" title="Дорожная карта по этапам">Дорожная карта объектов</a></li>
@@ -3801,6 +3932,7 @@
       <li><a href="#" id="show-documents" title="Загруженные документы и файлы">Документы</a></li>
       <li><a href="#" id="show-acts-signing" title="Связи ответственных по документам">Связи ответственных</a></li>
       <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
+      <li><a href="#" id="show-analytics" title="Аналитика и прогнозы">Аналитика</a></li>
       <li><a href="#" id="show-thoughts" title="Доска для заметок и связей">Доска мыслей</a></li>
     </ul>
     <h3 class="collapsible" id="data-section-toggle">Данные <span class="arrow">▶</span></h3>
@@ -3829,20 +3961,43 @@
         </label>
       </li>
       <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text);">
+          <input type="checkbox" id="auto-archive-completed" style="width:18px;height:18px;">
+          <span>Автоматически архивировать завершенные объекты</span>
+        </label>
+      </li>
+      <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
         <label style="font-size:12px;color:var(--text-muted);display:block;">ИИ для команд в поиске</label>
         <select id="ai-provider" style="width:100%;margin-top:6px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;">
-          <option value="ollama">Ollama (локально, бесплатно)</option>
-          <option value="openai">OpenAI (облако, нужен ключ)</option>
+          <option value="groq">Groq (бесплатно, быстро)</option>
+          <option value="gemini">Google Gemini (бесплатно)</option>
+          <option value="openai">OpenAI (платно, нужен ключ)</option>
         </select>
-        <div id="ai-ollama-wrap" style="margin-top:8px;">
-          <label style="font-size:11px;color:var(--text-muted);display:block;">URL Ollama</label>
-          <input type="text" id="ollama-url" placeholder="http://localhost:11434" style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;">
+        <div id="ai-groq-wrap" style="margin-top:8px;">
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <span>API ключ Groq</span>
+            <span id="groq-status" style="font-size:10px;color:var(--text-muted);display:none;">✓ Работает</span>
+          </label>
+          <input type="password" id="groq-api-key" placeholder="gsk_..." style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;" autocomplete="off">
+          <p style="font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:0;">Бесплатно! Получить ключ: <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent);">console.groq.com</a></p>
+        </div>
+        <div id="ai-gemini-wrap" style="margin-top:8px;display:none;">
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <span>API ключ Google Gemini</span>
+            <span id="gemini-status" style="font-size:10px;color:var(--text-muted);display:none;">✓ Работает</span>
+          </label>
+          <input type="password" id="gemini-api-key" placeholder="AIza..." style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;" autocomplete="off">
+          <p style="font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:0;">Бесплатно! Получить ключ: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent);">aistudio.google.com</a></p>
         </div>
         <div id="ai-openai-wrap" style="margin-top:8px;display:none;">
-          <label style="font-size:11px;color:var(--text-muted);display:block;">API ключ OpenAI</label>
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <span>API ключ OpenAI</span>
+            <span id="openai-status" style="font-size:10px;color:var(--text-muted);display:none;">✓ Работает</span>
+          </label>
           <input type="password" id="openai-api-key" placeholder="sk-..." style="width:100%;margin-top:4px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;" autocomplete="off">
+          <p style="font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:0;">Платно. Получить ключ: <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent);">platform.openai.com</a></p>
         </div>
-        <button type="button" id="save-openai-key-btn" style="margin-top:6px;padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Сохранить</button>
+        <button type="button" id="save-ai-key-btn" style="margin-top:6px;padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Сохранить</button>
       </li>
       <li style="list-style:none;padding:8px 14px;border-top:1px solid var(--border);margin-top:4px;">
         <label style="font-size:12px;color:var(--text-muted);display:block;">URL данных (автозагрузка при открытии)</label>
@@ -3904,6 +4059,85 @@
       <span class="close-modal" id="close-comments">&times;</span>
       <h2>Комментарии всем документам</h2>
       <div id="comments-list"></div>
+    </div>
+  </div>
+
+  <div class="comments-modal" id="report-modal" style="display:none;">
+    <div class="comments-content" style="max-width:800px;">
+      <span class="close-modal" id="close-report">&times;</span>
+      <h2>Скачать отчет</h2>
+      <div style="margin-bottom:16px;">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Отчет содержит все комментарии из объектов и ячеек документов</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" id="download-report-txt" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">TXT</button>
+          <button type="button" id="download-report-pdf" style="padding:8px 16px;background:var(--danger);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">PDF</button>
+          <button type="button" id="download-report-excel" style="padding:8px 16px;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Excel</button>
+        </div>
+      </div>
+      <div id="report-preview" style="background:var(--bg-input);padding:12px;border-radius:6px;max-height:400px;overflow-y:auto;font-family:monospace;font-size:12px;white-space:pre-wrap;color:var(--text);"></div>
+    </div>
+  </div>
+
+  <div class="history-modal" id="favorites-modal" style="display:none;">
+    <div class="history-content" style="max-width:600px;">
+      <span class="close-modal" id="close-favorites">&times;</span>
+      <h2>Избранные объекты</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Быстрый доступ к часто используемым объектам</p>
+      <div id="favorites-list"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <p style="font-size:12px;color:var(--text-muted);">💡 Совет: Нажмите на кнопку закрепления рядом с объектом, чтобы добавить его в избранное</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-modal" id="templates-modal" style="display:none;">
+    <div class="history-content" style="max-width:700px;">
+      <span class="close-modal" id="close-templates">&times;</span>
+      <h2>Шаблоны объектов</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Создайте шаблон на основе существующего объекта для быстрого создания похожих</p>
+      <div style="margin-bottom:16px;">
+        <button type="button" id="create-template-btn" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">+ Создать шаблон из текущего объекта</button>
+      </div>
+      <div id="templates-list"></div>
+    </div>
+  </div>
+
+  <div class="dashboard-modal" id="analytics-modal" style="display:none;">
+    <div class="modal-content" style="max-width:1200px;">
+      <span class="close-modal" id="close-analytics">&times;</span>
+      <h2>Аналитика и прогнозы</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;margin-top:20px;">
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Категоризация объектов</h3>
+          <button type="button" id="btn-categorize-objects" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Автоматически категоризировать</button>
+          <div id="categorization-results" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Рисковые объекты</h3>
+          <button type="button" id="btn-find-risky" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Найти проблемные</button>
+          <div id="risky-objects-results" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Прогноз сроков</h3>
+          <button type="button" id="btn-predict-deadlines" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Спрогнозировать</button>
+          <div id="deadline-predictions" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Тренды и аномалии</h3>
+          <button type="button" id="btn-analyze-trends" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Анализировать</button>
+          <div id="trends-results" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Приоритизация</h3>
+          <button type="button" id="btn-prioritize" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Рекомендовать приоритеты</button>
+          <div id="prioritization-results" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin-top:0;font-size:16px;">Эффективность подрядчиков</h3>
+          <button type="button" id="btn-analyze-contractors" style="width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;margin-top:8px;">Анализировать</button>
+          <div id="contractors-analysis" style="margin-top:12px;font-size:13px;"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4463,6 +4697,7 @@
         </div>
       </aside>
     </div>
+    <button type="button" class="calendar-add-event-fab" id="calendar-add-event-fab" title="Добавить событие на сегодня" aria-label="Добавить событие">+</button>
   </div>
 
   <div class="posts-container" id="posts-container">
@@ -4474,12 +4709,30 @@
         <a href="#" id="empty-show-roadmap" class="btn-outline">Дорожная карта</a>
       </div>
       <span class="search-shortcut-hint">Нажмите Ctrl+K для быстрого поиска</span>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:center;">
+        Горячие клавиши: Ctrl+F (избранные), Ctrl+T (шаблоны), Ctrl+D (дублировать), Ctrl+S (сохранить)
+      </div>
     </div>
   </div>
 
   <div id="sticky-notes-container"></div>
 
   </div><!-- /main-app -->
+
+  <div id="ai-chat-widget" style="display:none;" aria-label="Чат с ИИ">
+    <div id="ai-chat-panel" class="ai-chat-panel" role="dialog" aria-label="Чат по теме платформы">
+      <div id="ai-chat-header">Помощник по реестру <button type="button" id="ai-chat-close" aria-label="Закрыть">&times;</button></div>
+      <div id="ai-chat-messages"></div>
+      <p id="ai-chat-hint">Спроси о платформе или попроси найти информацию из реестра (объекты, сроки, метки).</p>
+      <div id="ai-chat-input-wrap">
+        <textarea id="ai-chat-input" placeholder="Напишите сообщение..." rows="2"></textarea>
+        <button type="button" id="ai-chat-send" aria-label="Отправить">Отправить</button>
+      </div>
+    </div>
+    <button type="button" id="ai-chat-toggle" aria-label="Открыть чат с ИИ">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  </div>
 
   <script>
     const LANDING_SECTIONS = [
@@ -4574,6 +4827,8 @@
         landingScreen.classList.add('hidden');
         mainApp.style.display = 'block';
         mainBody.classList.remove('landing-visible');
+        const chatWidget = document.getElementById('ai-chat-widget');
+        if (chatWidget) chatWidget.style.display = 'block';
         if (!viewId) return;
         if (viewId.startsWith('ai:')) {
           const prompt = decodeURIComponent(viewId.slice(3));
@@ -4734,7 +4989,7 @@
         // Первый вариант — выполнить команду через ИИ (если введено хотя бы 3 символа)
         if (t.length >= 3) {
           const shortTitle = t.length > 45 ? t.slice(0, 42) + '…' : t;
-          results.push({ id: 'ai', title: '✨ Выполнить команду: «' + shortTitle + '»', type: 'ИИ' });
+          results.push({ id: 'ai', title: 'Выполнить команду: «' + shortTitle + '»', type: 'ИИ' });
         }
         LANDING_SECTIONS.forEach(s => {
           const searchText = s.title + ' ' + (s.keywords || '') + ' ' + s.id;
@@ -5340,18 +5595,72 @@
       });
 
       // === Escape закрывает модалки и боковое меню ===
+      // === Горячие клавиши ===
       document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape') return;
-        hamburger.classList.remove('open');
-        sidebar.classList.remove('open');
-        if (document.getElementById('history-modal').style.display === 'flex') document.getElementById('history-modal').style.display = 'none';
-        if (document.getElementById('comments-modal').style.display === 'flex') document.getElementById('comments-modal').style.display = 'none';
-        if (document.getElementById('dashboard-modal').style.display === 'flex') document.getElementById('dashboard-modal').style.display = 'none';
-        if (document.getElementById('reminders-modal').style.display === 'flex') document.getElementById('reminders-modal').style.display = 'none';
-        if (document.getElementById('import-modal').style.display === 'flex') document.getElementById('import-modal').style.display = 'none';
-        if (document.getElementById('thoughts-modal').classList.contains('open')) { document.getElementById('thoughts-modal').classList.remove('open'); if (typeof saveThoughtsBoard === 'function') saveThoughtsBoard(); }
-        if (document.getElementById('subcontractor-modal').style.display === 'flex') { document.getElementById('subcontractor-modal').style.display = 'none'; }
-        if (document.getElementById('acts-web-modal').style.display === 'flex') { document.getElementById('acts-web-modal').style.display = 'none'; }
+        // Esc - закрыть модальные окна
+        if (e.key === 'Escape') {
+          hamburger.classList.remove('open');
+          sidebar.classList.remove('open');
+          if (document.getElementById('history-modal').style.display === 'flex') document.getElementById('history-modal').style.display = 'none';
+          if (document.getElementById('comments-modal').style.display === 'flex') document.getElementById('comments-modal').style.display = 'none';
+          if (document.getElementById('dashboard-modal').style.display === 'flex') document.getElementById('dashboard-modal').style.display = 'none';
+          if (document.getElementById('reminders-modal').style.display === 'flex') document.getElementById('reminders-modal').style.display = 'none';
+          if (document.getElementById('import-modal').style.display === 'flex') document.getElementById('import-modal').style.display = 'none';
+          if (document.getElementById('favorites-modal').style.display === 'flex') document.getElementById('favorites-modal').style.display = 'none';
+          if (document.getElementById('templates-modal').style.display === 'flex') document.getElementById('templates-modal').style.display = 'none';
+          if (document.getElementById('analytics-modal').style.display === 'flex') document.getElementById('analytics-modal').style.display = 'none';
+          if (document.getElementById('thoughts-modal').classList.contains('open')) { document.getElementById('thoughts-modal').classList.remove('open'); if (typeof saveThoughtsBoard === 'function') saveThoughtsBoard(); }
+          if (document.getElementById('subcontractor-modal').style.display === 'flex') { document.getElementById('subcontractor-modal').style.display = 'none'; }
+          if (document.getElementById('acts-web-modal').style.display === 'flex') { document.getElementById('acts-web-modal').style.display = 'none'; }
+          return;
+        }
+        
+        // Горячие клавиши только если не в поле ввода
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        
+        // Ctrl+F или F - Избранные объекты
+        if ((e.ctrlKey && e.key === 'f') || e.key === 'F3') {
+          e.preventDefault();
+          document.getElementById('show-favorites')?.click();
+        }
+        
+        // Ctrl+T - Шаблоны
+        if (e.ctrlKey && e.key === 't') {
+          e.preventDefault();
+          document.getElementById('show-templates')?.click();
+        }
+        
+        // Ctrl+A - Аналитика
+        if (e.ctrlKey && e.key === 'a') {
+          e.preventDefault();
+          document.getElementById('show-analytics')?.click();
+        }
+        
+        // Ctrl+D - Дублировать текущий объект
+        if (e.ctrlKey && e.key === 'd' && selector && selector.value) {
+          e.preventDefault();
+          const dupBtn = document.querySelector(`.duplicate-object-btn[data-addr="${escapeHtml(selector.value)}"]`);
+          if (dupBtn) dupBtn.click();
+        }
+        
+        // Ctrl+S - Сохранить (быстрое сохранение)
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          if (typeof saveToSupabase === 'function') saveToSupabase();
+          showToast('Сохранено');
+        }
+        
+        // Ctrl+N - Новый объект
+        if (e.ctrlKey && e.key === 'n') {
+          e.preventDefault();
+          document.getElementById('add-object-btn')?.click();
+        }
+        
+        // Ctrl+R - Отчет
+        if (e.ctrlKey && e.key === 'r') {
+          e.preventDefault();
+          document.getElementById('btn-download-report')?.click();
+        }
       });
 
       // === Стикер-заметки ===
@@ -5958,6 +6267,11 @@
         localStorage.setItem('lastSelectedObject', lastSelectedObject);
         renderRecentObjects();
       }
+
+      // Обновляем избранные при загрузке
+      setTimeout(() => {
+        if (typeof renderFavorites === 'function') renderFavorites();
+      }, 1000);
 
       function renderRecentObjects() {
         const wrap = document.getElementById('recent-objects');
@@ -6671,16 +6985,34 @@
           });
         }
         const pinBtn = card.querySelector('.pin-object-btn');
-        if (pinBtn) pinBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const i = pinnedObjectIds.indexOf(addr);
-          if (i >= 0) pinnedObjectIds.splice(i, 1); else pinnedObjectIds.push(addr);
-          savePinned();
-          populateSelector();
-          fillSelectorList();
-          renderRecentObjects();
-          showToast();
-        });
+        if (pinBtn) {
+          // Обновляем визуальное состояние кнопки
+          if (pinnedObjectIds.includes(addr)) {
+            pinBtn.style.color = 'var(--accent)';
+            pinBtn.title = 'Убрать из избранного';
+          }
+          
+          pinBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const i = pinnedObjectIds.indexOf(addr);
+            if (i >= 0) {
+              pinnedObjectIds.splice(i, 1);
+              pinBtn.style.color = '';
+              pinBtn.title = 'Добавить в избранное';
+              showToast('Убрано из избранного');
+            } else {
+              pinnedObjectIds.push(addr);
+              pinBtn.style.color = 'var(--accent)';
+              pinBtn.title = 'Убрать из избранного';
+              showToast('Добавлено в избранное');
+            }
+            savePinned();
+            populateSelector();
+            fillSelectorList();
+            renderRecentObjects();
+            if (typeof renderFavorites === 'function') renderFavorites();
+          });
+        }
         const dupBtn = card.querySelector('.duplicate-object-btn');
         if (dupBtn) dupBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -7303,6 +7635,30 @@
               renderObject(addr);
               const t = document.getElementById('toast');
               if (t) { t.textContent = 'Робот поставил метку «Завершён»'; t.classList.remove('toast-error'); t.classList.add('show'); }
+              
+              // Автоматическое архивирование завершенных объектов (опционально)
+              const autoArchive = localStorage.getItem('autoArchiveCompleted') === '1';
+              if (autoArchive) {
+                setTimeout(() => {
+                  const archived = JSON.parse(localStorage.getItem('archivedObjects') || '[]');
+                  if (!archived.includes(addr)) {
+                    archived.push(addr);
+                    localStorage.setItem('archivedObjects', JSON.stringify(archived));
+                    showToast(`Объект "${addr}" автоматически архивирован`);
+                  }
+                }, 5000);
+              }
+              
+              // Сохранение истории изменений
+              const history = JSON.parse(localStorage.getItem('registryHistory') || '[]');
+              history.push({
+                date: new Date().toISOString(),
+                action: 'set_tag',
+                addr: addr,
+                value: 'Завершён',
+                user: localStorage.getItem('currentUser') || 'Система'
+              });
+              localStorage.setItem('registryHistory', JSON.stringify(history));
             } else {
               const toastEl = document.getElementById('toast');
               if (toastEl && !toastEl.querySelector('.toast-action-btn')) {
@@ -7542,6 +7898,12 @@
         }
       });
 
+      document.getElementById('calendar-add-event-fab')?.addEventListener('click', () => {
+        const today = new Date();
+        const dateKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        showEventPopup(null, dateKey);
+      });
+
       function showEventPopup(ev, dateKey) {
         const isEdit = ev && ev.dataset.index !== undefined;
         const popup = document.createElement('div');
@@ -7630,38 +7992,45 @@
 
         textInput.focus();
 
-        // Позиционирование в центре экрана
-        const popupWidth = 320;
-        const popupHeight = 200;
-        const popupLeft = (window.innerWidth - popupWidth) / 2 + (window.pageXOffset || document.documentElement.scrollLeft);
-        const popupTop = (window.innerHeight - popupHeight) / 2 + (window.pageYOffset || document.documentElement.scrollTop);
-        popup.style.left = popupLeft + 'px';
-        popup.style.top = popupTop + 'px';
+        // На мобильных попап показывается внизу экрана (нижняя панель в CSS)
+        if (window.innerWidth <= 768) {
+          popup.style.left = '';
+          popup.style.top = '';
+        } else {
+          const popupWidth = 320;
+          const popupHeight = 200;
+          const popupLeft = (window.innerWidth - popupWidth) / 2 + (window.pageXOffset || document.documentElement.scrollLeft);
+          const popupTop = (window.innerHeight - popupHeight) / 2 + (window.pageYOffset || document.documentElement.scrollTop);
+          popup.style.left = popupLeft + 'px';
+          popup.style.top = popupTop + 'px';
+        }
         popup.classList.add('active');
 
-        // Перетаскивание окна
+        // Перетаскивание окна только на десктопе
         const dragBar = popup.querySelector('.event-popup-drag');
-        let dragStartX, dragStartY, dragStartLeft, dragStartTop;
-        dragBar.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.close') || e.target.closest('button')) return;
-          e.preventDefault();
-          dragStartX = e.clientX;
-          dragStartY = e.clientY;
-          dragStartLeft = parseInt(popup.style.left) || 0;
-          dragStartTop = parseInt(popup.style.top) || 0;
-          const onMove = (e2) => {
-            const dx = e2.clientX - dragStartX;
-            const dy = e2.clientY - dragStartY;
-            popup.style.left = (dragStartLeft + dx) + 'px';
-            popup.style.top = (dragStartTop + dy) + 'px';
-          };
-          const onUp = () => {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-          };
-          document.addEventListener('mousemove', onMove);
-          document.addEventListener('mouseup', onUp);
-        });
+        if (window.innerWidth > 768 && dragBar) {
+          let dragStartX, dragStartY, dragStartLeft, dragStartTop;
+          dragBar.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.close') || e.target.closest('button')) return;
+            e.preventDefault();
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartLeft = parseInt(popup.style.left) || 0;
+            dragStartTop = parseInt(popup.style.top) || 0;
+            const onMove = (e2) => {
+              const dx = e2.clientX - dragStartX;
+              const dy = e2.clientY - dragStartY;
+              popup.style.left = (dragStartLeft + dx) + 'px';
+              popup.style.top = (dragStartTop + dy) + 'px';
+            };
+            const onUp = () => {
+              document.removeEventListener('mousemove', onMove);
+              document.removeEventListener('mouseup', onUp);
+            };
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+          });
+        }
       }
 
       calendarPrev.addEventListener('click', () => {
@@ -8469,6 +8838,86 @@
         }
       }
 
+      // Функции для QR-кодов и версионирования
+      function generateQRCode(text) {
+        // Используем API для генерации QR (можно заменить на библиотеку)
+        const size = 200;
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}`;
+        return apiUrl;
+      }
+
+      function extractDataFromText(text) {
+        const extracted = {
+          dates: [],
+          amounts: [],
+          numbers: [],
+          inns: [],
+          ogrns: []
+        };
+        
+        // Даты (различные форматы)
+        const datePatterns = [
+          /\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}/g,
+          /\d{4}[.\/-]\d{1,2}[.\/-]\d{1,2}/g
+        ];
+        datePatterns.forEach(pattern => {
+          const matches = text.match(pattern);
+          if (matches) extracted.dates.push(...matches);
+        });
+        
+        // Суммы (рубли)
+        const amountPattern = /(\d{1,3}(?:\s\d{3})*(?:,\d{2})?)\s*(?:руб|₽|RUB)/gi;
+        const amounts = text.match(amountPattern);
+        if (amounts) extracted.amounts.push(...amounts);
+        
+        // Номера документов
+        const docPattern = /(?:№|номер|#)\s*([А-Яа-яA-Z0-9\-\/]+)/gi;
+        const docs = text.match(docPattern);
+        if (docs) extracted.numbers.push(...docs);
+        
+        // ИНН (10 или 12 цифр)
+        const innPattern = /\b(\d{10}|\d{12})\b/g;
+        const inns = text.match(innPattern);
+        if (inns) {
+          inns.forEach(inn => {
+            if (inn.length === 10 || inn.length === 12) extracted.inns.push(inn);
+          });
+        }
+        
+        // ОГРН (13 цифр)
+        const ogrnPattern = /\b(\d{13})\b/g;
+        const ogrns = text.match(ogrnPattern);
+        if (ogrns) extracted.ogrns.push(...ogrns);
+        
+        return extracted;
+      }
+
+      function saveDocumentVersion(filePath, file, metadata) {
+        const versions = JSON.parse(localStorage.getItem('documentVersions') || '{}');
+        if (!versions[filePath]) versions[filePath] = [];
+        
+        versions[filePath].push({
+          date: new Date().toISOString(),
+          size: file.size,
+          type: file.type,
+          metadata: metadata || {},
+          user: localStorage.getItem('currentUser') || 'Неизвестный'
+        });
+        
+        // Храним только последние 10 версий
+        if (versions[filePath].length > 10) {
+          versions[filePath] = versions[filePath].slice(-10);
+        }
+        
+        localStorage.setItem('documentVersions', JSON.stringify(versions));
+        return versions[filePath];
+      }
+
+      function getDocumentVersions(filePath) {
+        const versions = JSON.parse(localStorage.getItem('documentVersions') || '{}');
+        return versions[filePath] || [];
+      }
+
       function renderDocuments() {
         if (!documentsListEl) return;
         documentsListEl.innerHTML = '';
@@ -8515,6 +8964,8 @@
               <div class="document-card-name" title="${escapeHtml(doc.name)}">${escapeHtml(doc.name)}</div>
               <div class="document-card-actions">
                 <button type="button" class="document-card-btn" data-action="download" data-index="${originalIndex}" title="Скачать">Скачать</button>
+                <button type="button" class="document-card-btn" data-action="qr" data-index="${originalIndex}" title="QR-код">QR</button>
+                <button type="button" class="document-card-btn" data-action="versions" data-index="${originalIndex}" title="Версии">Версии</button>
                 <button type="button" class="document-card-btn full-mode-only" data-action="delete" data-index="${originalIndex}" title="Удалить">Удалить</button>
               </div>
             </div>
@@ -8567,6 +9018,54 @@
             } catch (e) {
               showAlert('Ошибка при скачивании файла: ' + (e.message || e), 'Ошибка');
             }
+          });
+        });
+
+        documentsListEl.querySelectorAll('[data-action="qr"]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.dataset.index, 10);
+            const doc = documentsList[index];
+            if (!doc) return;
+            
+            const url = doc.local ? '#' : getFileUrlFromSupabase(doc.path);
+            const qrUrl = generateQRCode(url || window.location.href);
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;';
+            modal.innerHTML = `
+              <div style="background:var(--bg-card);padding:24px;border-radius:8px;max-width:400px;text-align:center;">
+                <h3 style="margin-top:0;">QR-код для "${escapeHtml(doc.name)}"</h3>
+                <img src="${qrUrl}" style="max-width:200px;margin:16px 0;" alt="QR Code">
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Отсканируйте для быстрого доступа</p>
+                <button type="button" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;" onclick="this.closest('div[style*=\"position:fixed\"]').remove()">Закрыть</button>
+              </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) modal.remove();
+            });
+          });
+        });
+
+        documentsListEl.querySelectorAll('[data-action="versions"]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.dataset.index, 10);
+            const doc = documentsList[index];
+            if (!doc) return;
+            
+            const versions = getDocumentVersions(doc.path);
+            let html = '<h3 style="margin-top:0;">История версий</h3>';
+            if (versions.length === 0) {
+              html += '<p>Версий не найдено</p>';
+            } else {
+              versions.reverse().forEach((v, i) => {
+                const date = new Date(v.date).toLocaleString('ru-RU');
+                html += `<div style="padding:8px;background:var(--bg-input);border-radius:4px;margin-bottom:8px;">`;
+                html += `<strong>Версия ${versions.length - i}</strong><br>`;
+                html += `<span style="font-size:12px;color:var(--text-muted);">${date} | ${v.user} | ${formatFileSize(v.size)}</span>`;
+                html += `</div>`;
+              });
+            }
+            showAlert(html, 'Версии документа');
           });
         });
 
@@ -8639,6 +9138,11 @@
                 folder: null,
                 local: isLocal
               });
+              
+              // Сохраняем версию документа
+              const extractedData = extractDataFromText(file.name);
+              saveDocumentVersion(filePath, file, { extractedData });
+              
               saveDocumentsList();
               renderDocuments();
               if (typeof saveToSupabase === 'function') saveToSupabase();
@@ -10692,6 +11196,1190 @@
         document.getElementById('comments-modal').style.display = 'none';
       });
 
+      // === Скачать отчет ===
+      document.getElementById('btn-download-report').addEventListener('click', () => {
+        generateReport();
+        document.getElementById('report-modal').style.display = 'flex';
+        
+        // Проверяем загрузку библиотек
+        const checkLibraries = () => {
+          const pdfBtn = document.getElementById('download-report-pdf');
+          const excelBtn = document.getElementById('download-report-excel');
+          
+          if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+            if (pdfBtn) {
+              pdfBtn.disabled = true;
+              pdfBtn.title = 'Библиотека PDF загружается...';
+            }
+          } else {
+            if (pdfBtn) {
+              pdfBtn.disabled = false;
+              pdfBtn.title = '';
+            }
+          }
+          
+          if (typeof XLSX === 'undefined') {
+            if (excelBtn) {
+              excelBtn.disabled = true;
+              excelBtn.title = 'Библиотека Excel загружается...';
+            }
+          } else {
+            if (excelBtn) {
+              excelBtn.disabled = false;
+              excelBtn.title = '';
+            }
+          }
+        };
+        
+        checkLibraries();
+        // Проверяем каждую секунду
+        const checkInterval = setInterval(() => {
+          checkLibraries();
+          if ((typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) && typeof XLSX !== 'undefined') {
+            clearInterval(checkInterval);
+          }
+        }, 1000);
+        
+        // Останавливаем проверку через 10 секунд
+        setTimeout(() => clearInterval(checkInterval), 10000);
+      });
+
+      document.getElementById('close-report').addEventListener('click', () => {
+        document.getElementById('report-modal').style.display = 'none';
+      });
+      window.addEventListener('click', e => {
+        if (e.target.id === 'report-modal') {
+          document.getElementById('report-modal').style.display = 'none';
+        }
+        if (e.target.id === 'analytics-modal') {
+          document.getElementById('analytics-modal').style.display = 'none';
+        }
+      });
+
+      // === Избранные объекты ===
+      function renderFavorites() {
+        const favoritesList = document.getElementById('favorites-list');
+        if (!favoritesList) return;
+        
+        if (pinnedObjectIds.length === 0) {
+          favoritesList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Нет избранных объектов<br><span style="font-size:12px;margin-top:8px;display:block;">Нажмите на кнопку закрепления рядом с объектом</span></div>';
+          const countEl = document.getElementById('sidebar-favorites-count');
+          if (countEl) countEl.textContent = '';
+          return;
+        }
+        
+        let html = '';
+        pinnedObjectIds.forEach(addr => {
+          const obj = data[addr] || {};
+          const tag = obj.tag || '';
+          const deadline = obj.deadline || '';
+          const tagHtml = tag ? `<span class="object-tag-badge" style="font-size:11px;padding:2px 6px;">${escapeHtml(tag)}</span>` : '';
+          const deadlineHtml = deadline ? `<span style="font-size:11px;color:var(--text-muted);">${formatDateRu(deadline)}</span>` : '';
+          
+          html += `<div style="padding:12px;background:var(--bg-input);border-radius:6px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);" class="favorite-item" data-addr="${escapeHtml(addr)}">`;
+          html += `<div style="display:flex;justify-content:space-between;align-items:start;">`;
+          html += `<div style="flex:1;"><strong style="font-size:14px;">${escapeHtml(addr)}</strong><div style="margin-top:4px;display:flex;gap:6px;align-items:center;">${tagHtml}${deadlineHtml}</div></div>`;
+          html += `<button type="button" class="favorite-remove-btn" data-addr="${escapeHtml(addr)}" style="padding:4px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer;font-size:11px;" title="Убрать из избранного">Убрать</button>`;
+          html += `</div></div>`;
+        });
+        
+        favoritesList.innerHTML = html;
+        
+        // Обработчики кликов
+        favoritesList.querySelectorAll('.favorite-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            if (e.target.classList.contains('favorite-remove-btn')) return;
+            const addr = item.dataset.addr;
+            if (selector) {
+              selector.value = addr;
+              updateSelectorDisplay();
+              renderObject(addr);
+              addToRecent(addr);
+            }
+            document.getElementById('favorites-modal').style.display = 'none';
+          });
+        });
+        
+        favoritesList.querySelectorAll('.favorite-remove-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const addr = btn.dataset.addr;
+            const i = pinnedObjectIds.indexOf(addr);
+            if (i >= 0) {
+              pinnedObjectIds.splice(i, 1);
+              savePinned();
+              renderFavorites();
+              populateSelector();
+              fillSelectorList();
+              renderRecentObjects();
+              showToast('Убрано из избранного');
+            }
+          });
+        });
+        
+        const countEl = document.getElementById('sidebar-favorites-count');
+        if (countEl) countEl.textContent = `(${pinnedObjectIds.length})`;
+      }
+
+      document.getElementById('show-favorites').addEventListener('click', (e) => {
+        e.preventDefault();
+        renderFavorites();
+        document.getElementById('favorites-modal').style.display = 'flex';
+      });
+
+      document.getElementById('close-favorites').addEventListener('click', () => {
+        document.getElementById('favorites-modal').style.display = 'none';
+      });
+
+      window.addEventListener('click', e => {
+        if (e.target.id === 'favorites-modal') {
+          document.getElementById('favorites-modal').style.display = 'none';
+        }
+      });
+
+      // === Шаблоны объектов ===
+      function renderTemplates() {
+        const templatesList = document.getElementById('templates-list');
+        if (!templatesList) return;
+        
+        const templates = JSON.parse(localStorage.getItem('objectTemplates') || '[]');
+        
+        if (templates.length === 0) {
+          templatesList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Нет сохраненных шаблонов<br><span style="font-size:12px;margin-top:8px;display:block;">Создайте шаблон на основе текущего объекта</span></div>';
+          return;
+        }
+        
+        let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+        templates.forEach((template, idx) => {
+          html += `<div style="padding:12px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border);">`;
+          html += `<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">`;
+          html += `<div><strong>${escapeHtml(template.name)}</strong><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Создан: ${new Date(template.created).toLocaleDateString('ru-RU')}</div></div>`;
+          html += `<div style="display:flex;gap:6px;">`;
+          html += `<button type="button" class="template-use-btn" data-index="${idx}" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Использовать</button>`;
+          html += `<button type="button" class="template-delete-btn" data-index="${idx}" style="padding:6px 12px;background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;cursor:pointer;font-size:12px;">Удалить</button>`;
+          html += `</div></div>`;
+          html += `<div style="font-size:11px;color:var(--text-muted);">Документов: ${(template.data.mainDocs?.length || 0) + (template.data.extraDocs?.length || 0)}</div>`;
+          html += `</div>`;
+        });
+        html += '</div>';
+        
+        templatesList.innerHTML = html;
+        
+        templatesList.querySelectorAll('.template-use-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const template = templates[idx];
+            if (!template) return;
+            
+            const popup = document.createElement('div');
+            popup.className = 'add-tag-popup';
+            popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;';
+            popup.innerHTML = `
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:320px;">
+                <h3 style="margin-bottom:16px;">Создать объект из шаблона</h3>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Название нового объекта:</p>
+                <input type="text" id="template-object-name" placeholder="Адрес объекта" style="width:100%;padding:10px 14px;margin-bottom:20px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;" autofocus>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                  <button type="button" class="btn-secondary" id="template-cancel">Отмена</button>
+                  <button type="button" class="btn-primary" id="template-create">Создать</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(popup);
+            
+            const createBtn = popup.querySelector('#template-create');
+            const cancelBtn = popup.querySelector('#template-cancel');
+            const nameInput = popup.querySelector('#template-object-name');
+            
+            nameInput.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') createBtn.click();
+              if (e.key === 'Escape') cancelBtn.click();
+            });
+            
+            createBtn.onclick = () => {
+              const name = nameInput.value.trim();
+              if (!name) {
+                showAlert('Введите название объекта', 'Ошибка');
+                return;
+              }
+              if (OBJECTS.includes(name)) {
+                showAlert('Объект с таким названием уже существует', 'Ошибка');
+                return;
+              }
+              
+              OBJECTS.push(name);
+              data[name] = JSON.parse(JSON.stringify(template.data));
+              if (data[name].mainDocs) data[name].mainDocs = data[name].mainDocs.slice();
+              if (data[name].extraDocs) data[name].extraDocs = data[name].extraDocs?.slice() || [];
+              if (data[name].main) data[name].main = JSON.parse(JSON.stringify(data[name].main || []));
+              if (data[name].extra) data[name].extra = JSON.parse(JSON.stringify(data[name].extra || []));
+              
+              // Очищаем адрес и комментарий из шаблона
+              if (data[name].comment) data[name].comment = '';
+              
+              localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
+              localStorage.setItem('registryData', JSON.stringify(data));
+              
+              populateSelector();
+              selector.value = name;
+              updateSelectorDisplay();
+              renderObject(name);
+              addToRecent(name);
+              
+              popup.remove();
+              document.getElementById('templates-modal').style.display = 'none';
+              showToast('Объект создан из шаблона');
+            };
+            
+            cancelBtn.onclick = () => popup.remove();
+            popup.onclick = (ev) => { if (ev.target === popup) popup.remove(); };
+          });
+        });
+        
+        templatesList.querySelectorAll('.template-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const confirmed = await showConfirm(`Удалить шаблон "${templates[idx].name}"?`, 'Подтверждение');
+            if (!confirmed) return;
+            
+            templates.splice(idx, 1);
+            localStorage.setItem('objectTemplates', JSON.stringify(templates));
+            renderTemplates();
+            showToast('Шаблон удален');
+          });
+        });
+      }
+
+      document.getElementById('create-template-btn').addEventListener('click', async () => {
+        if (!selector || !selector.value) {
+          showAlert('Выберите объект для создания шаблона', 'Ошибка');
+          return;
+        }
+        
+        const addr = selector.value;
+        const obj = data[addr];
+        if (!obj) return;
+        
+        const name = await showPrompt('Название шаблона:', 'Создать шаблон', `Шаблон ${addr}`);
+        if (!name || !name.trim()) return;
+        
+        const templates = JSON.parse(localStorage.getItem('objectTemplates') || '[]');
+        
+        // Создаем шаблон на основе объекта
+        const template = {
+          name: name.trim(),
+          created: new Date().toISOString(),
+          basedOn: addr,
+          data: {
+            mainDocs: obj.mainDocs ? obj.mainDocs.slice() : [],
+            extraDocs: obj.extraDocs ? obj.extraDocs.slice() : [],
+            main: obj.main ? JSON.parse(JSON.stringify(obj.main)) : [],
+            extra: obj.extra ? JSON.parse(JSON.stringify(obj.extra)) : [],
+            tag: obj.tag || '',
+            deadline: obj.deadline || ''
+          }
+        };
+        
+        templates.push(template);
+        localStorage.setItem('objectTemplates', JSON.stringify(templates));
+        
+        renderTemplates();
+        showToast('Шаблон создан');
+      });
+
+      document.getElementById('show-templates').addEventListener('click', (e) => {
+        e.preventDefault();
+        renderTemplates();
+        document.getElementById('templates-modal').style.display = 'flex';
+      });
+
+      document.getElementById('close-templates').addEventListener('click', () => {
+        document.getElementById('templates-modal').style.display = 'none';
+      });
+
+      window.addEventListener('click', e => {
+        if (e.target.id === 'templates-modal') {
+          document.getElementById('templates-modal').style.display = 'none';
+        }
+      });
+
+      // === Аналитика ===
+      document.getElementById('show-analytics').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('analytics-modal').style.display = 'flex';
+      });
+
+      document.getElementById('close-analytics').addEventListener('click', () => {
+        document.getElementById('analytics-modal').style.display = 'none';
+      });
+
+      // Функции аналитики
+      function categorizeObjects() {
+        const categories = {
+          'Приоритет': [],
+          'Завершён': [],
+          'Просрочен': [],
+          'Без срока': [],
+          'С комментариями': [],
+          'Без документов': []
+        };
+        const today = new Date().toISOString().slice(0, 10);
+        
+        for (const addr in data) {
+          const obj = data[addr];
+          if (obj.tag === 'Приоритет') categories['Приоритет'].push(addr);
+          if (obj.tag === 'Завершён') categories['Завершён'].push(addr);
+          if (obj.deadline && obj.deadline < today && obj.tag !== 'Завершён') categories['Просрочен'].push(addr);
+          if (!obj.deadline) categories['Без срока'].push(addr);
+          if (obj.comment && obj.comment.trim()) categories['С комментариями'].push(addr);
+          const hasDocs = (obj.main && obj.main.length > 0) || (obj.extra && obj.extra.length > 0);
+          if (!hasDocs) categories['Без документов'].push(addr);
+        }
+        
+        let html = '';
+        for (const [cat, objs] of Object.entries(categories)) {
+          if (objs.length > 0) {
+            html += `<div style="margin-bottom:8px;"><strong>${cat}:</strong> ${objs.length} объектов`;
+            if (objs.length <= 5) {
+              html += `<br><span style="font-size:11px;color:var(--text-muted);">${objs.join(', ')}</span>`;
+            }
+            html += '</div>';
+          }
+        }
+        document.getElementById('categorization-results').innerHTML = html || 'Нет данных для категоризации';
+      }
+
+      function findRiskyObjects() {
+        const today = new Date();
+        const risky = [];
+        
+        for (const addr in data) {
+          const obj = data[addr];
+          let riskScore = 0;
+          const reasons = [];
+          
+          // Просроченные сроки
+          if (obj.deadline) {
+            const deadline = new Date(obj.deadline);
+            const daysOverdue = Math.floor((today - deadline) / (1000 * 60 * 60 * 24));
+            if (daysOverdue > 0) {
+              riskScore += daysOverdue * 2;
+              reasons.push(`Просрочено на ${daysOverdue} дней`);
+            } else if (daysOverdue > -7) {
+              riskScore += 5;
+              reasons.push('Срок скоро истекает');
+            }
+          } else {
+            riskScore += 3;
+            reasons.push('Нет срока');
+          }
+          
+          // Нет документов
+          const hasDocs = (obj.main && obj.main.length > 0) || (obj.extra && obj.extra.length > 0);
+          if (!hasDocs) {
+            riskScore += 10;
+            reasons.push('Нет документов');
+          }
+          
+          // Есть комментарии с проблемами
+          if (obj.comment) {
+            const problemKeywords = ['проблем', 'задержк', 'ошибк', 'не работает', 'требует'];
+            if (problemKeywords.some(kw => obj.comment.toLowerCase().includes(kw))) {
+              riskScore += 8;
+              reasons.push('Упоминание проблем в комментариях');
+            }
+          }
+          
+          // Нет метки "Завершён" при наличии всех документов
+          if (hasDocs && obj.tag !== 'Завершён') {
+            const mainDocs = Array.isArray(obj.mainDocs) ? obj.mainDocs : (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []);
+            const allFilled = obj.main && obj.main.every((cell, i) => {
+              if (typeof cell === 'object' && cell !== null) {
+                return cell.value !== undefined && cell.value !== null && cell.value !== '';
+              }
+              return cell !== null && cell !== '';
+            });
+            if (allFilled) {
+              riskScore += 5;
+              reasons.push('Все документы заполнены, но не завершено');
+            }
+          }
+          
+          if (riskScore > 0) {
+            risky.push({ addr, score: riskScore, reasons });
+          }
+        }
+        
+        risky.sort((a, b) => b.score - a.score);
+        const topRisky = risky.slice(0, 10);
+        
+        let html = '';
+        if (topRisky.length === 0) {
+          html = '<div style="color:var(--success);">✓ Рисковых объектов не обнаружено</div>';
+        } else {
+          html = `<div style="margin-bottom:8px;"><strong>Найдено ${risky.length} рисковых объектов:</strong></div>`;
+          topRisky.forEach(item => {
+            html += `<div style="margin-bottom:8px;padding:8px;background:var(--bg-input);border-radius:4px;">`;
+            html += `<strong>${item.addr}</strong> (риск: ${item.score})<br>`;
+            html += `<span style="font-size:11px;color:var(--text-muted);">${item.reasons.join(', ')}</span>`;
+            html += `</div>`;
+          });
+        }
+        document.getElementById('risky-objects-results').innerHTML = html;
+      }
+
+      function predictDeadlines() {
+        const predictions = [];
+        const today = new Date();
+        
+        for (const addr in data) {
+          const obj = data[addr];
+          if (obj.deadline || obj.tag === 'Завершён') continue;
+          
+          // Анализ на основе истории (если есть)
+          const history = JSON.parse(localStorage.getItem('registryHistory') || '[]');
+          const objHistory = history.filter(h => h.addr === addr);
+          
+          let predictedDays = 30; // По умолчанию 30 дней
+          
+          // Если есть документы, оцениваем прогресс
+          if (obj.main && obj.main.length > 0) {
+            const filled = obj.main.filter(cell => {
+              if (typeof cell === 'object' && cell !== null) {
+                return cell.value !== undefined && cell.value !== null && cell.value !== '';
+              }
+              return cell !== null && cell !== '';
+            }).length;
+            const total = obj.main.length;
+            const progress = (filled / total) * 100;
+            
+            // Если заполнено больше 50%, прогнозируем меньше дней
+            if (progress > 50) {
+              predictedDays = Math.max(7, 30 - Math.floor(progress / 10));
+            } else {
+              predictedDays = 30 + Math.floor((50 - progress) / 5);
+            }
+          }
+          
+          // Если есть история изменений, анализируем скорость
+          if (objHistory.length > 1) {
+            const recentChanges = objHistory.slice(-5);
+            const avgDaysBetween = recentChanges.length > 1 ? 
+              (new Date(recentChanges[recentChanges.length - 1].date) - new Date(recentChanges[0].date)) / (recentChanges.length - 1) / (1000 * 60 * 60 * 24) : 7;
+            predictedDays = Math.max(7, Math.min(60, avgDaysBetween * 3));
+          }
+          
+          const predictedDate = new Date(today);
+          predictedDate.setDate(predictedDate.getDate() + predictedDays);
+          
+          predictions.push({
+            addr,
+            predicted: predictedDate.toISOString().slice(0, 10),
+            days: predictedDays,
+            confidence: objHistory.length > 0 ? 'высокая' : 'средняя'
+          });
+        }
+        
+        let html = '';
+        if (predictions.length === 0) {
+          html = '<div>Все объекты имеют сроки или завершены</div>';
+        } else {
+          predictions.slice(0, 10).forEach(p => {
+            html += `<div style="margin-bottom:6px;padding:6px;background:var(--bg-input);border-radius:4px;">`;
+            html += `<strong>${p.addr}</strong><br>`;
+            html += `<span style="font-size:12px;">Прогноз: ${p.predicted} (через ${p.days} дней, уверенность: ${p.confidence})</span>`;
+            html += `</div>`;
+          });
+        }
+        document.getElementById('deadline-predictions').innerHTML = html;
+      }
+
+      function analyzeTrends() {
+        const trends = {
+          'Завершено за месяц': 0,
+          'Добавлено за месяц': 0,
+          'Просрочено': 0,
+          'Средний срок выполнения': 0
+        };
+        
+        const today = new Date();
+        const monthAgo = new Date(today);
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        
+        let completedCount = 0;
+        let totalDays = 0;
+        let completedWithDeadline = 0;
+        
+        for (const addr in data) {
+          const obj = data[addr];
+          if (obj.tag === 'Завершён') {
+            trends['Завершено за месяц']++;
+            if (obj.deadline) {
+              const deadline = new Date(obj.deadline);
+              const days = Math.floor((today - deadline) / (1000 * 60 * 60 * 24));
+              totalDays += Math.abs(days);
+              completedWithDeadline++;
+            }
+          }
+          
+          if (obj.deadline) {
+            const deadline = new Date(obj.deadline);
+            if (deadline < today && obj.tag !== 'Завершён') {
+              trends['Просрочено']++;
+            }
+          }
+        }
+        
+        if (completedWithDeadline > 0) {
+          trends['Средний срок выполнения'] = Math.round(totalDays / completedWithDeadline);
+        }
+        
+        // Аномалии
+        const anomalies = [];
+        const objectsByTag = {};
+        for (const addr in data) {
+          const tag = data[addr].tag || 'Без метки';
+          objectsByTag[tag] = (objectsByTag[tag] || 0) + 1;
+        }
+        
+        const totalObjects = Object.keys(data).length;
+        for (const [tag, count] of Object.entries(objectsByTag)) {
+          const percentage = (count / totalObjects) * 100;
+          if (tag === 'Просрочен' && percentage > 20) {
+            anomalies.push(`Высокий процент просроченных объектов: ${percentage.toFixed(1)}%`);
+          }
+          if (tag === 'Без метки' && percentage > 30) {
+            anomalies.push(`Много объектов без меток: ${percentage.toFixed(1)}%`);
+          }
+        }
+        
+        let html = '<div style="margin-bottom:12px;"><strong>Тренды:</strong></div>';
+        for (const [key, value] of Object.entries(trends)) {
+          html += `<div style="margin-bottom:6px;">${key}: ${value}</div>`;
+        }
+        
+        if (anomalies.length > 0) {
+          html += '<div style="margin-top:12px;padding:8px;background:rgba(202,138,4,0.15);border-radius:4px;"><strong>⚠ Аномалии:</strong><br>';
+          anomalies.forEach(a => html += `<div style="font-size:12px;margin-top:4px;">${a}</div>`);
+          html += '</div>';
+        }
+        
+        document.getElementById('trends-results').innerHTML = html;
+      }
+
+      function prioritizeObjects() {
+        const priorities = [];
+        const today = new Date();
+        
+        for (const addr in data) {
+          const obj = data[addr];
+          if (obj.tag === 'Завершён') continue;
+          
+          let priority = 0;
+          const reasons = [];
+          
+          // Приоритет по метке
+          if (obj.tag === 'Приоритет') {
+            priority += 100;
+            reasons.push('Метка "Приоритет"');
+          }
+          
+          // Приоритет по сроку
+          if (obj.deadline) {
+            const deadline = new Date(obj.deadline);
+            const daysLeft = Math.floor((deadline - today) / (1000 * 60 * 60 * 24));
+            if (daysLeft < 0) {
+              priority += 80;
+              reasons.push('Просрочено');
+            } else if (daysLeft <= 7) {
+              priority += 60;
+              reasons.push('Срок через ' + daysLeft + ' дней');
+            } else if (daysLeft <= 30) {
+              priority += 30;
+              reasons.push('Срок через ' + daysLeft + ' дней');
+            }
+          } else {
+            priority -= 10;
+            reasons.push('Нет срока');
+          }
+          
+          // Приоритет по прогрессу документов
+          if (obj.main && obj.main.length > 0) {
+            const filled = obj.main.filter(cell => {
+              if (typeof cell === 'object' && cell !== null) {
+                return cell.value !== undefined && cell.value !== null && cell.value !== '';
+              }
+              return cell !== null && cell !== '';
+            }).length;
+            const progress = (filled / obj.main.length) * 100;
+            if (progress > 80) {
+              priority += 20;
+              reasons.push('Почти готово (' + Math.round(progress) + '%)');
+            } else if (progress < 20) {
+              priority -= 5;
+            }
+          }
+          
+          priorities.push({ addr, priority, reasons });
+        }
+        
+        priorities.sort((a, b) => b.priority - a.priority);
+        const topPriorities = priorities.slice(0, 10);
+        
+        let html = '';
+        if (topPriorities.length === 0) {
+          html = '<div>Нет объектов для приоритизации</div>';
+        } else {
+          html = '<div style="margin-bottom:8px;"><strong>Рекомендуемый порядок работы:</strong></div>';
+          topPriorities.forEach((item, idx) => {
+            html += `<div style="margin-bottom:6px;padding:6px;background:var(--bg-input);border-radius:4px;">`;
+            html += `<strong>${idx + 1}. ${item.addr}</strong> (приоритет: ${item.priority})<br>`;
+            html += `<span style="font-size:11px;color:var(--text-muted);">${item.reasons.join(', ')}</span>`;
+            html += `</div>`;
+          });
+        }
+        document.getElementById('prioritization-results').innerHTML = html;
+      }
+
+      function analyzeContractors() {
+        const contractors = JSON.parse(localStorage.getItem('contractorsList') || '[]');
+        const subcontractors = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
+        
+        let html = '';
+        
+        if (contractors.length === 0 && subcontractors.length === 0) {
+          html = '<div>Нет данных о подрядчиках</div>';
+        } else {
+          html += '<div style="margin-bottom:12px;"><strong>Подрядчики:</strong></div>';
+          
+          contractors.forEach((c, idx) => {
+            const objectIds = c.objectIds || [];
+            const objects = objectIds.map(id => {
+              const obj = data[id];
+              if (!obj) return null;
+              return {
+                addr: id,
+                completed: obj.tag === 'Завершён',
+                deadline: obj.deadline,
+                hasDocs: (obj.main && obj.main.length > 0) || (obj.extra && obj.extra.length > 0)
+              };
+            }).filter(o => o !== null);
+            
+            const completed = objects.filter(o => o.completed).length;
+            const total = objects.length;
+            const efficiency = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            html += `<div style="margin-bottom:8px;padding:8px;background:var(--bg-input);border-radius:4px;">`;
+            html += `<strong>${c.company || 'Без названия'}</strong><br>`;
+            html += `<span style="font-size:12px;">Объектов: ${total}, Завершено: ${completed} (${efficiency}%)</span>`;
+            html += `</div>`;
+          });
+          
+          if (subcontractors.length > 0) {
+            html += '<div style="margin-top:16px;margin-bottom:12px;"><strong>Субподрядчики:</strong></div>';
+            subcontractors.forEach((s, idx) => {
+              const objectIds = s.objectIds || [];
+              const objects = objectIds.map(id => {
+                const obj = data[id];
+                if (!obj) return null;
+                return {
+                  addr: id,
+                  completed: obj.tag === 'Завершён',
+                  deadline: obj.deadline
+                };
+              }).filter(o => o !== null);
+              
+              const completed = objects.filter(o => o.completed).length;
+              const total = objects.length;
+              const efficiency = total > 0 ? Math.round((completed / total) * 100) : 0;
+              
+              html += `<div style="margin-bottom:8px;padding:8px;background:var(--bg-input);border-radius:4px;">`;
+              html += `<strong>${s.company || 'Без названия'}</strong><br>`;
+              html += `<span style="font-size:12px;">Объектов: ${total}, Завершено: ${completed} (${efficiency}%)</span>`;
+              html += `</div>`;
+            });
+          }
+        }
+        
+        document.getElementById('contractors-analysis').innerHTML = html;
+      }
+
+      // Обработчики кнопок аналитики
+      document.getElementById('btn-categorize-objects').addEventListener('click', categorizeObjects);
+      document.getElementById('btn-find-risky').addEventListener('click', findRiskyObjects);
+      document.getElementById('btn-predict-deadlines').addEventListener('click', predictDeadlines);
+      document.getElementById('btn-analyze-trends').addEventListener('click', analyzeTrends);
+      document.getElementById('btn-prioritize').addEventListener('click', prioritizeObjects);
+      document.getElementById('btn-analyze-contractors').addEventListener('click', analyzeContractors);
+
+      function generateReport() {
+        let report = '═══════════════════════════════════════════════════════════════\n';
+        report += '  ОТЧЕТ ПО КОММЕНТАРИЯМ РЕЕСТРА ОБЪЕКТОВ КАПИТАЛЬНОГО РЕМОНТА\n';
+        report += '═══════════════════════════════════════════════════════════════\n\n';
+        report += 'Дата формирования: ' + new Date().toLocaleString('ru-RU') + '\n\n';
+
+        // Комментарии к объектам
+        report += '═══════════════════════════════════════════════════════════════\n';
+        report += 'КОММЕНТАРИИ К ОБЪЕКТАМ\n';
+        report += '═══════════════════════════════════════════════════════════════\n\n';
+        
+        let hasObjectComments = false;
+        for (const addr in data) {
+          if (data[addr].comment && data[addr].comment.trim()) {
+            hasObjectComments = true;
+            report += `Объект: ${addr}\n`;
+            report += `Комментарий: ${data[addr].comment.trim()}\n`;
+            if (data[addr].tag) report += `Метка: ${data[addr].tag}\n`;
+            if (data[addr].deadline) report += `Срок: ${data[addr].deadline}\n`;
+            report += '\n';
+          }
+        }
+        if (!hasObjectComments) {
+          report += 'Нет комментариев к объектам\n\n';
+        }
+
+        // Комментарии в ячейках документов
+        report += '═══════════════════════════════════════════════════════════════\n';
+        report += 'КОММЕНТАРИИ В ЯЧЕЙКАХ ДОКУМЕНТОВ\n';
+        report += '═══════════════════════════════════════════════════════════════\n\n';
+
+        let hasCellComments = false;
+        for (const addr in data) {
+          const objData = data[addr];
+          const mainDocs = Array.isArray(objData.mainDocs) ? objData.mainDocs : (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []);
+          const extraDocs = Array.isArray(objData.extraDocs) ? objData.extraDocs : (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []);
+          
+          // Проверяем основные документы и их ячейки
+          if (objData.main && Array.isArray(objData.main)) {
+            for (let i = 0; i < objData.main.length; i++) {
+              const cell = objData.main[i];
+              const doc = mainDocs[i] || {};
+              const docName = doc.name || `Документ ${i + 1}`;
+              
+              // Если ячейка - объект с комментарием
+              if (cell && typeof cell === 'object') {
+                if (cell.comment && cell.comment.trim()) {
+                  hasCellComments = true;
+                  report += `Объект: ${addr}\n`;
+                  report += `"${docName}" - ${cell.comment.trim()}\n`;
+                  report += '\n';
+                }
+              }
+              // Если ячейка - строка (старый формат)
+              else if (cell && typeof cell === 'string' && cell.trim()) {
+                hasCellComments = true;
+                report += `Объект: ${addr}\n`;
+                report += `"${docName}" - ${cell.trim()}\n`;
+                report += '\n';
+              }
+            }
+          }
+
+          // Проверяем дополнительные документы и их ячейки
+          if (objData.extra && Array.isArray(objData.extra)) {
+            for (let i = 0; i < objData.extra.length; i++) {
+              const cell = objData.extra[i];
+              const doc = extraDocs[i] || {};
+              const docName = doc.name || `Документ (доп.) ${i + 1}`;
+              
+              // Если ячейка - объект с комментарием
+              if (cell && typeof cell === 'object') {
+                if (cell.comment && cell.comment.trim()) {
+                  hasCellComments = true;
+                  report += `Объект: ${addr}\n`;
+                  report += `"${docName}" - ${cell.comment.trim()}\n`;
+                  report += '\n';
+                }
+              }
+              // Если ячейка - строка (старый формат)
+              else if (cell && typeof cell === 'string' && cell.trim()) {
+                hasCellComments = true;
+                report += `Объект: ${addr}\n`;
+                report += `"${docName}" - ${cell.trim()}\n`;
+                report += '\n';
+              }
+            }
+          }
+
+          // Проверяем комментарии напрямую в документах (если есть поле comment в doc)
+          for (let i = 0; i < mainDocs.length; i++) {
+            const doc = mainDocs[i];
+            if (doc && doc.comment && doc.comment.trim()) {
+              hasCellComments = true;
+              report += `Объект: ${addr}\n`;
+              report += `"${doc.name || 'Документ ' + (i + 1)}" - ${doc.comment.trim()}\n`;
+              report += '\n';
+            }
+          }
+
+          for (let i = 0; i < extraDocs.length; i++) {
+            const doc = extraDocs[i];
+            if (doc && doc.comment && doc.comment.trim()) {
+              hasCellComments = true;
+              report += `Объект: ${addr}\n`;
+              report += `"${doc.name || 'Документ (доп.) ' + (i + 1)}" - ${doc.comment.trim()}\n`;
+              report += '\n';
+            }
+          }
+        }
+
+        if (!hasCellComments) {
+          report += 'Нет комментариев в ячейках документов\n\n';
+        }
+
+        report += '═══════════════════════════════════════════════════════════════\n';
+        report += 'Конец отчета\n';
+        report += '═══════════════════════════════════════════════════════════════\n';
+
+        // Показываем превью
+        document.getElementById('report-preview').textContent = report;
+
+        // Сохраняем данные отчета для экспорта
+        window.currentReportData = {
+          text: report,
+          objectComments: [],
+          cellComments: [],
+          allObjects: []
+        };
+
+        // Собираем ВСЕ объекты для Excel (даже без комментариев)
+        const allObjectAddrs = typeof OBJECTS !== 'undefined' && Array.isArray(OBJECTS) ? OBJECTS : Object.keys(data);
+        
+        for (const addr of allObjectAddrs) {
+          const obj = data[addr] || {};
+          
+          // Все объекты (даже без комментариев)
+          window.currentReportData.allObjects.push({
+            'Объект': addr,
+            'Метка': obj.tag || '',
+            'Срок': obj.deadline || '',
+            'Комментарий к объекту': (obj.comment && obj.comment.trim()) || ''
+          });
+          
+          // Только объекты с комментариями (для отдельного листа)
+          if (obj.comment && obj.comment.trim()) {
+            window.currentReportData.objectComments.push({
+              'Объект': addr,
+              'Комментарий': obj.comment.trim(),
+              'Метка': obj.tag || '',
+              'Срок': obj.deadline || ''
+            });
+          }
+        }
+
+        // Собираем комментарии в ячейках
+        for (const addr in data) {
+          const objData = data[addr];
+          const mainDocs = Array.isArray(objData.mainDocs) ? objData.mainDocs : (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []);
+          const extraDocs = Array.isArray(objData.extraDocs) ? objData.extraDocs : (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []);
+          
+          if (objData.main && Array.isArray(objData.main)) {
+            for (let i = 0; i < objData.main.length; i++) {
+              const cell = objData.main[i];
+              const doc = mainDocs[i] || {};
+              const docName = doc.name || `Документ ${i + 1}`;
+              
+              if (cell && typeof cell === 'object' && cell.comment && cell.comment.trim()) {
+                window.currentReportData.cellComments.push({
+                  'Объект': addr,
+                  'Документ': docName,
+                  'Комментарий': cell.comment.trim()
+                });
+              } else if (cell && typeof cell === 'string' && cell.trim()) {
+                window.currentReportData.cellComments.push({
+                  'Объект': addr,
+                  'Документ': docName,
+                  'Комментарий': cell.trim()
+                });
+              }
+            }
+          }
+
+          if (objData.extra && Array.isArray(objData.extra)) {
+            for (let i = 0; i < objData.extra.length; i++) {
+              const cell = objData.extra[i];
+              const doc = extraDocs[i] || {};
+              const docName = doc.name || `Документ (доп.) ${i + 1}`;
+              
+              if (cell && typeof cell === 'object' && cell.comment && cell.comment.trim()) {
+                window.currentReportData.cellComments.push({
+                  'Объект': addr,
+                  'Документ': docName,
+                  'Комментарий': cell.comment.trim()
+                });
+              } else if (cell && typeof cell === 'string' && cell.trim()) {
+                window.currentReportData.cellComments.push({
+                  'Объект': addr,
+                  'Документ': docName,
+                  'Комментарий': cell.trim()
+                });
+              }
+            }
+          }
+          
+          // Комментарии напрямую в документах
+          for (let i = 0; i < mainDocs.length; i++) {
+            const doc = mainDocs[i];
+            if (doc && doc.comment && doc.comment.trim()) {
+              window.currentReportData.cellComments.push({
+                'Объект': addr,
+                'Документ': doc.name || `Документ ${i + 1}`,
+                'Комментарий': doc.comment.trim()
+              });
+            }
+          }
+          
+          for (let i = 0; i < extraDocs.length; i++) {
+            const doc = extraDocs[i];
+            if (doc && doc.comment && doc.comment.trim()) {
+              window.currentReportData.cellComments.push({
+                'Объект': addr,
+                'Документ': doc.name || `Документ (доп.) ${i + 1}`,
+                'Комментарий': doc.comment.trim()
+              });
+            }
+          }
+        }
+
+        // Обработчик скачивания TXT
+        document.getElementById('download-report-txt').onclick = () => {
+          const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `отчет_комментарии_${new Date().toISOString().slice(0, 10)}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Отчет TXT скачан');
+        };
+
+        // Обработчик скачивания PDF
+        document.getElementById('download-report-pdf').onclick = () => {
+          try {
+            if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+              showAlert('Библиотека PDF не загружена. Обновите страницу и подождите загрузки библиотек.', 'Ошибка');
+              return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 20;
+            let yPos = margin;
+            const lineHeight = 6;
+            const titleLineHeight = 8;
+            const maxWidth = pageWidth - 2 * margin;
+            
+            function addPageIfNeeded(requiredSpace) {
+              if (yPos + requiredSpace > pageHeight - margin) {
+                doc.addPage();
+                yPos = margin;
+                return true;
+              }
+              return false;
+            }
+            
+            // Заголовок
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text('ОТЧЕТ ПО КОММЕНТАРИЯМ', pageWidth / 2, yPos, { align: 'center' });
+            yPos += titleLineHeight;
+            doc.setFontSize(14);
+            doc.text('РЕЕСТРА ОБЪЕКТОВ КАПИТАЛЬНОГО РЕМОНТА', pageWidth / 2, yPos, { align: 'center' });
+            yPos += titleLineHeight * 1.5;
+            
+            // Дата
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Дата формирования: ${new Date().toLocaleString('ru-RU')}`, pageWidth / 2, yPos, { align: 'center' });
+            yPos += titleLineHeight * 1.5;
+            
+            // Раздел: Комментарии к объектам
+            addPageIfNeeded(titleLineHeight * 2);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text('КОММЕНТАРИИ К ОБЪЕКТАМ', margin, yPos);
+            yPos += titleLineHeight;
+            
+            // Линия под заголовком
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, yPos, pageWidth - margin, yPos);
+            yPos += lineHeight * 1.5;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            
+            const objectComments = window.currentReportData.objectComments.filter(obj => obj.Комментарий);
+            if (objectComments.length === 0) {
+              doc.setTextColor(150, 150, 150);
+              doc.text('Нет комментариев к объектам', margin, yPos);
+              yPos += lineHeight * 2;
+            } else {
+              objectComments.forEach((obj, idx) => {
+                addPageIfNeeded(lineHeight * 5);
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Объект: ${obj.Объект}`, margin, yPos);
+                yPos += lineHeight;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(50, 50, 50);
+                const commentLines = doc.splitTextToSize(`Комментарий: ${obj.Комментарий}`, maxWidth);
+                commentLines.forEach(line => {
+                  addPageIfNeeded(lineHeight);
+                  doc.text(line, margin, yPos);
+                  yPos += lineHeight;
+                });
+                
+                if (obj.Метка) {
+                  doc.text(`Метка: ${obj.Метка}`, margin, yPos);
+                  yPos += lineHeight;
+                }
+                if (obj.Срок) {
+                  doc.text(`Срок: ${obj.Срок}`, margin, yPos);
+                  yPos += lineHeight;
+                }
+                
+                yPos += lineHeight * 0.5;
+                
+                if (idx < objectComments.length - 1) {
+                  doc.setDrawColor(240, 240, 240);
+                  doc.line(margin, yPos, pageWidth - margin, yPos);
+                  yPos += lineHeight;
+                }
+              });
+            }
+            
+            // Раздел: Комментарии в ячейках
+            addPageIfNeeded(titleLineHeight * 2);
+            yPos += lineHeight;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text('КОММЕНТАРИИ В ЯЧЕЙКАХ ДОКУМЕНТОВ', margin, yPos);
+            yPos += titleLineHeight;
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, yPos, pageWidth - margin, yPos);
+            yPos += lineHeight * 1.5;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            
+            const cellComments = window.currentReportData.cellComments;
+            if (cellComments.length === 0) {
+              doc.setTextColor(150, 150, 150);
+              doc.text('Нет комментариев в ячейках документов', margin, yPos);
+            } else {
+              cellComments.forEach((item, idx) => {
+                addPageIfNeeded(lineHeight * 4);
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Объект: ${item.Объект}`, margin, yPos);
+                yPos += lineHeight;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Документ: ${item.Документ}`, margin, yPos);
+                yPos += lineHeight;
+                
+                doc.setTextColor(50, 50, 50);
+                const commentLines = doc.splitTextToSize(`Комментарий: ${item.Комментарий}`, maxWidth);
+                commentLines.forEach(line => {
+                  addPageIfNeeded(lineHeight);
+                  doc.text(line, margin, yPos);
+                  yPos += lineHeight;
+                });
+                
+                yPos += lineHeight * 0.5;
+                
+                if (idx < cellComments.length - 1) {
+                  doc.setDrawColor(240, 240, 240);
+                  doc.line(margin, yPos, pageWidth - margin, yPos);
+                  yPos += lineHeight;
+                }
+              });
+            }
+            
+            doc.save(`отчет_комментарии_${new Date().toISOString().slice(0, 10)}.pdf`);
+            showToast('Отчет PDF скачан');
+          } catch (e) {
+            showAlert('Ошибка при создании PDF: ' + (e.message || e), 'Ошибка');
+          }
+        };
+
+        // Обработчик скачивания Excel
+        document.getElementById('download-report-excel').onclick = () => {
+          try {
+            if (typeof XLSX === 'undefined') {
+              showAlert('Библиотека Excel не загружена. Обновите страницу и подождите загрузки библиотек.', 'Ошибка');
+              return;
+            }
+            
+            const wb = XLSX.utils.book_new();
+            
+            // Лист 1: Все объекты (даже без комментариев)
+            if (window.currentReportData.allObjects.length > 0) {
+              const ws1 = XLSX.utils.json_to_sheet(window.currentReportData.allObjects);
+              // Настраиваем ширину колонок
+              const colWidths = [
+                { wch: 35 }, // Объект
+                { wch: 15 }, // Метка
+                { wch: 12 }, // Срок
+                { wch: 60 }  // Комментарий к объекту
+              ];
+              ws1['!cols'] = colWidths;
+              XLSX.utils.book_append_sheet(wb, ws1, 'Все объекты');
+            }
+            
+            // Лист 2: Комментарии к объектам (только с комментариями)
+            const objectCommentsWithData = window.currentReportData.objectComments.filter(obj => obj.Комментарий);
+            if (objectCommentsWithData.length > 0) {
+              const ws2 = XLSX.utils.json_to_sheet(objectCommentsWithData);
+              const colWidths = [
+                { wch: 30 }, // Объект
+                { wch: 50 }, // Комментарий
+                { wch: 15 }, // Метка
+                { wch: 12 }  // Срок
+              ];
+              ws2['!cols'] = colWidths;
+              XLSX.utils.book_append_sheet(wb, ws2, 'Комментарии объектов');
+            }
+            
+            // Лист 3: Комментарии в ячейках
+            if (window.currentReportData.cellComments.length > 0) {
+              const ws3 = XLSX.utils.json_to_sheet(window.currentReportData.cellComments);
+              const colWidths = [
+                { wch: 30 }, // Объект
+                { wch: 40 }, // Документ
+                { wch: 50 }  // Комментарий
+              ];
+              ws3['!cols'] = colWidths;
+              XLSX.utils.book_append_sheet(wb, ws3, 'Комментарии в ячейках');
+            }
+            
+            // Лист 4: Полный текст отчета
+            const reportLines = report.split('\n');
+            const reportData = reportLines.map(line => [line]);
+            const ws4 = XLSX.utils.aoa_to_sheet(reportData);
+            ws4['!cols'] = [{ wch: 100 }];
+            XLSX.utils.book_append_sheet(wb, ws4, 'Полный отчет');
+            
+            XLSX.writeFile(wb, `отчет_комментарии_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            showToast('Отчет Excel скачан');
+          } catch (e) {
+            showAlert('Ошибка при создании Excel: ' + (e.message || e), 'Ошибка');
+          }
+        };
+      }
+
       // === Dashboard ===
       showDashboard.addEventListener('click', e => {
         e.preventDefault();
@@ -11412,12 +13100,37 @@
       document.addEventListener('ai-command', async (e) => {
         const prompt = (e.detail && e.detail.prompt) || '';
         if (!prompt.trim()) return;
-        const provider = localStorage.getItem('aiProvider') || 'ollama';
-        const apiKey = localStorage.getItem('openaiApiKey') || '';
-        const ollamaUrl = (localStorage.getItem('ollamaUrl') || 'http://localhost:11434').replace(/\/$/, '');
-        if (provider === 'openai' && !apiKey.trim()) {
-          await showAlert('Выбран OpenAI. Укажите API ключ в Настройках (меню → Настройки → ИИ для команд).', 'ИИ');
-          return;
+        const provider = localStorage.getItem('aiProvider') || 'groq';
+        const groqKey = localStorage.getItem('groqApiKey') || '';
+        const geminiKey = localStorage.getItem('geminiApiKey') || '';
+        const openaiKey = localStorage.getItem('openaiApiKey') || '';
+        let apiKey = '';
+        let apiUrl = '';
+        let model = '';
+        if (provider === 'groq') {
+          apiKey = groqKey;
+          apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+          model = 'llama-3.1-8b-instant';
+          if (!apiKey.trim()) {
+            await showAlert('Укажите API ключ Groq в Настройках (меню → Настройки → ИИ для команд). Бесплатный ключ можно получить на console.groq.com', 'ИИ');
+            return;
+          }
+        } else if (provider === 'gemini') {
+          apiKey = geminiKey;
+          apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+          model = 'gemini-pro';
+          if (!apiKey.trim()) {
+            await showAlert('Укажите API ключ Google Gemini в Настройках (меню → Настройки → ИИ для команд). Бесплатный ключ можно получить на aistudio.google.com', 'ИИ');
+            return;
+          }
+        } else {
+          apiKey = openaiKey;
+          apiUrl = 'https://api.openai.com/v1/chat/completions';
+          model = 'gpt-4o-mini';
+          if (!apiKey.trim()) {
+            await showAlert('Укажите API ключ OpenAI в Настройках (меню → Настройки → ИИ для команд). Получить ключ можно на platform.openai.com', 'ИИ');
+            return;
+          }
         }
         const toastEl = document.getElementById('toast');
         if (toastEl) { toastEl.textContent = 'ИИ выполняет команду…'; toastEl.classList.remove('toast-error'); toastEl.classList.add('show'); }
@@ -11426,32 +13139,37 @@
         const systemPrompt = `Ты — помощник для реестра объектов капитального ремонта. Пользователь даёт команду на русском. Ответь ТОЛЬКО валидным JSON без markdown и пояснений, в формате: {"actions":[{"type":"add_object","address":"адрес"},{"type":"set_tag","address":"адрес","tag":"Приоритет|Завершён или свой"},{"type":"set_deadline","address":"адрес","deadline":"YYYY-MM-DD"},{"type":"set_comment","address":"адрес","comment":"текст"}]}. Допустимые type: add_object (создать объект по адресу), set_tag (метка: Приоритет, Завершён или свой текст), set_deadline (срок в формате ГГГГ-ММ-ДД), set_comment (комментарий к объекту). Адрес — строка, например "ул. Ленина, 5". Если по запросу нечего делать — верни {"actions":[]}.`;
         let content = '';
         try {
-          if (provider === 'ollama') {
-            const res = await fetch(ollamaUrl + '/api/chat', {
+          let res, json;
+          if (provider === 'gemini') {
+            // Google Gemini использует другой формат API
+            res = await fetch(`${apiUrl}?key=${apiKey}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                model: 'llama3.2',
-                messages: [
-                  { role: 'system', content: systemPrompt + '\n\n' + context },
-                  { role: 'user', content: prompt }
-                ],
-                stream: false,
-                options: { temperature: 0.2, num_predict: 1500 }
+                contents: [{
+                  parts: [{
+                    text: systemPrompt + '\n\n' + context + '\n\nКоманда пользователя: ' + prompt
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.2,
+                  maxOutputTokens: 1500
+                }
               })
             });
             if (!res.ok) {
               const err = await res.text();
-              throw new Error('Ollama: ' + res.status + ' — убедитесь, что Ollama запущена (ollama serve) и модель установлена: ollama run llama3.2');
+              throw new Error(res.status + ' ' + err);
             }
-            const json = await res.json();
-            content = (json.message && json.message.content) || '';
+            json = await res.json();
+            content = (json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts[0] && json.candidates[0].content.parts[0].text) || '';
           } else {
-            const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            // Groq и OpenAI используют одинаковый формат
+            res = await fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
               body: JSON.stringify({
-                model: 'gpt-4o-mini',
+                model: model,
                 messages: [
                   { role: 'system', content: systemPrompt + '\n\n' + context },
                   { role: 'user', content: prompt }
@@ -11464,7 +13182,7 @@
               const err = await res.text();
               throw new Error(res.status + ' ' + err);
             }
-            const json = await res.json();
+            json = await res.json();
             content = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || '';
           }
           let raw = content.trim();
@@ -11480,6 +13198,28 @@
                 data[addr] = { mainDocs: (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []).slice(), extraDocs: (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []).slice(), main: [], extra: [], tag: '', deadline: '', comment: '' };
                 if (typeof OBJECTS !== 'undefined' && Array.isArray(OBJECTS) && OBJECTS.indexOf(addr) === -1) { OBJECTS.push(addr); localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS)); }
                 if (!firstAddr) firstAddr = addr;
+                
+                // Автоматическое создание задачи при добавлении объекта
+                const reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
+                reminders.push({
+                  id: Date.now(),
+                  type: 'object',
+                  objectAddr: addr,
+                  text: `Проверить объект: ${addr}`,
+                  date: new Date().toISOString().slice(0, 10),
+                  completed: false
+                });
+                localStorage.setItem('reminders', JSON.stringify(reminders));
+                
+                // Сохранение истории изменений
+                const history = JSON.parse(localStorage.getItem('registryHistory') || '[]');
+                history.push({
+                  date: new Date().toISOString(),
+                  action: 'add_object',
+                  addr: addr,
+                  user: localStorage.getItem('currentUser') || 'Система'
+                });
+                localStorage.setItem('registryHistory', JSON.stringify(history));
               }
             } else if (a.type === 'set_tag' && a.address) {
               const addr = String(a.address).trim();
@@ -11510,9 +13250,211 @@
           }
           if (toastEl) { toastEl.textContent = actions.length ? 'Готово: выполнено действий ' + actions.length : 'ИИ не выполнил изменений'; toastEl.classList.add('show'); }
         } catch (err) {
-          if (toastEl) { toastEl.textContent = 'Ошибка ИИ: ' + (err.message || err); toastEl.classList.add('toast-error', 'show'); }
+          let msg = err.message || String(err);
+          const errLower = msg.toLowerCase();
+          const providerName = provider === 'groq' ? 'Groq' : (provider === 'gemini' ? 'Google Gemini' : 'OpenAI');
+          if (errLower.includes('failed to fetch') || errLower.includes('network') || errLower.includes('cors')) {
+            msg = `Не удалось подключиться к ${providerName}. Проверьте интернет-соединение и правильность API ключа в Настройках.`;
+          } else {
+            msg = `Ошибка ИИ (${providerName}): ` + msg;
+          }
+          if (toastEl) { toastEl.textContent = msg; toastEl.classList.add('toast-error', 'show'); }
         }
       });
+
+      // === Плавающий чат ИИ: общение по теме платформы и поиск по данным реестра ===
+      (function initAiChatWidget() {
+        const widget = document.getElementById('ai-chat-widget');
+        const panel = document.getElementById('ai-chat-panel');
+        const toggle = document.getElementById('ai-chat-toggle');
+        const closeBtn = document.getElementById('ai-chat-close');
+        const messagesEl = document.getElementById('ai-chat-messages');
+        const inputEl = document.getElementById('ai-chat-input');
+        const sendBtn = document.getElementById('ai-chat-send');
+        if (!widget || !panel || !messagesEl || !inputEl || !sendBtn) return;
+
+        const chatHistory = [];
+
+        function buildPlatformContext() {
+          const MAX_CONTEXT_CHARS = 5300;
+          const data = JSON.parse(localStorage.getItem('registryData') || '{}');
+          const objList = JSON.parse(localStorage.getItem('OBJECTS_LIST') || '[]');
+          const objects = (Array.isArray(objList) && objList.length > 0) ? objList : Object.keys(data);
+          if (objects.length === 0) return 'В реестре пока нет объектов.';
+
+          const sections = [];
+          const maxObj = 30;
+          const maxCell = 72;
+
+          // 1) Объекты: метка, срок
+          const objLines = objects.slice(0, maxObj).map(addr => {
+            const rec = data[addr];
+            const tag = (rec && rec.tag) ? rec.tag : '';
+            const dl = (rec && rec.deadline) ? rec.deadline : '';
+            return addr + (tag ? ' | ' + tag : '') + (dl ? ' | ' + dl : '');
+          });
+          sections.push('Объекты: ' + objLines.join('; ') + (objects.length > maxObj ? ' (+' + (objects.length - maxObj) + ')' : ''));
+
+          // 2) Справочная информация: ответственные, ФИО, Контакт (телефон), должность — до 25 объектов, значения не обрезать коротко
+          const dataRows = JSON.parse(localStorage.getItem('dataRows') || '[]');
+          const dataColumns = JSON.parse(localStorage.getItem('dataColumns') || '[]');
+          const personsData = JSON.parse(localStorage.getItem('personsData') || '{}');
+          const rows = (dataRows || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const cols = (dataColumns || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const needRow = (name) => /ответствен|контакт|телефон|ФИО|Контакт|Должность|Организация|Основание/i.test(name || '');
+
+          if (rows.length && cols.length) {
+            const refLines = [];
+            objects.slice(0, 25).forEach(addr => {
+              const rowData = personsData[addr];
+              if (!rowData || typeof rowData !== 'object') return;
+              const parts = [];
+              rows.forEach(row => {
+                if (!needRow(row.name)) return;
+                const cell = rowData[row.id];
+                if (!cell || typeof cell !== 'object') return;
+                cols.forEach(col => {
+                  const val = (cell[col.id] || '').trim();
+                  if (val) parts.push((row.name || '').slice(0, 28) + ' ' + (col.name || col.id) + ': ' + String(val).slice(0, maxCell));
+                });
+              });
+              if (parts.length) refLines.push(addr + ': ' + parts.join('; '));
+            });
+            if (refLines.length) sections.push('Справочник (ответственные, ФИО, тел, должность):\n' + refLines.join('\n'));
+          }
+
+          // 3) Субподрядчики — до 20
+          const subcontractorsList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
+          if (subcontractorsList.length) {
+            const subLines = subcontractorsList.slice(0, 20).map(s => {
+              const objs = Array.isArray(s.objectIds) ? s.objectIds : (s.contracts && s.contracts[0] && s.contracts[0].objectIds) || [];
+              return (s.company || '—').slice(0, 38) + ' | Ответств: ' + (s.installer || '—') + ' | ' + (s.position || '—') + (objs.length ? ' | Объекты: ' + objs.slice(0, 3).join(', ') : '');
+            });
+            sections.push('Субподрядчики:\n' + subLines.join('\n'));
+          }
+
+          // 4) Подрядчики — до 20, телефоны полностью
+          const contractorsList = JSON.parse(localStorage.getItem('contractorsList') || '[]');
+          if (contractorsList.length) {
+            const conLines = contractorsList.slice(0, 20).map(c => {
+              const rep = (c.responsibleRep || '') + (c.phoneRep ? ', тел ' + c.phoneRep : '');
+              const ctrl = (c.responsibleControl || '') + (c.phoneControl ? ', тел ' + c.phoneControl : '');
+              const self = c.selfPerformedResponsible ? (c.selfPerformedResponsible.fio || '') + (c.selfPerformedResponsible.phone ? ', тел ' + c.selfPerformedResponsible.phone : '') : '';
+              return (c.company || '—').slice(0, 35) + (rep ? ' | Представ: ' + rep : '') + (ctrl ? ' | Контроль: ' + ctrl : '') + (self ? ' | Сам: ' + self : '');
+            });
+            sections.push('Подрядчики (телефоны):\n' + conLines.join('\n'));
+          }
+
+          // 5) УК, сервис, ФКР, стройконтроль — по 8
+          ['managingCompaniesList', 'serviceOrgsList', 'fkrList', 'constructionControlList'].forEach(key => {
+            const list = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!list.length) return;
+            const title = { managingCompaniesList: 'УК', serviceOrgsList: 'Сервис', fkrList: 'ФКР', constructionControlList: 'Стройконтроль' }[key];
+            const lines = list.slice(0, 8).map(e => (e.company || e.name || '—').slice(0, 32) + (e.phone ? ' тел ' + e.phone : '') + (e.responsible ? ' ' + e.responsible : ''));
+            sections.push(title + ': ' + lines.join('; '));
+          });
+
+          let out = sections.join('\n\n');
+          if (out.length > MAX_CONTEXT_CHARS) out = out.slice(0, MAX_CONTEXT_CHARS - 40) + '\n\n… (сокращено по лимиту).';
+          return out;
+        }
+
+        function appendMessage(role, text, isPlaceholder) {
+          const div = document.createElement('div');
+          div.className = 'ai-msg ' + role + (isPlaceholder ? ' loading' : '');
+          div.textContent = text || (isPlaceholder ? 'Думаю…' : '');
+          messagesEl.appendChild(div);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+          return div;
+        }
+
+        function setPlaceholderText(div, text) {
+          if (div) { div.textContent = text; div.classList.remove('loading'); }
+        }
+
+        async function sendChatToApi(userText) {
+          const provider = localStorage.getItem('aiProvider') || 'groq';
+          const groqKey = localStorage.getItem('groqApiKey') || '';
+          const geminiKey = localStorage.getItem('geminiApiKey') || '';
+          const openaiKey = localStorage.getItem('openaiApiKey') || '';
+          let apiKey = '', apiUrl = '', model = '';
+          if (provider === 'groq') {
+            apiKey = groqKey; apiUrl = 'https://api.groq.com/openai/v1/chat/completions'; model = 'llama-3.1-8b-instant';
+          } else if (provider === 'gemini') {
+            apiKey = geminiKey; apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'; model = 'gemini-pro';
+          } else {
+            apiKey = openaiKey; apiUrl = 'https://api.openai.com/v1/chat/completions'; model = 'gpt-4o-mini';
+          }
+          if (!apiKey.trim()) return 'Укажите API ключ в Настройках (меню → Настройки → ИИ для команд).';
+
+          const platformContext = buildPlatformContext();
+          const systemContent = 'Ты — помощник по платформе «Реестр объектов капитального ремонта». Отвечай кратко и по делу на русском. Ниже приведены ВСЕ данные платформы: объекты (метки, сроки, комментарии), справочная информация по каждому объекту (ответственные за выполнение работ, за строительный контроль, ФИО, Контакт/телефон, Должность, Организация), субподрядчики (компания, ответственный, объекты), подрядчики (компания, представитель и телефон, ответственный за строительный контроль и телефон), управляющие/сервис/ФКР/стройконтроль, связи ответственных по документам. Используй ТОЛЬКО эти данные для ответа. Если пользователь спрашивает номер телефона ответственного — ищи в справочной информации (столбец Контакт/телефон) и в подрядчиках/субподрядчиках. Не придумывай данные. Если в приведённых данных нет запрашиваемого — так и скажи.\n\n' + platformContext;
+
+          const recentHistory = chatHistory.slice(-4);
+          const messagesForApi = [
+            { role: 'system', content: systemContent },
+            ...recentHistory.map(m => ({ role: m.role, content: m.content })),
+            { role: 'user', content: userText }
+          ];
+
+          if (provider === 'gemini') {
+            const text = messagesForApi.filter(m => m.role !== 'system').map(m => m.role + ': ' + m.content).join('\n\n') + '\n\nassistant: ';
+            const fullPrompt = systemContent + '\n\n---\n\nДиалог:\n\n' + text;
+            const res = await fetch(`${apiUrl}?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: fullPrompt }] }],
+                generationConfig: { temperature: 0.5, maxOutputTokens: 1500 }
+              })
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const json = await res.json();
+            return (json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts && json.candidates[0].content.parts[0] && json.candidates[0].content.parts[0].text) || 'Нет ответа.';
+          }
+
+          const body = {
+            model: model,
+            messages: messagesForApi.map(m => ({ role: m.role, content: m.content })),
+            temperature: 0.5,
+            max_tokens: 1500
+          };
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+            body: JSON.stringify(body)
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const json = await res.json();
+          return (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || 'Нет ответа.';
+        }
+
+        function onSend() {
+          const text = (inputEl.value || '').trim();
+          if (!text) return;
+          inputEl.value = '';
+          chatHistory.push({ role: 'user', content: text });
+          appendMessage('user', text, false);
+          const placeholder = appendMessage('assistant', '', true);
+          sendBtn.disabled = true;
+          sendChatToApi(text).then(reply => {
+            setPlaceholderText(placeholder, reply || 'Нет ответа.');
+            chatHistory.push({ role: 'assistant', content: reply || '' });
+          }).catch(err => {
+            setPlaceholderText(placeholder, 'Ошибка: ' + (err.message || err));
+          }).finally(() => { sendBtn.disabled = false; messagesEl.scrollTop = messagesEl.scrollHeight; });
+        }
+
+        toggle.addEventListener('click', () => {
+          panel.classList.toggle('open');
+          if (panel.classList.contains('open')) inputEl.focus();
+        });
+        closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+        sendBtn.addEventListener('click', onSend);
+        inputEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); }
+        });
+      })();
 
       importModal.addEventListener('click', (e) => {
         if (e.target === importModal) importModal.style.display = 'none';
@@ -11624,39 +13566,160 @@
         }
       });
       const aiProviderSelect = document.getElementById('ai-provider');
-      const aiOllamaWrap = document.getElementById('ai-ollama-wrap');
-      const aiOpenaiWrap = document.getElementById('ai-openai-wrap');
-      const ollamaUrlInput = document.getElementById('ollama-url');
-      const openaiApiKeyInput = document.getElementById('openai-api-key');
-      if (aiProviderSelect) aiProviderSelect.value = localStorage.getItem('aiProvider') || 'ollama';
-      if (ollamaUrlInput) ollamaUrlInput.value = localStorage.getItem('ollamaUrl') || 'http://localhost:11434';
-      if (openaiApiKeyInput) openaiApiKeyInput.value = localStorage.getItem('openaiApiKey') || '';
+      const groqWrap = document.getElementById('ai-groq-wrap');
+      const geminiWrap = document.getElementById('ai-gemini-wrap');
+      const openaiWrap = document.getElementById('ai-openai-wrap');
+      const groqKeyInput = document.getElementById('groq-api-key');
+      const geminiKeyInput = document.getElementById('gemini-api-key');
+      const openaiKeyInput = document.getElementById('openai-api-key');
+      
+      if (aiProviderSelect) aiProviderSelect.value = localStorage.getItem('aiProvider') || 'groq';
+      if (groqKeyInput) groqKeyInput.value = localStorage.getItem('groqApiKey') || '';
+      if (geminiKeyInput) geminiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+      if (openaiKeyInput) openaiKeyInput.value = localStorage.getItem('openaiApiKey') || '';
+      
       function toggleAiProviderFields() {
-        const v = aiProviderSelect ? aiProviderSelect.value : 'ollama';
-        if (aiOllamaWrap) aiOllamaWrap.style.display = v === 'ollama' ? 'block' : 'none';
-        if (aiOpenaiWrap) aiOpenaiWrap.style.display = v === 'openai' ? 'block' : 'none';
+        const v = aiProviderSelect ? aiProviderSelect.value : 'groq';
+        if (groqWrap) groqWrap.style.display = v === 'groq' ? 'block' : 'none';
+        if (geminiWrap) geminiWrap.style.display = v === 'gemini' ? 'block' : 'none';
+        if (openaiWrap) openaiWrap.style.display = v === 'openai' ? 'block' : 'none';
       }
       toggleAiProviderFields();
       aiProviderSelect?.addEventListener('change', toggleAiProviderFields);
+      
       const autoCompleteTag100Checkbox = document.getElementById('auto-complete-tag-100');
       if (autoCompleteTag100Checkbox) autoCompleteTag100Checkbox.checked = localStorage.getItem('autoCompleteTagOn100') === '1';
       autoCompleteTag100Checkbox?.addEventListener('change', () => {
         localStorage.setItem('autoCompleteTagOn100', autoCompleteTag100Checkbox.checked ? '1' : '0');
         showToast('Сохранено');
       });
-      document.getElementById('save-openai-key-btn')?.addEventListener('click', () => {
-        const provider = aiProviderSelect && aiProviderSelect.value ? aiProviderSelect.value : 'ollama';
-        localStorage.setItem('aiProvider', provider);
-        if (provider === 'ollama' && ollamaUrlInput) {
-          const url = (ollamaUrlInput.value || '').trim() || 'http://localhost:11434';
-          localStorage.setItem('ollamaUrl', url);
+      
+      const autoArchiveCheckbox = document.getElementById('auto-archive-completed');
+      if (autoArchiveCheckbox) autoArchiveCheckbox.checked = localStorage.getItem('autoArchiveCompleted') === '1';
+      autoArchiveCheckbox?.addEventListener('change', () => {
+        localStorage.setItem('autoArchiveCompleted', autoArchiveCheckbox.checked ? '1' : '0');
+        showToast('Сохранено');
+      });
+      
+      // Функция проверки подключения нейронки
+      async function testAiConnection(provider, apiKey) {
+        try {
+          let apiUrl, model, headers, body;
+          if (provider === 'groq') {
+            apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+            model = 'llama-3.1-8b-instant';
+            headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+            body = JSON.stringify({ model: model, messages: [{ role: 'user', content: 'test' }], max_tokens: 5 });
+          } else if (provider === 'gemini') {
+            apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+            headers = { 'Content-Type': 'application/json' };
+            body = JSON.stringify({ contents: [{ parts: [{ text: 'test' }] }] });
+          } else {
+            apiUrl = 'https://api.openai.com/v1/chat/completions';
+            model = 'gpt-4o-mini';
+            headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+            body = JSON.stringify({ model: model, messages: [{ role: 'user', content: 'test' }], max_tokens: 5 });
+          }
+          const res = await fetch(apiUrl, { method: 'POST', headers: headers, body: body });
+          return res.ok;
+        } catch (e) {
+          return false;
         }
-        if (provider === 'openai' && openaiApiKeyInput) {
-          const key = openaiApiKeyInput.value.trim();
+      }
+
+      // Обновление статусов при загрузке
+      async function updateAiStatuses() {
+        const groqKey = localStorage.getItem('groqApiKey') || '';
+        const geminiKey = localStorage.getItem('geminiApiKey') || '';
+        const openaiKey = localStorage.getItem('openaiApiKey') || '';
+        
+        if (groqKey) {
+          const statusEl = document.getElementById('groq-status');
+          if (statusEl) {
+            const isWorking = await testAiConnection('groq', groqKey);
+            if (isWorking) {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--success)';
+              statusEl.textContent = '✓ Работает';
+            } else {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--danger)';
+              statusEl.textContent = '✗ Не работает';
+            }
+          }
+        }
+        
+        if (geminiKey) {
+          const statusEl = document.getElementById('gemini-status');
+          if (statusEl) {
+            const isWorking = await testAiConnection('gemini', geminiKey);
+            if (isWorking) {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--success)';
+              statusEl.textContent = '✓ Работает';
+            } else {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--danger)';
+              statusEl.textContent = '✗ Не работает';
+            }
+          }
+        }
+        
+        if (openaiKey) {
+          const statusEl = document.getElementById('openai-status');
+          if (statusEl) {
+            const isWorking = await testAiConnection('openai', openaiKey);
+            if (isWorking) {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--success)';
+              statusEl.textContent = '✓ Работает';
+            } else {
+              statusEl.style.display = 'inline';
+              statusEl.style.color = 'var(--danger)';
+              statusEl.textContent = '✗ Не работает';
+            }
+          }
+        }
+      }
+
+      document.getElementById('save-ai-key-btn')?.addEventListener('click', async () => {
+        const provider = aiProviderSelect ? aiProviderSelect.value : 'groq';
+        localStorage.setItem('aiProvider', provider);
+        if (groqKeyInput) {
+          const key = groqKeyInput.value.trim();
+          if (key) localStorage.setItem('groqApiKey', key); else localStorage.removeItem('groqApiKey');
+        }
+        if (geminiKeyInput) {
+          const key = geminiKeyInput.value.trim();
+          if (key) localStorage.setItem('geminiApiKey', key); else localStorage.removeItem('geminiApiKey');
+        }
+        if (openaiKeyInput) {
+          const key = openaiKeyInput.value.trim();
           if (key) localStorage.setItem('openaiApiKey', key); else localStorage.removeItem('openaiApiKey');
         }
-        showToast('Настройки ИИ сохранены');
+        
+        // Проверяем подключение текущего провайдера
+        const currentKey = provider === 'groq' ? groqKeyInput?.value.trim() : 
+                          provider === 'gemini' ? geminiKeyInput?.value.trim() : 
+                          openaiKeyInput?.value.trim();
+        if (currentKey) {
+          showToast('Проверяю подключение...');
+          const isWorking = await testAiConnection(provider, currentKey);
+          if (isWorking) {
+            showToast('✓ Подключение успешно! Настройки сохранены');
+          } else {
+            showToast('✗ Не удалось подключиться. Проверьте ключ');
+          }
+        } else {
+          showToast('Настройки ИИ сохранены');
+        }
+        
+        // Обновляем все статусы
+        setTimeout(() => updateAiStatuses(), 500);
       });
+
+      // Обновляем статусы при загрузке страницы
+      setTimeout(() => updateAiStatuses(), 1000);
 
       // === Автозагрузка: сначала URL (если задан), иначе — из Supabase ===
       const savedDataUrl = localStorage.getItem('registryDataUrl');
