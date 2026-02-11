@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     :root {
       --bg: #0a0c0f;
@@ -538,6 +539,14 @@
       border-radius: 4px;
       font-size: 13px;
     }
+    .no-uk-needed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .no-uk-needed-wrap input { cursor: pointer; }
 
     .hamburger {
       width: 32px;
@@ -2219,6 +2228,13 @@
     .calendar-legend-dot.yellow { background: #eab308; }
     .calendar-legend-dot.green { background: #22c55e; }
     .calendar-legend-dot.blue { background: #6366f1; }
+    .calendar-legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .calendar-legend-row .calendar-legend-label { flex: 1; }
+    .calendar-legend-edit { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 4px; font-size: 12px; border-radius: 2px; }
+    .calendar-legend-edit:hover { color: var(--accent); background: var(--hover); }
+    .event-row[draggable="true"] { cursor: grab; }
+    .event-row.event-dragging { opacity: 0.6; }
+    .calendar-day.calendar-day-drag-over { background: var(--accent-glow); outline: 2px dashed var(--accent); }
 
     @media (max-width: 900px) {
       .calendar-sidebar {
@@ -3934,6 +3950,8 @@
       <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
       <li><a href="#" id="show-analytics" title="Аналитика и прогнозы">Аналитика</a></li>
       <li><a href="#" id="show-thoughts" title="Доска для заметок и связей">Доска мыслей</a></li>
+      <li><a href="#" id="show-qr" title="QR-код для быстрого доступа к текущему объекту или разделу">QR-код</a></li>
+      <li><a href="#" id="show-mini-report" title="Обход объектов с пометками и выгрузка в Excel">Мини-отчёт по объектам</a></li>
     </ul>
     <h3 class="collapsible" id="data-section-toggle">Данные <span class="arrow">▶</span></h3>
     <ul class="collapsible-content" id="data-section-menu" style="display:none;">
@@ -4070,11 +4088,45 @@
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Отчет содержит все комментарии из объектов и ячеек документов</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button type="button" id="download-report-txt" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">TXT</button>
-          <button type="button" id="download-report-pdf" style="padding:8px 16px;background:var(--danger);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">PDF</button>
           <button type="button" id="download-report-excel" style="padding:8px 16px;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Excel</button>
         </div>
       </div>
       <div id="report-preview" style="background:var(--bg-input);padding:12px;border-radius:6px;max-height:400px;overflow-y:auto;font-family:monospace;font-size:12px;white-space:pre-wrap;color:var(--text);"></div>
+    </div>
+  </div>
+
+  <div class="history-modal" id="qr-modal" style="display:none;">
+    <div class="history-content" style="max-width:380px;">
+      <span class="close-modal" id="close-qr-modal">&times;</span>
+      <h2>QR-код для быстрого доступа</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Отсканируйте камерой или откройте ссылку на другом устройстве</p>
+      <div id="qr-code-container" style="display:flex;justify-content:center;margin:16px 0;min-height:220px;align-items:center;background:var(--bg-input);border-radius:8px;padding:12px;">
+        <img id="qr-code-image" alt="QR-код" style="max-width:220px;height:auto;">
+      </div>
+      <input type="text" id="qr-link-input" readonly style="width:100%;padding:8px 10px;margin-bottom:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px;">
+      <button type="button" id="qr-copy-link" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Копировать ссылку</button>
+    </div>
+  </div>
+
+  <div class="history-modal" id="mini-report-modal" style="display:none;">
+    <div class="history-content" style="max-width:560px;">
+      <span class="close-modal" id="close-mini-report">&times;</span>
+      <h2>Мини-отчёт по объектам</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Пройдите по объектам, оставьте пометки. Затем скачайте результат в Excel.</p>
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span id="mini-report-counter" style="font-size:14px;color:var(--text-secondary);">Объект 1 из 0</span>
+        <button type="button" id="mini-report-prev" style="padding:8px 14px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;cursor:pointer;font-size:13px;">← Назад</button>
+        <button type="button" id="mini-report-next" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Вперёд →</button>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Объект</label>
+        <div id="mini-report-addr" style="padding:10px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;font-weight:500;word-break:break-word;"></div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Ваша пометка</label>
+        <textarea id="mini-report-note" rows="4" placeholder="Заметка по объекту..." style="width:100%;padding:10px 12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
+      <button type="button" id="mini-report-download-excel" style="width:100%;padding:12px;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;">Скачать в Excel</button>
     </div>
   </div>
 
@@ -4302,6 +4354,10 @@
         <button type="button" class="btn-secondary entity-export-excel-btn" id="export-excel-managing" title="Скачать Excel" style="padding:6px 12px;font-size:12px;">Экспорт в Excel</button>
         <button type="button" class="subcontractors-add-btn" id="managing-add-btn" title="Добавить">+ Добавить</button>
       </div>
+    </div>
+    <div class="no-uk-needed-block" id="managing-no-uk-block" style="display:none;margin-bottom:12px;padding:10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);">
+      <h3 style="font-size:13px;margin-bottom:8px;">Объекты, где УК не нужна (ТСЖ)</h3>
+      <div id="managing-no-uk-list"></div>
     </div>
     <div class="subcontractors-list" id="managing-list"></div>
     <p class="subcontractors-empty" id="managing-empty">Нет записей. Нажмите «Добавить».</p>
@@ -4665,6 +4721,7 @@
       </div>
       <div class="calendar-actions">
         <button type="button" class="calendar-btn calendar-today" id="calendar-today" title="Перейти к сегодня">Сегодня</button>
+        <button type="button" class="calendar-btn" id="calendar-print-btn" title="Печать или PDF календаря">Печать / PDF</button>
         <div class="calendar-month-year">
           <select id="calendar-month-select" class="calendar-select" title="Месяц"></select>
           <select id="calendar-year-select" class="calendar-select" title="Год"></select>
@@ -4686,14 +4743,8 @@
         <h3 class="calendar-sidebar-title">Ближайшие события</h3>
         <div class="calendar-upcoming" id="calendar-upcoming"></div>
         <div class="calendar-legend">
-          <h3 class="calendar-sidebar-title">Цвета</h3>
-          <div class="calendar-legend-items">
-            <span class="calendar-legend-dot red"></span> Событие
-            <span class="calendar-legend-dot orange"></span> Важное
-            <span class="calendar-legend-dot yellow"></span> Напоминание
-            <span class="calendar-legend-dot green"></span> Выполнено
-            <span class="calendar-legend-dot blue"></span> Обычное
-          </div>
+          <h3 class="calendar-sidebar-title">Цвета <span class="calendar-legend-hint" title="Нажмите на карандаш, чтобы изменить подпись">✎</span></h3>
+          <div class="calendar-legend-items" id="calendar-legend-items"></div>
         </div>
       </aside>
     </div>
@@ -4779,6 +4830,14 @@
     }
     function searchIncludes(haystack, needle) {
       return normalizeForSearch(haystack).includes(normalizeForSearch(needle));
+    }
+    /** Поиск по всем фрагментам запроса: разбивает query на слова и проверяет, что каждое слово встречается в haystack (например «управ орб 40» найдёт «Управляющая компания ул. орбитальная 40») */
+    function searchIncludesAll(haystack, query) {
+      const h = normalizeForSearch(haystack);
+      if (!h) return false;
+      const tokens = normalizeForSearch(query).split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) return true;
+      return tokens.every(tok => h.includes(tok));
     }
 
     function formatDateRu(iso) {
@@ -4993,15 +5052,15 @@
         }
         LANDING_SECTIONS.forEach(s => {
           const searchText = s.title + ' ' + (s.keywords || '') + ' ' + s.id;
-          if (searchIncludes(searchText, t))
+          if (searchIncludesAll(searchText, t))
             results.push({ id: s.id, title: s.title, type: 'section' });
         });
         if (typeof OBJECTS !== 'undefined') {
           OBJECTS.forEach(addr => {
-            if (searchIncludes(addr, t))
+            if (searchIncludesAll(addr, t))
               results.push({ id: 'object:' + addr, title: addr, type: 'Объект' });
             const comment = (data[addr]?.comment || '').trim();
-            if (comment && searchIncludes(comment, t))
+            if (comment && searchIncludesAll(comment, t))
               results.push({ id: 'object:' + addr, title: addr + ' — комментарий', type: 'Комментарий объекта' });
             const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : (typeof MAIN_DOCS !== 'undefined' ? MAIN_DOCS : []);
             const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : (typeof EXTRA_DOCS !== 'undefined' ? EXTRA_DOCS : []);
@@ -5010,9 +5069,9 @@
               const type = idx < mainList.length ? 'main' : 'extra';
               const localIdx = idx < mainList.length ? idx : idx - mainList.length;
               const docComment = (state[type]?.[localIdx]?.comment || '').trim();
-              if (searchIncludes(doc, t))
+              if (searchIncludesAll(doc, t))
                 results.push({ id: 'object:' + addr, title: doc.substring(0, 50) + (doc.length > 50 ? '…' : '') + ' (' + addr + ')', type: 'Документ' });
-              if (docComment && searchIncludes(docComment, t))
+              if (docComment && searchIncludesAll(docComment, t))
                 results.push({ id: 'object:' + addr, title: 'Комментарий к документу — ' + addr, type: 'Комментарий документа' });
             });
             const rowData = (typeof personsData !== 'undefined' && personsData[addr]) || {};
@@ -5022,7 +5081,7 @@
               const r = rowData[row.id] || {};
               cols.forEach(col => {
                 const val = (r[col.id] || '').toString().trim();
-                if (val && searchIncludes(val, t)) {
+                if (val && searchIncludesAll(val, t)) {
                   const label = (row.name || '') + ': ' + val.substring(0, 40) + (val.length > 40 ? '…' : '');
                   results.push({ id: 'data:' + addr, title: label + ' — ' + addr, type: 'Справочная информация' });
                 }
@@ -5033,20 +5092,20 @@
         const subList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
         subList.forEach((item, index) => {
           const company = (item.company || '') + ' ' + (item.installer || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.order || '') + ' ' + (item.objectIds || []).join(' ');
-          if (searchIncludes(company, t))
+          if (searchIncludesAll(company, t))
             results.push({ id: 'subcontractor:' + index, title: (item.company || 'Субподрядчик') + (item.inn ? ' · ИНН ' + item.inn : ''), type: 'Субподрядчик' });
         });
         const contractorsListLanding = JSON.parse(localStorage.getItem('contractorsList') || '[]');
         contractorsListLanding.forEach((item, index) => {
           const searchable = (item.company || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.objectIds || []).join(' ');
-          if (searchIncludes(searchable, t))
+          if (searchIncludesAll(searchable, t))
             results.push({ id: 'contractor:' + index, title: (item.company || 'Подрядчик') + (item.inn ? ' · ИНН ' + item.inn : ''), type: 'Подрядчик' });
         });
         function searchDataEntityList(listKey, typeId, typeLabel) {
           const list = JSON.parse(localStorage.getItem(listKey) || '[]');
           list.forEach((item, index) => {
             const searchable = (item.company || '') + ' ' + (item.responsible || '') + ' ' + (item.objectIds || []).join(' ');
-            if (searchIncludes(searchable, t))
+            if (searchIncludesAll(searchable, t))
               results.push({ id: typeId + ':' + index, title: (item.company || typeLabel) + ' — ' + (item.responsible || ''), type: typeLabel });
           });
         }
@@ -5130,7 +5189,10 @@
 
       landingHamburger.addEventListener('click', () => { hideLandingAndGoTo('main'); setTimeout(() => { document.getElementById('hamburger')?.click(); }, 50); });
 
+      let lastMouseX = 0, lastMouseY = 0;
       document.addEventListener('mousemove', (e) => {
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
         if (!landingScreen || landingScreen.classList.contains('hidden')) return;
         const w = window.innerWidth, h = window.innerHeight;
         const x = (e.clientX / w - 0.5) * 24;
@@ -6079,7 +6141,7 @@
                 el.style.display = q ? 'none' : '';
                 lastVisibleLabel = el;
               } else if (addr) {
-                const show = !q || searchIncludes(addr, q);
+                const show = !q || searchIncludesAll(addr, q);
                 el.style.display = show ? '' : 'none';
                 if (show && lastVisibleLabel) { lastVisibleLabel.style.display = ''; lastVisibleLabel = null; }
               }
@@ -6559,16 +6621,22 @@
       function renderRemindersList() {
         const list = document.getElementById('reminders-list');
         if (!list) return;
+        let changed = false;
+        (smartReminders || []).forEach((r) => {
+          const id = (r.id && String(r.id).trim()) || ('rm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9));
+          if (!r.id || r.id !== id) { r.id = id; changed = true; }
+        });
+        if (changed) saveSmartReminders();
         list.innerHTML = '';
         (smartReminders || []).sort((a, b) => (a.date || '').localeCompare(b.date || '')).forEach((r) => {
           const row = document.createElement('div');
           row.className = 'reminder-row';
-          const id = r.id || ('rm_' + Math.random().toString(36).slice(2, 9));
-          if (!r.id) r.id = id;
+          const id = String(r.id || '');
           row.innerHTML = '<span class="reminder-date">' + (r.date || '—') + '</span><span class="reminder-obj">' + (r.addr ? escapeHtml(r.addr) : 'Все') + '</span><span class="reminder-label">' + escapeHtml(r.label || '') + '</span>' + (r.note ? '<span style="color:var(--text-muted);">' + escapeHtml(r.note) + '</span>' : '') + '<span class="reminder-actions"><button type="button" class="reminder-del" data-id="' + escapeHtml(id) + '">Удалить</button></span>';
           list.appendChild(row);
           row.querySelector('.reminder-del').addEventListener('click', () => {
-            smartReminders = smartReminders.filter(x => x.id !== id);
+            const toRemove = row.querySelector('.reminder-del').getAttribute('data-id');
+            smartReminders = smartReminders.filter(x => String(x.id || '') !== toRemove);
             saveSmartReminders();
             renderRemindersList();
             renderDeadlineReminders();
@@ -6656,15 +6724,15 @@
         }
         SEARCH_SECTIONS.forEach(s => {
           const searchText = s.title + ' ' + (s.keywords || '');
-          if (searchIncludes(searchText, query))
+          if (searchIncludesAll(searchText, query))
             results.push({ type: 'Раздел', sectionId: s.id, title: s.title, text: s.title, openToData: false });
         });
         OBJECTS.forEach(addr => {
-          if (searchIncludes(addr, query)) {
+          if (searchIncludesAll(addr, query)) {
             results.push({ type: 'Объект', addr, text: addr, openToData: false });
           }
           const comment = (data[addr]?.comment || '').trim();
-          if (comment && searchIncludes(comment, query)) {
+          if (comment && searchIncludesAll(comment, query)) {
             results.push({ type: 'Комментарий объекта', addr, text: comment.substring(0, 80) + (comment.length > 80 ? '…' : ''), openToData: false });
           }
           const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
@@ -6674,10 +6742,10 @@
             const type = idx < mainList.length ? 'main' : 'extra';
             const localIdx = idx < mainList.length ? idx : idx - mainList.length;
             const comment = (state[type]?.[localIdx]?.comment || '').trim();
-            if (searchIncludes(doc, query)) {
+            if (searchIncludesAll(doc, query)) {
               results.push({ type: 'Документ', addr, text: doc.substring(0, 60) + (doc.length > 60 ? '…' : ''), openToData: false });
             }
-            if (comment && searchIncludes(comment, query)) {
+            if (comment && searchIncludesAll(comment, query)) {
               results.push({ type: 'Комментарий документа', addr, text: comment.substring(0, 60) + (comment.length > 60 ? '…' : ''), openToData: false });
             }
           });
@@ -6688,7 +6756,7 @@
             const r = rowData[row.id] || {};
             cols.forEach(col => {
               const val = (r[col.id] || '').toString().trim();
-              if (val && searchIncludes(val, query)) {
+              if (val && searchIncludesAll(val, query)) {
                 results.push({ type: 'Справочная информация', addr, text: (row.name || '') + ': ' + val.substring(0, 50) + (val.length > 50 ? '…' : ''), openToData: true });
               }
             });
@@ -6697,20 +6765,20 @@
         const subList = JSON.parse(localStorage.getItem('subcontractorsList') || '[]');
         subList.forEach((item, index) => {
           const searchable = (item.company || '') + ' ' + (item.installer || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.order || '') + ' ' + (item.objectIds || []).join(' ');
-          if (searchIncludes(searchable, query))
+          if (searchIncludesAll(searchable, query))
             results.push({ type: 'Субподрядчик', subcontractorIndex: index, text: (item.company || '—') + (item.inn ? ' · ИНН ' + item.inn : ''), openToData: false });
         });
         const contractorsListSearch = JSON.parse(localStorage.getItem('contractorsList') || '[]');
         contractorsListSearch.forEach((item, index) => {
           const searchable = (item.company || '') + ' ' + (item.inn || '') + ' ' + (item.ogrn || '') + ' ' + (item.objectIds || []).join(' ');
-          if (searchIncludes(searchable, query))
+          if (searchIncludesAll(searchable, query))
             results.push({ type: 'Подрядчик', contractorIndex: index, text: (item.company || '—') + (item.inn ? ' · ИНН ' + item.inn : ''), openToData: false });
         });
         function searchEntityList(listKey, typeLabel, resultKey, resultIndex) {
           const list = JSON.parse(localStorage.getItem(listKey) || '[]');
           list.forEach((item, index) => {
             const searchable = (item.company || '') + ' ' + (item.responsible || '') + ' ' + (item.objectIds || []).join(' ');
-            if (searchIncludes(searchable, query))
+            if (searchIncludesAll(searchable, query))
               results.push({ type: typeLabel, [resultKey]: index, text: (item.company || '—') + (item.responsible ? ' · ' + item.responsible : ''), openToData: false });
           });
         }
@@ -6932,6 +7000,7 @@
                   <label>Срок:</label>
                   <input type="date" class="object-deadline-input" id="deadline-${addr}" value="${objDeadline}">
                 </div>
+                <label class="no-uk-needed-wrap" title="Отметьте, если у объекта только ТСЖ и управляющая компания не нужна"><input type="checkbox" class="no-uk-needed-checkbox" id="no-uk-needed-${addr}" ${data[addr]?.noManagingCompanyNeeded ? 'checked' : ''}> УК не нужна (ТСЖ)</label>
                 <button type="button" class="object-export-docs-btn" id="export-docs-${addr}" title="Скачать список документов объекта">Экспорт документов</button>
               </div>
             </div>
@@ -6960,6 +7029,7 @@
           card.querySelector('.delete-object-btn')?.classList.add('full-mode-only');
           card.querySelector('.tag-select-wrap')?.classList.add('full-mode-only');
           card.querySelector('.deadline-input-wrap')?.classList.add('full-mode-only');
+          card.querySelector('.no-uk-needed-wrap')?.classList.add('full-mode-only');
           card.querySelector('.delete-mode-controls')?.classList.add('full-mode-only');
           const objCommentTextarea = card.querySelector('.object-comment textarea');
           if (objCommentTextarea) objCommentTextarea.readOnly = true;
@@ -7311,6 +7381,16 @@
                 }
               }
             }
+          });
+        }
+        const noUkCheckbox = card.querySelector('.no-uk-needed-checkbox');
+        if (noUkCheckbox) {
+          noUkCheckbox.addEventListener('change', () => {
+            data[addr] = data[addr] || {};
+            data[addr].noManagingCompanyNeeded = noUkCheckbox.checked;
+            localStorage.setItem('registryData', JSON.stringify(data));
+            if (typeof updateDataEntityWarningBadge === 'function') updateDataEntityWarningBadge('managing');
+            showToast();
           });
         }
         const exportDocsBtn = card.querySelector('.object-export-docs-btn');
@@ -7727,6 +7807,36 @@
         return (day + 6) % 7;
       }
 
+      const CALENDAR_LEGEND_DEFAULTS = { red: 'Событие', orange: 'Важное', yellow: 'Напоминание', green: 'Выполнено', blue: 'Обычное' };
+      let calendarLegendLabels = JSON.parse(localStorage.getItem('calendarLegendLabels') || 'null');
+      if (!calendarLegendLabels || typeof calendarLegendLabels !== 'object') calendarLegendLabels = Object.assign({}, CALENDAR_LEGEND_DEFAULTS);
+
+      function saveCalendarLegendLabels() {
+        localStorage.setItem('calendarLegendLabels', JSON.stringify(calendarLegendLabels));
+      }
+
+      function renderCalendarLegend() {
+        const wrap = document.getElementById('calendar-legend-items');
+        if (!wrap) return;
+        const colors = ['red', 'orange', 'yellow', 'green', 'blue'];
+        wrap.innerHTML = colors.map(c => {
+          const label = (calendarLegendLabels[c] || CALENDAR_LEGEND_DEFAULTS[c] || c);
+          return '<span class="calendar-legend-row"><span class="calendar-legend-dot ' + c + '"></span> <span class="calendar-legend-label">' + escapeHtml(label) + '</span> <button type="button" class="calendar-legend-edit" data-color="' + c + '" title="Изменить подпись">✎</button></span>';
+        }).join('');
+        wrap.querySelectorAll('.calendar-legend-edit').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const color = btn.getAttribute('data-color');
+            const current = (calendarLegendLabels[color] || CALENDAR_LEGEND_DEFAULTS[color] || '');
+            const newLabel = window.prompt('Подпись для этого цвета:', current);
+            if (newLabel !== null && newLabel.trim() !== '') {
+              calendarLegendLabels[color] = newLabel.trim();
+              saveCalendarLegendLabels();
+              renderCalendarLegend();
+            }
+          });
+        });
+      }
+
       function fillMonthYearSelects() {
         if (calendarMonthSelect) {
           calendarMonthSelect.innerHTML = MONTH_NAMES_SHORT.map((name, i) => '<option value="' + i + '"' + (i === currentMonth ? ' selected' : '') + '>' + name + '</option>').join('');
@@ -7818,9 +7928,11 @@
           events.forEach((event, idx) => {
             const row = document.createElement('div');
             row.className = 'event-row';
+            row.draggable = true;
             row.dataset.index = String(idx);
             row.dataset.text = event.text || '';
             row.dataset.time = event.time || '';
+            row.dataset.dateKey = dateKey;
             row.classList.add(event.color || 'blue');
             const safeText = (event.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             const timePart = (event.time || '').trim() ? '<span class="event-time">' + (event.time || '').replace(/</g, '&lt;') + '</span> ' : '';
@@ -7839,12 +7951,46 @@
               showToast();
             });
             row.appendChild(delBtn);
+            row.addEventListener('dragstart', (e) => {
+              e.dataTransfer.setData('text/plain', dateKey + '|' + idx);
+              e.dataTransfer.effectAllowed = 'move';
+              row.classList.add('event-dragging');
+            });
+            row.addEventListener('dragend', () => row.classList.remove('event-dragging'));
             row.addEventListener('click', (e) => {
               if (e.target.classList.contains('event-delete')) return;
               e.stopPropagation();
               showEventPopup(row, dateKey);
             });
             eventsWrap.appendChild(row);
+          });
+          dayEl.addEventListener('dragover', (e) => {
+            if (dayEl.classList.contains('empty')) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            dayEl.classList.add('calendar-day-drag-over');
+          });
+          dayEl.addEventListener('dragleave', () => dayEl.classList.remove('calendar-day-drag-over'));
+          dayEl.addEventListener('drop', (e) => {
+            dayEl.classList.remove('calendar-day-drag-over');
+            if (dayEl.classList.contains('empty')) return;
+            e.preventDefault();
+            const raw = e.dataTransfer.getData('text/plain');
+            if (!raw) return;
+            const [srcDateKey, srcIdxStr] = raw.split('|');
+            const srcIdx = parseInt(srcIdxStr, 10);
+            if (srcDateKey === dateKey && srcIdx >= 0) return;
+            const srcEvents = calendarData[srcDateKey];
+            if (!srcEvents || !srcEvents[srcIdx]) return;
+            const ev = srcEvents[srcIdx];
+            srcEvents.splice(srcIdx, 1);
+            if (srcEvents.length === 0) delete calendarData[srcDateKey];
+            if (!calendarData[dateKey]) calendarData[dateKey] = [];
+            calendarData[dateKey].push(ev);
+            localStorage.setItem('calendarData', JSON.stringify(calendarData));
+            renderCalendar();
+            renderUpcoming();
+            showToast();
           });
           
           // Обработчик увеличения ячейки при удержании мыши 2 секунды
@@ -7882,6 +8028,7 @@
         }
 
         renderUpcoming();
+        if (typeof renderCalendarLegend === 'function') renderCalendarLegend();
       }
 
       calendarDays.addEventListener('click', (e) => {
@@ -7992,15 +8139,22 @@
 
         textInput.focus();
 
-        // На мобильных попап показывается внизу экрана (нижняя панель в CSS)
+        // Позиция: у курсора мыши (десктоп), внизу экрана (мобильные)
         if (window.innerWidth <= 768) {
           popup.style.left = '';
           popup.style.top = '';
         } else {
           const popupWidth = 320;
-          const popupHeight = 200;
-          const popupLeft = (window.innerWidth - popupWidth) / 2 + (window.pageXOffset || document.documentElement.scrollLeft);
-          const popupTop = (window.innerHeight - popupHeight) / 2 + (window.pageYOffset || document.documentElement.scrollTop);
+          const popupHeight = 280;
+          const offset = 16;
+          let popupLeft = (typeof lastMouseX === 'number' ? lastMouseX : window.innerWidth / 2) + offset;
+          let popupTop = (typeof lastMouseY === 'number' ? lastMouseY : window.innerHeight / 2) + offset;
+          const maxLeft = (window.pageXOffset || 0) + window.innerWidth - popupWidth - 8;
+          const maxTop = (window.pageYOffset || 0) + window.innerHeight - popupHeight - 8;
+          popupLeft = Math.min(popupLeft, maxLeft);
+          popupTop = Math.min(popupTop, maxTop);
+          popupLeft = Math.max((window.pageXOffset || 0) + 8, popupLeft);
+          popupTop = Math.max((window.pageYOffset || 0) + 8, popupTop);
           popup.style.left = popupLeft + 'px';
           popup.style.top = popupTop + 'px';
         }
@@ -8050,6 +8204,30 @@
         currentYear = t.getFullYear();
         currentMonth = t.getMonth();
         renderCalendar();
+      });
+
+      document.getElementById('calendar-print-btn').addEventListener('click', () => {
+        const firstDayOfWeek = getFirstDayOfMonth(currentYear, currentMonth);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const prefix = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-';
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        let rows = '<tr>' + weekdays.map(w => '<th style="border:1px solid #333;padding:6px;font-size:11px;">' + w + '</th>').join('') + '</tr><tr>';
+        let dayCount = 0;
+        for (let i = 0; i < firstDayOfWeek; i++) { rows += '<td style="border:1px solid #ddd;padding:4px;min-height:60px;vertical-align:top;font-size:12px;"></td>'; dayCount++; }
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateKey = prefix + String(day).padStart(2, '0');
+          const events = (calendarData[dateKey] || []).map(e => (e.time ? e.time + ' ' : '') + (e.text || '')).join('; ');
+          rows += '<td style="border:1px solid #333;padding:4px;min-height:60px;vertical-align:top;font-size:12px;"><strong>' + day + '</strong><br><span style="font-size:10px;color:#555;">' + (events ? events.replace(/</g, '&lt;') : '') + '</span></td>';
+          dayCount++;
+          if (dayCount % 7 === 0) rows += '</tr><tr>';
+        }
+        while (dayCount % 7 !== 0) { rows += '<td style="border:1px solid #ddd;padding:4px;"></td>'; dayCount++; }
+        rows += '</tr>';
+        const title = MONTH_NAMES[currentMonth] + ' ' + currentYear;
+        const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Календарь ' + title + '</title><style>body{font-family:Inter,sans-serif;padding:16px;} table{border-collapse:collapse;width:100%;} @media print{ body{margin:0;} }</style></head><body><h2 style="margin-bottom:12px;">' + title + '</h2><table>' + rows + '</table><p style="font-size:11px;color:#888;margin-top:12px;">Печать: ' + new Date().toLocaleString('ru-RU') + '</p></body></html>';
+        const w = window.open('', '_blank', 'width=900,height=700');
+        if (w) { w.document.write(html); w.document.close(); w.focus(); setTimeout(() => { w.print(); w.close(); }, 400); }
       });
 
       if (calendarMonthSelect) calendarMonthSelect.addEventListener('change', function() {
@@ -10185,17 +10363,47 @@
         (arr || []).forEach(o => { (o.objectIds || []).forEach(addr => set.add(addr)); });
         return Array.from(set);
       }
+      function getObjectsWithoutEntity(type) {
+        const list = getDataEntityList(type);
+        const addrs = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
+        if (type === 'managing') {
+          return addrs.filter(addr => !data[addr]?.noManagingCompanyNeeded && !list.some(x => getObjectIdsForDataEntityItem(x, type).indexOf(addr) !== -1));
+        }
+        return addrs.filter(addr => !list.some(x => getObjectIdsForDataEntityItem(x, type).indexOf(addr) !== -1));
+      }
+      function getObjectsNoUkNeeded() {
+        const addrs = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
+        return addrs.filter(addr => data[addr]?.noManagingCompanyNeeded);
+      }
       function updateDataEntityWarningBadge(type) {
         const cfg = DATA_ENTITY_CONFIG[type];
         const list = getDataEntityList(type);
         const addrs = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
-        const without = addrs.filter(addr => !list.some(x => getObjectIdsForDataEntityItem(x, type).indexOf(addr) !== -1)).length;
+        let withoutList = addrs.filter(addr => !list.some(x => getObjectIdsForDataEntityItem(x, type).indexOf(addr) !== -1));
+        if (type === 'managing') withoutList = withoutList.filter(addr => !data[addr]?.noManagingCompanyNeeded);
+        const without = withoutList.length;
         const badge = document.getElementById(cfg.badgeId);
         const badgePage = document.getElementById(cfg.badgePageId);
-        const text = without > 0 ? without + ' без ' + (type === 'managing' ? 'УК' : type === 'service' ? 'обслуж.' : type === 'fkr' ? 'ФКР' : 'стр. контр.') : '';
-        if (badge) { badge.textContent = text; badge.style.display = text ? 'inline' : 'none'; }
-        if (badgePage) { badgePage.textContent = text; badgePage.style.display = text ? 'inline' : 'none'; }
+        const label = type === 'managing' ? 'УК' : type === 'service' ? 'обслуж.' : type === 'fkr' ? 'ФКР' : 'стр. контр.';
+        const text = without > 0 ? without + ' без ' + label : '';
+        if (badge) { badge.textContent = text; badge.style.display = text ? 'inline' : 'none'; badge.title = without > 0 ? 'Нажмите, чтобы показать список' : ''; badge.style.cursor = without > 0 ? 'pointer' : ''; }
+        if (badgePage) { badgePage.textContent = text; badgePage.style.display = text ? 'inline' : 'none'; badgePage.title = without > 0 ? 'Нажмите, чтобы показать список' : ''; badgePage.style.cursor = without > 0 ? 'pointer' : ''; }
       }
+      function showObjectsWithoutEntityModal(type) {
+        const list = typeof getObjectsWithoutEntity === 'function' ? getObjectsWithoutEntity(type) : [];
+        const labels = { managing: 'Объекты без УК', service: 'Объекты без обслуживающей организации', fkr: 'Объекты без ФКР', construction: 'Объекты без строительного контроля' };
+        const title = labels[type] || 'Объекты';
+        if (list.length === 0) { showAlert('Нет таких объектов.', title); return; }
+        showAlert(list.join('\n'), title);
+      }
+      document.addEventListener('click', (e) => {
+        const badge = e.target.closest('.subcontractors-warning-badge');
+        if (!badge || !badge.id || !badge.textContent.trim()) return;
+        if (badge.id.indexOf('managing') !== -1) showObjectsWithoutEntityModal('managing');
+        else if (badge.id.indexOf('service') !== -1) showObjectsWithoutEntityModal('service');
+        else if (badge.id.indexOf('fkr') !== -1) showObjectsWithoutEntityModal('fkr');
+        else if (badge.id.indexOf('construction') !== -1) showObjectsWithoutEntityModal('construction');
+      });
       function exportEntityListToExcel(entityType) {
         const thStyle = 'border:1px solid #000; padding:8px 10px; background:#4472C4; color:#fff; font-size:11pt; font-weight:bold;';
         const tdStyle = 'border:1px solid #000; padding:6px 10px;';
@@ -10395,6 +10603,41 @@
         });
         const emptyEl = document.getElementById(cfg.emptyId);
         if (emptyEl) emptyEl.style.display = list.length === 0 ? 'block' : 'none';
+        if (type === 'managing') {
+          const noUkBlock = document.getElementById('managing-no-uk-block');
+          const noUkList = document.getElementById('managing-no-uk-list');
+          if (noUkBlock && noUkList) {
+            const noUkAddrs = typeof getObjectsNoUkNeeded === 'function' ? getObjectsNoUkNeeded() : [];
+            noUkBlock.style.display = noUkAddrs.length ? 'block' : 'none';
+            noUkList.innerHTML = noUkAddrs.map(addr => '<span class="subcontractor-obj-badge" data-addr="' + escapeHtml(addr) + '" style="cursor:pointer;margin-right:8px;margin-bottom:6px;display:inline-block;">' + escapeHtml(addr.length > 40 ? addr.slice(0, 37) + '…' : addr) + '</span>').join('');
+            noUkList.querySelectorAll('.subcontractor-obj-badge').forEach(badge => {
+              badge.addEventListener('click', (e) => {
+                e.preventDefault();
+                const addr = badge.dataset.addr;
+                if (!addr) return;
+                const managingEl = document.getElementById('managing-container');
+                if (managingEl) managingEl.style.display = 'none';
+                ['service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+                calendarContainer.style.display = 'none';
+                roadmapContainer.style.display = 'none';
+                dataContainer.style.display = 'none';
+                emptyState.style.display = 'none';
+                subcontractorsContainer.style.display = 'none';
+                if (contractorsContainer) contractorsContainer.style.display = 'none';
+                responsibleConnectionsContainer.style.display = 'none';
+                container.style.display = 'block';
+                if (selector) { selector.value = addr; if (typeof updateSelectorDisplay === 'function') updateSelectorDisplay(); }
+                if (typeof addToRecent === 'function') addToRecent(addr);
+                if (typeof renderObject === 'function') renderObject(addr);
+                if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', addr);
+                history.replaceState(null, '', location.pathname + location.search + '#object/' + encodeURIComponent(addr));
+                if (selector) selector.dispatchEvent(new Event('change', { bubbles: true }));
+                if (sidebar) sidebar.classList.remove('open');
+                window.scrollTo(0, 0);
+              });
+            });
+          }
+        }
       }
       let dataEntityOfficialFilePending = {};
       let dataEntityOfficialFileInput = null;
@@ -11201,46 +11444,16 @@
         generateReport();
         document.getElementById('report-modal').style.display = 'flex';
         
-        // Проверяем загрузку библиотек
+        const excelBtn = document.getElementById('download-report-excel');
         const checkLibraries = () => {
-          const pdfBtn = document.getElementById('download-report-pdf');
-          const excelBtn = document.getElementById('download-report-excel');
-          
-          if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-            if (pdfBtn) {
-              pdfBtn.disabled = true;
-              pdfBtn.title = 'Библиотека PDF загружается...';
-            }
-          } else {
-            if (pdfBtn) {
-              pdfBtn.disabled = false;
-              pdfBtn.title = '';
-            }
-          }
-          
           if (typeof XLSX === 'undefined') {
-            if (excelBtn) {
-              excelBtn.disabled = true;
-              excelBtn.title = 'Библиотека Excel загружается...';
-            }
+            if (excelBtn) { excelBtn.disabled = true; excelBtn.title = 'Библиотека Excel загружается...'; }
           } else {
-            if (excelBtn) {
-              excelBtn.disabled = false;
-              excelBtn.title = '';
-            }
+            if (excelBtn) { excelBtn.disabled = false; excelBtn.title = ''; }
           }
         };
-        
         checkLibraries();
-        // Проверяем каждую секунду
-        const checkInterval = setInterval(() => {
-          checkLibraries();
-          if ((typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) && typeof XLSX !== 'undefined') {
-            clearInterval(checkInterval);
-          }
-        }, 1000);
-        
-        // Останавливаем проверку через 10 секунд
+        const checkInterval = setInterval(() => { checkLibraries(); if (typeof XLSX !== 'undefined') clearInterval(checkInterval); }, 1000);
         setTimeout(() => clearInterval(checkInterval), 10000);
       });
 
@@ -11335,6 +11548,106 @@
         if (e.target.id === 'favorites-modal') {
           document.getElementById('favorites-modal').style.display = 'none';
         }
+      });
+
+      // === QR-код для быстрого доступа ===
+      document.getElementById('show-qr').addEventListener('click', (e) => {
+        e.preventDefault();
+        const qrModal = document.getElementById('qr-modal');
+        const qrContainer = document.getElementById('qr-code-container');
+        qrContainer.innerHTML = '<img id="qr-code-image" alt="QR-код" style="max-width:220px;height:auto;">';
+        const qrImg = document.getElementById('qr-code-image');
+        const qrInput = document.getElementById('qr-link-input');
+        const sel = document.getElementById('object-selector');
+        const addr = sel && sel.value ? sel.value : '';
+        const hash = addr ? '#object/' + encodeURIComponent(addr) : '#main';
+        const url = location.origin + location.pathname + (location.search || '') + hash;
+        if (qrInput) qrInput.value = url;
+        qrModal.style.display = 'flex';
+        function drawQr() {
+          if (typeof window.QRCode !== 'undefined' && window.QRCode.toDataURL) {
+            window.QRCode.toDataURL(url, { width: 220, margin: 1 }).then(function(dataUrl) {
+              if (qrImg) qrImg.src = dataUrl;
+            }).catch(function() {
+              if (qrImg) qrImg.alt = 'Ошибка генерации QR';
+            });
+          } else {
+            qrContainer.innerHTML = '<span style="color:var(--text-muted);">Загрузка библиотеки QR…</span>';
+            setTimeout(function() {
+              qrContainer.innerHTML = '<img id="qr-code-image" alt="QR-код" style="max-width:220px;height:auto;">';
+              drawQr();
+            }, 500);
+          }
+        }
+        drawQr();
+      });
+      document.getElementById('close-qr-modal').addEventListener('click', () => { document.getElementById('qr-modal').style.display = 'none'; });
+      window.addEventListener('click', function(e) { if (e.target.id === 'qr-modal') document.getElementById('qr-modal').style.display = 'none'; });
+      document.getElementById('qr-copy-link').addEventListener('click', function() {
+        const input = document.getElementById('qr-link-input');
+        if (input && input.value) {
+          input.select();
+          document.execCommand('copy');
+          if (typeof showToast === 'function') showToast(); else alert('Ссылка скопирована');
+        }
+      });
+
+      // === Мини-отчёт по объектам (обход с пометками, выгрузка в Excel) ===
+      const miniReportNotes = {};
+      document.getElementById('show-mini-report').addEventListener('click', function(e) {
+        e.preventDefault();
+        const modal = document.getElementById('mini-report-modal');
+        const list = typeof getActiveObjects === 'function' ? getActiveObjects() : (OBJECTS || []).filter(function(o) { return !(archivedObjects || []).includes(o); });
+        if (list.length === 0) {
+          if (typeof showAlert === 'function') showAlert('Нет активных объектов для обхода.', 'Мини-отчёт'); return;
+        }
+        miniReportNotes._list = list;
+        miniReportNotes._index = 0;
+        function updateMiniReportUI() {
+          const idx = miniReportNotes._index;
+          const arr = miniReportNotes._list || [];
+          const addr = arr[idx] || '';
+          document.getElementById('mini-report-counter').textContent = 'Объект ' + (idx + 1) + ' из ' + arr.length;
+          document.getElementById('mini-report-addr').textContent = addr || '—';
+          document.getElementById('mini-report-note').value = miniReportNotes[addr] != null ? miniReportNotes[addr] : '';
+          document.getElementById('mini-report-prev').disabled = idx <= 0;
+          document.getElementById('mini-report-next').disabled = idx >= arr.length - 1;
+        }
+        function saveCurrentNote() {
+          const arr = miniReportNotes._list || [];
+          const addr = arr[miniReportNotes._index];
+          if (addr) miniReportNotes[addr] = (document.getElementById('mini-report-note').value || '').trim();
+        }
+        updateMiniReportUI();
+        modal.style.display = 'flex';
+        document.getElementById('mini-report-prev').onclick = function() {
+          saveCurrentNote();
+          if (miniReportNotes._index > 0) { miniReportNotes._index--; updateMiniReportUI(); }
+        };
+        document.getElementById('mini-report-next').onclick = function() {
+          saveCurrentNote();
+          if (miniReportNotes._index < (miniReportNotes._list.length - 1)) { miniReportNotes._index++; updateMiniReportUI(); }
+        };
+        document.getElementById('mini-report-note').oninput = document.getElementById('mini-report-note').onblur = function() {
+          var addr = (miniReportNotes._list || [])[miniReportNotes._index];
+          if (addr) miniReportNotes[addr] = (document.getElementById('mini-report-note').value || '').trim();
+        };
+      });
+      document.getElementById('close-mini-report').addEventListener('click', function() { document.getElementById('mini-report-modal').style.display = 'none'; });
+      window.addEventListener('click', function(e) { if (e.target.id === 'mini-report-modal') document.getElementById('mini-report-modal').style.display = 'none'; });
+      document.getElementById('mini-report-download-excel').addEventListener('click', function() {
+        var arr = miniReportNotes._list || [];
+        var idx = miniReportNotes._index;
+        var addr = arr[idx];
+        if (addr) miniReportNotes[addr] = (document.getElementById('mini-report-note').value || '').trim();
+        arr = miniReportNotes._list || [];
+        const rows = arr.map(function(addr) { return { 'Объект': addr, 'Пометка': miniReportNotes[addr] != null ? miniReportNotes[addr] : '', 'Дата проверки': new Date().toLocaleDateString('ru-RU') }; });
+        if (typeof XLSX === 'undefined') { if (typeof showAlert === 'function') showAlert('Библиотека Excel не загружена.', 'Ошибка'); return; }
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Пометки по объектам');
+        XLSX.writeFile(wb, 'mini_otchet_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+        if (typeof showToast === 'function') showToast(); else alert('Файл скачан');
       });
 
       // === Шаблоны объектов ===
@@ -12153,166 +12466,6 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           showToast('Отчет TXT скачан');
-        };
-
-        // Обработчик скачивания PDF
-        document.getElementById('download-report-pdf').onclick = () => {
-          try {
-            if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-              showAlert('Библиотека PDF не загружена. Обновите страницу и подождите загрузки библиотек.', 'Ошибка');
-              return;
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const margin = 20;
-            let yPos = margin;
-            const lineHeight = 6;
-            const titleLineHeight = 8;
-            const maxWidth = pageWidth - 2 * margin;
-            
-            function addPageIfNeeded(requiredSpace) {
-              if (yPos + requiredSpace > pageHeight - margin) {
-                doc.addPage();
-                yPos = margin;
-                return true;
-              }
-              return false;
-            }
-            
-            // Заголовок
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0, 0, 0);
-            doc.text('ОТЧЕТ ПО КОММЕНТАРИЯМ', pageWidth / 2, yPos, { align: 'center' });
-            yPos += titleLineHeight;
-            doc.setFontSize(14);
-            doc.text('РЕЕСТРА ОБЪЕКТОВ КАПИТАЛЬНОГО РЕМОНТА', pageWidth / 2, yPos, { align: 'center' });
-            yPos += titleLineHeight * 1.5;
-            
-            // Дата
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Дата формирования: ${new Date().toLocaleString('ru-RU')}`, pageWidth / 2, yPos, { align: 'center' });
-            yPos += titleLineHeight * 1.5;
-            
-            // Раздел: Комментарии к объектам
-            addPageIfNeeded(titleLineHeight * 2);
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0, 0, 0);
-            doc.text('КОММЕНТАРИИ К ОБЪЕКТАМ', margin, yPos);
-            yPos += titleLineHeight;
-            
-            // Линия под заголовком
-            doc.setDrawColor(200, 200, 200);
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-            yPos += lineHeight * 1.5;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            
-            const objectComments = window.currentReportData.objectComments.filter(obj => obj.Комментарий);
-            if (objectComments.length === 0) {
-              doc.setTextColor(150, 150, 150);
-              doc.text('Нет комментариев к объектам', margin, yPos);
-              yPos += lineHeight * 2;
-            } else {
-              objectComments.forEach((obj, idx) => {
-                addPageIfNeeded(lineHeight * 5);
-                
-                doc.setTextColor(0, 0, 0);
-                doc.setFont('helvetica', 'bold');
-                doc.text(`Объект: ${obj.Объект}`, margin, yPos);
-                yPos += lineHeight;
-                
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(50, 50, 50);
-                const commentLines = doc.splitTextToSize(`Комментарий: ${obj.Комментарий}`, maxWidth);
-                commentLines.forEach(line => {
-                  addPageIfNeeded(lineHeight);
-                  doc.text(line, margin, yPos);
-                  yPos += lineHeight;
-                });
-                
-                if (obj.Метка) {
-                  doc.text(`Метка: ${obj.Метка}`, margin, yPos);
-                  yPos += lineHeight;
-                }
-                if (obj.Срок) {
-                  doc.text(`Срок: ${obj.Срок}`, margin, yPos);
-                  yPos += lineHeight;
-                }
-                
-                yPos += lineHeight * 0.5;
-                
-                if (idx < objectComments.length - 1) {
-                  doc.setDrawColor(240, 240, 240);
-                  doc.line(margin, yPos, pageWidth - margin, yPos);
-                  yPos += lineHeight;
-                }
-              });
-            }
-            
-            // Раздел: Комментарии в ячейках
-            addPageIfNeeded(titleLineHeight * 2);
-            yPos += lineHeight;
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0, 0, 0);
-            doc.text('КОММЕНТАРИИ В ЯЧЕЙКАХ ДОКУМЕНТОВ', margin, yPos);
-            yPos += titleLineHeight;
-            
-            doc.setDrawColor(200, 200, 200);
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-            yPos += lineHeight * 1.5;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            
-            const cellComments = window.currentReportData.cellComments;
-            if (cellComments.length === 0) {
-              doc.setTextColor(150, 150, 150);
-              doc.text('Нет комментариев в ячейках документов', margin, yPos);
-            } else {
-              cellComments.forEach((item, idx) => {
-                addPageIfNeeded(lineHeight * 4);
-                
-                doc.setTextColor(0, 0, 0);
-                doc.setFont('helvetica', 'bold');
-                doc.text(`Объект: ${item.Объект}`, margin, yPos);
-                yPos += lineHeight;
-                
-                doc.setFont('helvetica', 'normal');
-                doc.text(`Документ: ${item.Документ}`, margin, yPos);
-                yPos += lineHeight;
-                
-                doc.setTextColor(50, 50, 50);
-                const commentLines = doc.splitTextToSize(`Комментарий: ${item.Комментарий}`, maxWidth);
-                commentLines.forEach(line => {
-                  addPageIfNeeded(lineHeight);
-                  doc.text(line, margin, yPos);
-                  yPos += lineHeight;
-                });
-                
-                yPos += lineHeight * 0.5;
-                
-                if (idx < cellComments.length - 1) {
-                  doc.setDrawColor(240, 240, 240);
-                  doc.line(margin, yPos, pageWidth - margin, yPos);
-                  yPos += lineHeight;
-                }
-              });
-            }
-            
-            doc.save(`отчет_комментарии_${new Date().toISOString().slice(0, 10)}.pdf`);
-            showToast('Отчет PDF скачан');
-          } catch (e) {
-            showAlert('Ошибка при создании PDF: ' + (e.message || e), 'Ошибка');
-          }
         };
 
         // Обработчик скачивания Excel
