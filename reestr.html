@@ -2235,6 +2235,7 @@
     .event-row[draggable="true"] { cursor: grab; }
     .event-row.event-dragging { opacity: 0.6; }
     .calendar-day.calendar-day-drag-over { background: var(--accent-glow); outline: 2px dashed var(--accent); }
+    .calendar-day.calendar-day-no-match { opacity: 0.4; }
 
     @media (max-width: 900px) {
       .calendar-sidebar {
@@ -3266,11 +3267,24 @@
     .timeline-mini .bar.overdue { background: var(--danger); }
     .timeline-mini .bar.soon { background: var(--warning); }
     .sidebar-count { font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+    .shortcuts-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .shortcuts-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .breadcrumbs-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 0; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border); margin-bottom: 8px; min-height: 36px; }
+    .breadcrumbs-bar a { color: var(--accent); text-decoration: none; }
+    .breadcrumbs-bar a:hover { text-decoration: underline; }
+    .breadcrumbs-bar span { color: var(--text-muted); }
+    .main-filters-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0 12px; margin-bottom: 4px; }
+    .filter-pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border); transition: var(--transition); }
+    .filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .save-indicator { padding: 8px 14px; gap: 8px; border-radius: 8px; width: auto; min-width: 120px; }
+    .save-indicator .save-indicator-text { font-size: 13px; font-weight: 500; }
     .subcontractors-warning-badge { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 2px 8px; border-radius: 6px; background: rgba(234, 179, 8, 0.2); color: #b45309; font-size: 12px; }
     .subcontractors-warning-badge .warn-icon { color: #b45309; font-weight: bold; }
     .subcontractors-warning-badge-inline { font-size: 11px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; font-weight: 300; }
     .pinned-badge { color: var(--warning); font-size: 12px; margin-left: 4px; }
     .object-group-label { font-size: 11px; color: var(--text-muted); padding: 4px 8px; text-transform: uppercase; }
+    .selector-sort-select { padding: 6px 8px; font-size: 11px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); margin-right: 6px; max-width: 120px; }
 
     /* === Субподрядчики (стиль Alfa-Bank) === */
     .subcontractors-container {
@@ -3913,6 +3927,13 @@
       <div class="search-results" id="search-results" role="listbox"></div>
     </div>
     <div class="selector-container">
+      <select id="selector-sort" class="selector-sort-select" title="Сортировка объектов" aria-label="Сортировка">
+        <option value="attention">По вниманию</option>
+        <option value="name">По имени</option>
+        <option value="deadline">По сроку</option>
+        <option value="tag">По метке</option>
+        <option value="progress">По прогрессу</option>
+      </select>
       <div class="selector-wrapper" id="selector-wrapper">
         <div class="selector-display" id="selector-display" tabindex="0" role="button" aria-label="Выбор объекта">Выберите объект...</div>
         <div class="selector-list" id="selector-list"></div>
@@ -3924,8 +3945,17 @@
     </div>
     <a href="#" class="dashboard-link" id="show-dashboard">dashboard</a>
     <button type="button" id="quick-create-note" class="quick-note-btn" title="Создать заметку" aria-label="Создать заметку"><span class="material-icons" style="font-size:18px">note_add</span></button>
+    <button type="button" id="btn-shortcuts" class="shortcuts-btn" title="Горячие клавиши (Ctrl+Shift+/)">?</button>
     <span class="header-badge overdue" id="header-overdue-badge" style="display:none;" title="Просроченные объекты">0</span>
-    <div class="save-indicator" id="save-indicator" aria-hidden="true"><svg class="check" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7"/></svg></div>
+    <div class="save-indicator" id="save-indicator" aria-hidden="true"><svg class="check" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7"/></svg><span class="save-indicator-text">Сохранено</span></div>
+  </div>
+  <div class="breadcrumbs-bar" id="breadcrumbs-bar"></div>
+  <div class="main-filters-bar" id="main-filters-bar">
+    <span class="filter-pill active" data-filter="all">Все</span>
+    <span class="filter-pill" data-filter="priority">Приоритет</span>
+    <span class="filter-pill" data-filter="done">Завершён</span>
+    <span class="filter-pill" data-filter="overdue">Просрочено</span>
+    <span class="filter-pill" data-filter="this_week">На этой неделе</span>
   </div>
   <div class="recent-objects" id="recent-objects"></div>
   <div class="deadline-reminders" id="deadline-reminders"></div>
@@ -3942,6 +3972,7 @@
       <li><a href="#" id="show-calendar" title="Календарь событий">Календарь <span class="sidebar-count" id="sidebar-calendar-count"></span></a></li>
       <li><a href="#" id="btn-download-report" title="Скачать отчет с комментариями">Скачать отчет</a></li>
       <li><a href="#" id="show-reminders" title="Умные напоминания">Создать напоминание <span class="sidebar-count" id="sidebar-reminders-count"></span></a></li>
+      <li><a href="#" id="sidebar-overdue-link" title="Просроченные сроки и напоминания" style="display:none;">Просрочено: <span class="sidebar-count sidebar-overdue-count" id="sidebar-overdue-count">0</span></a></li>
       <li><a href="#" id="create-note" title="Создать стикер-заметку">Создать заметку</a></li>
       <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap" title="Дорожная карта по этапам">Дорожная карта объектов</a></li>
       <li><a href="#" id="show-data" class="sidebar-item-data" title="Справочная информация по объектам">Справочная информация</a></li>
@@ -3966,6 +3997,7 @@
     <ul class="collapsible-content" id="system-menu" style="display: none;">
       <li><a href="#" class="full-mode-only" id="btn-export">Экспорт в TXT</a></li>
       <li><a href="#" class="full-mode-only" id="btn-import">Импорт из TXT</a></li>
+      <li><a href="#" id="btn-backup" title="Скачать полную копию реестра (JSON)">Скачать бэкап</a></li>
       <li><a href="#" id="btn-toggle-notes" title="Скрыть или показать стикер-заметки">Скрыть заметки</a></li>
       <li><a href="#" id="show-archived" class="full-mode-only" title="Архивные объекты">Архив</a></li>
       <li><a href="#" id="btn-toggle-theme">Тема: как в системе</a></li>
@@ -4221,6 +4253,20 @@
         <input type="date" id="batch-deadline" style="width:100%;padding:8px 12px;margin-top:4px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">
       </div>
       <button type="button" id="batch-apply" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">Применить</button>
+    </div>
+  </div>
+  <div class="history-modal shortcuts-modal" id="shortcuts-modal" style="display:none;">
+    <div class="history-content" style="max-width:420px;">
+      <span class="close-modal" id="close-shortcuts">&times;</span>
+      <h2>Горячие клавиши</h2>
+      <ul class="shortcuts-list" style="list-style:none;padding:0;margin:0;font-size:13px;">
+        <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+K</kbd> Поиск</li>
+        <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+Shift+/</kbd> Эта справка</li>
+        <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+F</kbd> Избранные</li>
+        <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+T</kbd> Шаблоны</li>
+        <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+D</kbd> Дублировать объект</li>
+        <li style="display:flex;justify-content:space-between;padding:8px 0;"><kbd style="background:var(--bg-input);padding:4px 8px;border-radius:4px;">Ctrl+S</kbd> Сохранить</li>
+      </ul>
     </div>
   </div>
   <div class="history-modal reminders-modal" id="reminders-modal" style="display:none;">
@@ -4720,6 +4766,7 @@
         <button type="button" class="calendar-btn calendar-next" id="calendar-next-month" title="Следующий месяц">▶</button>
       </div>
       <div class="calendar-actions">
+        <input type="text" id="calendar-events-search" class="calendar-search-input" placeholder="Поиск по событиям..." autocomplete="off" style="max-width:160px;padding:6px 10px;font-size:12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);">
         <button type="button" class="calendar-btn calendar-today" id="calendar-today" title="Перейти к сегодня">Сегодня</button>
         <button type="button" class="calendar-btn" id="calendar-print-btn" title="Печать или PDF календаря">Печать / PDF</button>
         <div class="calendar-month-year">
@@ -5312,6 +5359,8 @@
       const undoStack = [];
       const UNDO_MAX = 50;
       function getActiveObjects() { return OBJECTS.filter(o => !archivedObjects.includes(o)); }
+      let objectSortOrder = localStorage.getItem('objectSortOrder') || 'attention';
+      let currentObjectFilter = localStorage.getItem('objectFilter') || 'all';
       /** Робот: порядок «сначала требуют внимания» — просрочено, на этой неделе, без метки, закреплённые, остальные */
       function getObjectsSortedByAttention() {
         const today = new Date().toISOString().slice(0, 10);
@@ -5331,6 +5380,45 @@
           if (pinA >= 0 && pinB >= 0) return pinA - pinB;
           return a.localeCompare(b);
         });
+      }
+      function getFilteredObjectList() {
+        const today = new Date().toISOString().slice(0, 10);
+        const weekEnd = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+        let list = getActiveObjects().slice();
+        if (currentObjectFilter === 'priority') list = list.filter(a => (data[a]?.tag || '').trim() === 'Приоритет');
+        else if (currentObjectFilter === 'done') list = list.filter(a => (data[a]?.tag || '').trim() === 'Завершён');
+        else if (currentObjectFilter === 'overdue') list = list.filter(a => (data[a]?.deadline || '') && data[a].deadline < today);
+        else if (currentObjectFilter === 'this_week') list = list.filter(a => (data[a]?.deadline || '') && data[a].deadline >= today && data[a].deadline <= weekEnd);
+        return list;
+      }
+      function getObjectsSortedBy(sortKey, list) {
+        if (!list) list = getFilteredObjectList().slice();
+        const today = new Date().toISOString().slice(0, 10);
+        const pinned = list.filter(a => pinnedObjectIds.indexOf(a) >= 0);
+        const rest = list.filter(a => pinnedObjectIds.indexOf(a) < 0);
+        if (sortKey === 'name') rest.sort((a, b) => a.localeCompare(b));
+        else if (sortKey === 'deadline') rest.sort((a, b) => (data[a]?.deadline || '').localeCompare(data[b]?.deadline || ''));
+        else if (sortKey === 'tag') rest.sort((a, b) => (data[a]?.tag || '').localeCompare(data[b]?.tag || ''));
+        else if (sortKey === 'progress') {
+          rest.sort((a, b) => {
+            const mainA = Array.isArray(data[a]?.mainDocs) ? data[a].mainDocs.length : 0, extraA = Array.isArray(data[a]?.extraDocs) ? data[a].extraDocs.length : 0;
+            const mainB = Array.isArray(data[b]?.mainDocs) ? data[b].mainDocs.length : 0, extraB = Array.isArray(data[b]?.extraDocs) ? data[b].extraDocs.length : 0;
+            const totalA = mainA + extraA, totalB = mainB + extraB;
+            const stateA = data[a]?.main || [], stateB = data[b]?.main || [];
+            const checkedA = (stateA.filter(x => x?.checked).length) + ((data[a]?.extra || []).filter(x => x?.checked).length);
+            const checkedB = (stateB.filter(x => x?.checked).length) + ((data[b]?.extra || []).filter(x => x?.checked).length);
+            const pctA = totalA ? checkedA / totalA : 0, pctB = totalB ? checkedB / totalB : 0;
+            return pctA - pctB;
+          });
+        } else rest.sort((a, b) => {
+          const dA = data[a]?.deadline || '', dB = data[b]?.deadline || '';
+          const overdueA = dA && dA < today ? 1 : 0, overdueB = dB && dB < today ? 1 : 0;
+          if (overdueA !== overdueB) return overdueB - overdueA;
+          const weekA = dA && dA >= today && dA <= new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10) ? 1 : 0, weekB = dB && dB >= today && dB <= new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10) ? 1 : 0;
+          if (weekA !== weekB) return weekB - weekA;
+          return (data[a]?.tag || '').localeCompare(data[b]?.tag || '') || a.localeCompare(b);
+        });
+        return pinned.concat(rest);
       }
       function savePinned() { localStorage.setItem('pinnedObjectIds', JSON.stringify(pinnedObjectIds)); }
       function saveArchived() { localStorage.setItem('archivedObjects', JSON.stringify(archivedObjects)); }
@@ -6059,7 +6147,7 @@
       }
       function syncSelectorNativeOptions() {
         const current = selector.value;
-        const list = getObjectsSortedByAttention();
+        const list = getObjectsSortedBy(objectSortOrder);
         selector.innerHTML = '<option value="">Выберите объект...</option>';
         list.forEach(obj => {
           const opt = document.createElement('option');
@@ -6073,7 +6161,7 @@
 
       function fillSelectorList() {
         syncSelectorNativeOptions();
-        const list = getObjectsSortedByAttention();
+        const list = getObjectsSortedBy(objectSortOrder);
         const byCity = {};
         list.forEach(obj => { const c = extractCity(obj); if (!byCity[c]) byCity[c] = []; byCity[c].push(obj); });
         const cities = Object.keys(byCity).sort();
@@ -6160,6 +6248,40 @@
         }
       }
 
+      const selectorSortEl = document.getElementById('selector-sort');
+      if (selectorSortEl) {
+        selectorSortEl.value = objectSortOrder;
+        selectorSortEl.addEventListener('change', () => {
+          objectSortOrder = selectorSortEl.value;
+          localStorage.setItem('objectSortOrder', objectSortOrder);
+          fillSelectorList();
+          populateSelector();
+        });
+      }
+      document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          currentObjectFilter = pill.dataset.filter || 'all';
+          localStorage.setItem('objectFilter', currentObjectFilter);
+          document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          const list = getObjectsSortedBy(objectSortOrder);
+          if (selector.value && list.indexOf(selector.value) < 0 && list.length > 0) {
+            selector.value = list[0];
+            updateSelectorDisplay();
+            renderObject(list[0]);
+            if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', list[0]);
+          }
+          fillSelectorList();
+          populateSelector();
+        });
+      });
+      const mainFiltersBar = document.getElementById('main-filters-bar');
+      if (mainFiltersBar) {
+        mainFiltersBar.querySelectorAll('.filter-pill').forEach(function(p) {
+          var f = p.dataset.filter || 'all';
+          p.classList.toggle('active', f === currentObjectFilter);
+        });
+      }
       selectorDisplay.addEventListener('click', (e) => {
         e.stopPropagation();
         selectorWrapper.classList.toggle('open');
@@ -6173,7 +6295,7 @@
       // === Заполнить селектор (нативный select для значения) ===
       function populateSelector() {
         selector.innerHTML = '<option value="">Выберите объект...</option>';
-        getObjectsSortedByAttention().forEach(obj => {
+        getObjectsSortedBy(objectSortOrder).forEach(obj => {
           const opt = document.createElement('option');
           opt.value = obj;
           opt.textContent = obj;
@@ -6612,8 +6734,14 @@
       function updateSidebarCounts() {
         const calCount = document.getElementById('sidebar-calendar-count');
         const remCount = document.getElementById('sidebar-reminders-count');
+        const overdueCountEl = document.getElementById('sidebar-overdue-count');
+        const overdueLinkEl = document.getElementById('sidebar-overdue-link');
+        const today = new Date().toISOString().slice(0, 10);
+        const overdueCount = getActiveObjects().filter(a => data[a]?.deadline && data[a].deadline < today).length + (smartReminders || []).filter(r => r.date && r.date < today).length;
         if (calCount) { const n = Object.keys(calendarData || {}).length; calCount.textContent = n ? `(${n})` : ''; }
-        if (remCount) { const n = (smartReminders || []).filter(r => r.date && r.date >= new Date().toISOString().slice(0, 10)).length; remCount.textContent = n ? `(${n})` : ''; }
+        if (remCount) { const n = (smartReminders || []).filter(r => r.date && r.date >= today).length; remCount.textContent = n ? `(${n})` : ''; }
+        if (overdueCountEl) overdueCountEl.textContent = overdueCount;
+        if (overdueLinkEl) { overdueLinkEl.style.display = overdueCount > 0 ? 'inline' : 'none'; overdueLinkEl.onclick = (e) => { e.preventDefault(); document.getElementById('deadline-reminders')?.scrollIntoView?.({ behavior: 'smooth' }); }; }
       }
 
       // === Модалка «Умные напоминания» ===
@@ -7359,6 +7487,11 @@
             data[addr] = data[addr] || {};
             data[addr].deadline = deadlineInput.value || '';
             localStorage.setItem('registryData', JSON.stringify(data));
+            const today = new Date().toISOString().slice(0, 10);
+            if (deadlineInput.value && deadlineInput.value < today) {
+              const t = document.getElementById('toast');
+              if (t) { t.textContent = 'Дата в прошлом'; t.classList.add('toast-error'); t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); t.classList.remove('toast-error'); t.textContent = ''; }, 2500); }
+            }
             renderDeadlineReminders();
             showToast();
             if (deadlineInput.value) {
@@ -7785,11 +7918,12 @@
           ind.classList.remove('show');
           void ind.offsetWidth;
           ind.classList.add('show');
-          setTimeout(() => ind.classList.remove('show'), 1800);
+          setTimeout(() => ind.classList.remove('show'), 2500);
         }
       }
 
       // === Календарь ===
+      let calendarSearchQuery = '';
       const MONTH_NAMES = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
       const MONTH_NAMES_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
       const today = new Date();
@@ -7924,7 +8058,13 @@
           dayEl.innerHTML = '<span class="num">' + day + '</span><div class="day-events"></div>';
 
           const eventsWrap = dayEl.querySelector('.day-events');
-          const events = calendarData[dateKey] || [];
+          let events = calendarData[dateKey] || [];
+          if (calendarSearchQuery && calendarSearchQuery.trim()) {
+            events = events.filter(ev => searchIncludesAll((ev.text || '') + ' ' + (ev.time || ''), calendarSearchQuery.trim()));
+            if (events.length === 0) dayEl.classList.add('calendar-day-no-match');
+          } else {
+            dayEl.classList.remove('calendar-day-no-match');
+          }
           events.forEach((event, idx) => {
             const row = document.createElement('div');
             row.className = 'event-row';
@@ -8205,6 +8345,14 @@
         currentMonth = t.getMonth();
         renderCalendar();
       });
+
+      const calendarEventsSearchEl = document.getElementById('calendar-events-search');
+      if (calendarEventsSearchEl) {
+        calendarEventsSearchEl.addEventListener('input', () => {
+          calendarSearchQuery = calendarEventsSearchEl.value || '';
+          renderCalendar();
+        });
+      }
 
       document.getElementById('calendar-print-btn').addEventListener('click', () => {
         const firstDayOfWeek = getFirstDayOfMonth(currentYear, currentMonth);
@@ -14097,7 +14245,57 @@
         emptyState.style.display = 'block';
       }
 
-      function updateBreadcrumbs(view, objectName) {}
+      function updateBreadcrumbs(view, objectName) {
+        const bar = document.getElementById('breadcrumbs-bar');
+        if (!bar) return;
+        const items = [];
+        items.push({ name: 'Реестр', href: '#' });
+        if (view === 'main') {
+          items.push({ name: 'Объекты', href: '#' });
+          if (objectName) items.push({ name: objectName.length > 40 ? objectName.slice(0, 37) + '…' : objectName, href: '' });
+        } else if (view === 'calendar') items.push({ name: 'Календарь', href: '' });
+        else if (view === 'data') { items.push({ name: 'Справочная информация', href: '#' }); if (objectName) items.push({ name: objectName.slice(0, 40) + (objectName.length > 40 ? '…' : ''), href: '' }); }
+        else if (view === 'subcontractors') items.push({ name: 'Субподрядчики', href: '' });
+        else if (view === 'contractors') items.push({ name: 'Подрядчики', href: '' });
+        else if (view === 'roadmap') items.push({ name: 'Дорожная карта', href: '' });
+        else if (view === 'documents') items.push({ name: 'Документы', href: '' });
+        else if (view === 'responsible') items.push({ name: 'Связи ответственных', href: '' });
+        else if (view && view !== 'main') items.push({ name: view, href: '' });
+        bar.innerHTML = items.map((it, i) => i < items.length - 1
+          ? (it.href ? '<a href="' + it.href + '">' + escapeHtml(it.name) + '</a>' : '<span>' + escapeHtml(it.name) + '</span>') + ' <span aria-hidden="true">›</span> '
+          : '<span>' + escapeHtml(it.name) + '</span>').join('');
+        bar.querySelectorAll('a').forEach(a => {
+          a.addEventListener('click', (e) => { e.preventDefault(); if (a.getAttribute('href') === '#') { document.getElementById('registry-title')?.click(); } });
+        });
+      }
+
+      const shortcutsModal = document.getElementById('shortcuts-modal');
+      const closeShortcuts = document.getElementById('close-shortcuts');
+      if (document.getElementById('btn-shortcuts')) {
+        document.getElementById('btn-shortcuts').addEventListener('click', () => { if (shortcutsModal) shortcutsModal.style.display = 'flex'; });
+      }
+      if (closeShortcuts) closeShortcuts.addEventListener('click', () => { if (shortcutsModal) shortcutsModal.style.display = 'none'; });
+      if (shortcutsModal) shortcutsModal.addEventListener('click', e => { if (e.target === shortcutsModal) shortcutsModal.style.display = 'none'; });
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '/') {
+          e.preventDefault();
+          if (shortcutsModal) shortcutsModal.style.display = shortcutsModal.style.display === 'flex' ? 'none' : 'flex';
+        }
+      });
+
+      document.getElementById('btn-backup')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const keys = ['OBJECTS_LIST', 'registryData', 'calendarData', 'smartReminders', 'personsData', 'pinnedObjectIds', 'archivedObjects', 'subcontractorsList', 'contractorsList', 'managingCompaniesList', 'serviceOrgsList', 'fkrList', 'constructionControlList', 'dataRows', 'dataColumns', 'customTags', 'calendarLegendLabels', 'roadmapData', 'roadmapNotes', 'roadmapColumns', 'stickyNotes', 'historyLog'];
+        const backup = { exportedAt: new Date().toISOString(), data: {} };
+        keys.forEach(k => { try { const v = localStorage.getItem(k); if (v) backup.data[k] = JSON.parse(v); } catch (e) { backup.data[k] = localStorage.getItem(k); } });
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'reeestr_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast();
+      });
 
       // === Ctrl+K для поиска ===
       document.addEventListener('keydown', (e) => {
