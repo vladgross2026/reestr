@@ -3977,6 +3977,7 @@
       <li><a href="#" id="show-roadmap" class="sidebar-item-roadmap" title="Дорожная карта по этапам">Дорожная карта объектов</a></li>
       <li><a href="#" id="show-data" class="sidebar-item-data" title="Справочная информация по объектам">Справочная информация</a></li>
       <li><a href="#" id="show-documents" title="Загруженные документы и файлы">Документы</a></li>
+      <li><a href="#" id="show-documents-search" title="Поиск документов по объектам">Поиск документов</a></li>
       <li><a href="#" id="show-acts-signing" title="Связи ответственных по документам">Связи ответственных</a></li>
       <li><a href="#" id="show-dashboard-sidebar" title="Сводка по документам">Сводка</a></li>
       <li><a href="#" id="show-analytics" title="Аналитика и прогнозы">Аналитика</a></li>
@@ -4754,6 +4755,37 @@
     </div>
     <div class="documents-list" id="documents-list">
       <p class="documents-empty" id="documents-empty">Нет загруженных документов. Нажмите «Загрузить файлы» для добавления.</p>
+    </div>
+  </div>
+
+  <div class="history-modal" id="documents-search-modal" style="display:none;">
+    <div class="history-content" style="max-width:1000px;max-height:90vh;display:flex;flex-direction:column;">
+      <span class="close-modal" id="documents-search-close">&times;</span>
+      <h2>Поиск документов по объектам</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Выберите документы и отметьте галочкой «есть» или «нет» — есть ли документ у объекта. Состояние сохраняется автоматически.</p>
+      <div style="display:flex;flex-direction:column;gap:16px;flex:1;overflow:hidden;">
+        <div>
+          <label style="display:block;margin-bottom:8px;font-size:13px;font-weight:500;">Поиск документов:</label>
+          <input type="text" id="documents-search-docs-input" placeholder="Введите название документа для поиска..." autocomplete="off" style="width:100%;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);font-size:13px;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;overflow:hidden;">
+          <div style="display:flex;flex-direction:column;overflow:hidden;">
+            <div style="margin-bottom:8px;font-size:13px;font-weight:500;">Выберите документы:</div>
+            <div id="documents-search-docs-list" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;background:var(--bg-card);">
+              <!-- Список документов будет здесь -->
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;overflow:hidden;">
+            <div style="margin-bottom:8px;font-size:13px;font-weight:500;">Объекты с выбранными документами:</div>
+            <div id="documents-search-objects-list" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;background:var(--bg-card);">
+              <!-- Список объектов будет здесь -->
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border);">
+          <button type="button" class="btn-secondary" id="documents-search-close-btn">Закрыть</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -5684,65 +5716,76 @@
 
       // Скрыть все панели (Документы, УК, ОК, Сводка и т.д.) и показать основной контент
       function hideAllPanelsShowMain() {
-        calendarContainer.style.display = 'none';
-        dataContainer.style.display = 'none';
-        roadmapContainer.style.display = 'none';
-        subcontractorsContainer.style.display = 'none';
+        if (calendarContainer) calendarContainer.style.display = 'none';
+        if (dataContainer) dataContainer.style.display = 'none';
+        if (roadmapContainer) roadmapContainer.style.display = 'none';
+        if (subcontractorsContainer) subcontractorsContainer.style.display = 'none';
         if (contractorsContainer) contractorsContainer.style.display = 'none';
-        responsibleConnectionsContainer.style.display = 'none';
+        if (responsibleConnectionsContainer) responsibleConnectionsContainer.style.display = 'none';
         const documentsContainerEl = document.getElementById('documents-container');
         if (documentsContainerEl) documentsContainerEl.style.display = 'none';
         ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'none';
         });
-        container.style.display = 'block';
-        emptyState.style.display = 'block';
+        if (container) container.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'block';
       }
 
       // === Кнопка РЕЕСТР ===
       function goToMainScreen() {
         hideAllPanelsShowMain();
-        selector.value = '';
-        updateSelectorDisplay();
-        renderObject(null);
+        if (selector) selector.value = '';
+        if (typeof updateSelectorDisplay === 'function') updateSelectorDisplay();
+        if (typeof renderObject === 'function') renderObject(null);
       }
-      registryTitle.addEventListener('click', goToMainScreen);
+      if (registryTitle) {
+        registryTitle.addEventListener('click', goToMainScreen);
+      }
 
       // === Hamburger ===
       const hamburger = document.getElementById('hamburger');
       const sidebar = document.getElementById('sidebar');
       const sidebarClose = document.getElementById('sidebar-close');
 
-      document.getElementById('sidebar-reestr').addEventListener('click', (e) => {
-        e.preventDefault();
-        goToMainScreen();
-        hamburger.classList.remove('open');
-        sidebar.classList.remove('open');
-      });
+      const sidebarReestrBtn = document.getElementById('sidebar-reestr');
+      if (sidebarReestrBtn) {
+        sidebarReestrBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          goToMainScreen();
+          if (hamburger) hamburger.classList.remove('open');
+          if (sidebar) sidebar.classList.remove('open');
+        });
+      }
 
-      hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('open');
-        sidebar.classList.toggle('open');
-        if (typeof updateSubcontractorsWarningBadge === 'function') updateSubcontractorsWarningBadge();
-      });
-      sidebarClose.addEventListener('click', () => {
-        hamburger.classList.remove('open');
-        sidebar.classList.remove('open');
-      });
+      if (hamburger) {
+        hamburger.addEventListener('click', () => {
+          hamburger.classList.toggle('open');
+          if (sidebar) sidebar.classList.toggle('open');
+          if (typeof updateSubcontractorsWarningBadge === 'function') updateSubcontractorsWarningBadge();
+        });
+      }
+      if (sidebarClose) {
+        sidebarClose.addEventListener('click', () => {
+          if (hamburger) hamburger.classList.remove('open');
+          if (sidebar) sidebar.classList.remove('open');
+        });
+      }
       document.addEventListener('click', e => {
-        if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+        if (sidebar && hamburger && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
           hamburger.classList.remove('open');
           sidebar.classList.remove('open');
         }
       });
-      sidebar.addEventListener('click', e => {
-        const link = e.target.closest('a[href="#"]');
-        if (link && !link.closest('#system-menu')) {
-          hamburger.classList.remove('open');
-          sidebar.classList.remove('open');
-        }
-      });
+      if (sidebar) {
+        sidebar.addEventListener('click', e => {
+          const link = e.target.closest('a[href="#"]');
+          if (link && !link.closest('#system-menu')) {
+            if (hamburger) hamburger.classList.remove('open');
+            sidebar.classList.remove('open');
+          }
+        });
+      }
 
       // === Escape закрывает модалки и боковое меню ===
       // === Горячие клавиши ===
@@ -5988,14 +6031,20 @@
         createStickyNote(x, y, '', id, 1, 14, 'yellow');
       }
 
-      document.getElementById('create-note').addEventListener('click', (e) => {
-        e.preventDefault();
-        doCreateNote();
-      });
-      document.getElementById('quick-create-note').addEventListener('click', (e) => {
-        e.preventDefault();
-        doCreateNote();
-      });
+      const createNoteBtn = document.getElementById('create-note');
+      if (createNoteBtn) {
+        createNoteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof doCreateNote === 'function') doCreateNote();
+        });
+      }
+      const quickCreateNoteBtn = document.getElementById('quick-create-note');
+      if (quickCreateNoteBtn) {
+        quickCreateNoteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof doCreateNote === 'function') doCreateNote();
+        });
+      }
 
       renderStickyNotes();
 
@@ -6023,14 +6072,19 @@
       // === Сворачиваемая секция "Настройки" ===
       const systemToggle = document.getElementById('system-toggle');
       const systemMenu = document.getElementById('system-menu');
-      systemToggle.addEventListener('click', () => {
-        systemToggle.classList.toggle('open');
-        if (systemMenu.style.display === 'none') {
-          systemMenu.style.display = 'block';
-        } else {
-          systemMenu.style.display = 'none';
+      if (systemToggle && systemMenu) {
+        if (!systemToggle._toggleHandlerAttached) {
+          systemToggle._toggleHandlerAttached = true;
+          systemToggle.addEventListener('click', () => {
+            systemToggle.classList.toggle('open');
+            if (systemMenu.style.display === 'none') {
+              systemMenu.style.display = 'block';
+            } else {
+              systemMenu.style.display = 'none';
+            }
+          });
         }
-      });
+      }
 
       const dataSectionToggle = document.getElementById('data-section-toggle');
       const dataSectionMenu = document.getElementById('data-section-menu');
@@ -6306,34 +6360,60 @@
       populateSelector();
 
       // === Режим наблюдателя / полный режим ===
-      document.getElementById('admin-login-btn').addEventListener('click', async () => {
-        const pwd = document.getElementById('admin-password');
-        if (pwd && pwd.value === 'grossadmin') {
-          isFullMode = true;
-          pwd.value = '';
-          if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            loadFromSupabase().then(imported => { if (imported) applyImportedData(imported); });
-            if (supabaseSaveIntervalId) clearInterval(supabaseSaveIntervalId);
-            supabaseSaveIntervalId = setInterval(() => saveToSupabase(), 15000);
-          }
-          updateObserverUI();
-        } else {
-          await showAlert('Неверный пароль.', 'Ошибка');
+      const adminLoginBtn = document.getElementById('admin-login-btn');
+      const adminPassword = document.getElementById('admin-password');
+      const adminLogoutBtn = document.getElementById('admin-logout-btn');
+      
+      if (adminLoginBtn) {
+        if (!adminLoginBtn._handlerAttached) {
+          adminLoginBtn._handlerAttached = true;
+          adminLoginBtn.addEventListener('click', async () => {
+            if (!adminPassword) {
+              await showAlert('Поле пароля не найдено.', 'Ошибка');
+              return;
+            }
+            if (adminPassword.value === 'grossadmin') {
+              isFullMode = true;
+              adminPassword.value = '';
+              if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+                if (typeof loadFromSupabase === 'function') {
+                  loadFromSupabase().then(imported => { if (imported && typeof applyImportedData === 'function') applyImportedData(imported); });
+                }
+                if (supabaseSaveIntervalId) clearInterval(supabaseSaveIntervalId);
+                supabaseSaveIntervalId = setInterval(() => { if (typeof saveToSupabase === 'function') saveToSupabase(); }, 15000);
+              }
+              if (typeof updateObserverUI === 'function') updateObserverUI();
+            } else {
+              await showAlert('Неверный пароль.', 'Ошибка');
+            }
+          });
         }
-      });
-      document.getElementById('admin-password').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
-      });
-      document.getElementById('admin-logout-btn').addEventListener('click', () => {
-        if (supabaseSaveIntervalId) {
-          clearInterval(supabaseSaveIntervalId);
-          supabaseSaveIntervalId = null;
+      }
+      
+      if (adminPassword) {
+        if (!adminPassword._handlerAttached) {
+          adminPassword._handlerAttached = true;
+          adminPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && adminLoginBtn) adminLoginBtn.click();
+          });
         }
-        if (isFullMode && SUPABASE_URL && SUPABASE_ANON_KEY) saveToSupabase();
-        isFullMode = false;
-        updateObserverUI();
-      });
-      updateObserverUI();
+      }
+      
+      if (adminLogoutBtn) {
+        if (!adminLogoutBtn._handlerAttached) {
+          adminLogoutBtn._handlerAttached = true;
+          adminLogoutBtn.addEventListener('click', () => {
+            if (supabaseSaveIntervalId) {
+              clearInterval(supabaseSaveIntervalId);
+              supabaseSaveIntervalId = null;
+            }
+            if (isFullMode && SUPABASE_URL && SUPABASE_ANON_KEY && typeof saveToSupabase === 'function') saveToSupabase();
+            isFullMode = false;
+            if (typeof updateObserverUI === 'function') updateObserverUI();
+          });
+        }
+      }
+      if (typeof updateObserverUI === 'function') updateObserverUI();
 
       // === Добавить объект ===
       function findSimilarObjects(newName) {
@@ -6367,7 +6447,8 @@
             const msgEl = document.getElementById('custom-modal-message');
             const btnsEl = document.getElementById('custom-modal-buttons');
             titleEl.textContent = 'Похожий объект';
-            msgEl.innerHTML = 'Скопировать структуру документов и ответственных с объекта:<br><select id="similar-object-select" style="width:100%;margin-top:10px;padding:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">' +
+            const selectOptions = others.map(a => '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>').join('');
+            msgEl.innerHTML = 'Скопировать структуру документов и ответственных с объекта:<br><select id="similar-object-select" style="width:100%;margin-top:10px;padding:10px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:6px;">' + selectOptions +
               '<option value="">— не копировать —</option>' + similar.slice(0, 20).map(a => '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</option>').join('') + '</select>';
             msgEl.style.display = 'block';
             btnsEl.innerHTML = '<button type="button" class="btn-primary" id="similar-object-ok">Создать объект</button>';
@@ -6760,44 +6841,111 @@
           const row = document.createElement('div');
           row.className = 'reminder-row';
           const id = String(r.id || '');
-          row.innerHTML = '<span class="reminder-date">' + (r.date || '—') + '</span><span class="reminder-obj">' + (r.addr ? escapeHtml(r.addr) : 'Все') + '</span><span class="reminder-label">' + escapeHtml(r.label || '') + '</span>' + (r.note ? '<span style="color:var(--text-muted);">' + escapeHtml(r.note) + '</span>' : '') + '<span class="reminder-actions"><button type="button" class="reminder-del" data-id="' + escapeHtml(id) + '">Удалить</button></span>';
+          const dateStr = escapeHtml(r.date || '—');
+          const addrStr = r.addr ? escapeHtml(r.addr) : 'Все';
+          const labelStr = escapeHtml(r.label || '');
+          const noteStr = r.note ? escapeHtml(r.note) : '';
+          const idStr = escapeHtml(id);
+          row.innerHTML = '<span class="reminder-date">' + dateStr + '</span><span class="reminder-obj">' + addrStr + '</span><span class="reminder-label">' + labelStr + '</span>' + (r.note ? '<span style="color:var(--text-muted);">' + noteStr + '</span>' : '') + '<span class="reminder-actions"><button type="button" class="reminder-del" data-id="' + idStr + '">Удалить</button></span>';
           list.appendChild(row);
-          row.querySelector('.reminder-del').addEventListener('click', () => {
-            const toRemove = row.querySelector('.reminder-del').getAttribute('data-id');
-            smartReminders = smartReminders.filter(x => String(x.id || '') !== toRemove);
-            saveSmartReminders();
-            renderRemindersList();
-            renderDeadlineReminders();
-          });
+            const delBtn = row.querySelector('.reminder-del');
+            if (delBtn) {
+              if (!delBtn._handlerAttached) {
+                delBtn._handlerAttached = true;
+                delBtn.addEventListener('click', () => {
+                  const toRemove = delBtn.getAttribute('data-id');
+                  if (toRemove && typeof smartReminders !== 'undefined') {
+                    smartReminders = smartReminders.filter(x => String(x.id || '') !== toRemove);
+                    if (typeof saveSmartReminders === 'function') saveSmartReminders();
+                    if (typeof renderRemindersList === 'function') renderRemindersList();
+                    if (typeof renderDeadlineReminders === 'function') renderDeadlineReminders();
+                  }
+                });
+              }
+            }
         });
       }
-      document.getElementById('show-reminders').addEventListener('click', (e) => {
-        e.preventDefault();
-        const sel = document.getElementById('reminder-obj');
-        sel.innerHTML = '<option value="">— все —</option>';
-        getActiveObjects().forEach(addr => { const o = document.createElement('option'); o.value = addr; o.textContent = addr; sel.appendChild(o); });
-        renderRemindersList();
-        remindersModal.style.display = 'flex';
-        hamburger.classList.remove('open');
-        sidebar.classList.remove('open');
-      });
-      document.getElementById('close-reminders').addEventListener('click', () => { remindersModal.style.display = 'none'; });
-      window.addEventListener('click', e => { if (e.target === remindersModal) remindersModal.style.display = 'none'; });
-      document.getElementById('reminder-add').addEventListener('click', () => {
-        const addr = document.getElementById('reminder-obj').value.trim() || '';
-        const label = document.getElementById('reminder-label').value.trim() || 'Срок';
-        const date = document.getElementById('reminder-date').value;
-        const note = document.getElementById('reminder-note').value.trim() || '';
-        if (!date) { showToast(); return; }
-        smartReminders.push({ id: 'rm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), addr: addr || undefined, label, date, note: note || undefined });
-        saveSmartReminders();
-        renderRemindersList();
-        renderDeadlineReminders();
-        document.getElementById('reminder-date').value = '';
-        document.getElementById('reminder-label').value = '';
-        document.getElementById('reminder-note').value = '';
-        showToast();
-      });
+      const showRemindersBtn = document.getElementById('show-reminders');
+      if (showRemindersBtn) {
+        if (!showRemindersBtn._handlerAttached) {
+          showRemindersBtn._handlerAttached = true;
+          showRemindersBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sel = document.getElementById('reminder-obj');
+            if (!sel) {
+              showAlert('Элемент выбора объекта не найден.', 'Ошибка');
+              return;
+            }
+            sel.innerHTML = '<option value="">— все —</option>';
+            const activeObjects = typeof getActiveObjects === 'function' ? getActiveObjects() : [];
+            activeObjects.forEach(addr => {
+              const o = document.createElement('option');
+              o.value = addr;
+              o.textContent = addr;
+              sel.appendChild(o);
+            });
+            if (typeof renderRemindersList === 'function') renderRemindersList();
+            if (remindersModal) remindersModal.style.display = 'flex';
+            if (hamburger) hamburger.classList.remove('open');
+            if (sidebar) sidebar.classList.remove('open');
+          });
+        }
+      }
+      
+      const closeRemindersBtn = document.getElementById('close-reminders');
+      if (closeRemindersBtn) {
+        if (!closeRemindersBtn._handlerAttached) {
+          closeRemindersBtn._handlerAttached = true;
+          closeRemindersBtn.addEventListener('click', () => {
+            if (remindersModal) remindersModal.style.display = 'none';
+          });
+        }
+      }
+      
+      if (remindersModal) {
+        window.addEventListener('click', e => {
+          if (e.target === remindersModal) remindersModal.style.display = 'none';
+        });
+      }
+      
+      const reminderAddBtn = document.getElementById('reminder-add');
+      if (reminderAddBtn) {
+        if (!reminderAddBtn._handlerAttached) {
+          reminderAddBtn._handlerAttached = true;
+          reminderAddBtn.addEventListener('click', () => {
+            const reminderObj = document.getElementById('reminder-obj');
+            const reminderLabel = document.getElementById('reminder-label');
+            const reminderDate = document.getElementById('reminder-date');
+            const reminderNote = document.getElementById('reminder-note');
+            
+            if (!reminderDate) {
+              showToast();
+              return;
+            }
+            
+            const addr = reminderObj ? reminderObj.value.trim() : '';
+            const label = reminderLabel ? reminderLabel.value.trim() : 'Срок';
+            const date = reminderDate.value;
+            const note = reminderNote ? reminderNote.value.trim() : '';
+            
+            if (!date) {
+              showToast();
+              return;
+            }
+            
+            if (typeof smartReminders !== 'undefined') {
+              smartReminders.push({ id: 'rm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), addr: addr || undefined, label, date, note: note || undefined });
+              if (typeof saveSmartReminders === 'function') saveSmartReminders();
+              if (typeof renderRemindersList === 'function') renderRemindersList();
+              if (typeof renderDeadlineReminders === 'function') renderDeadlineReminders();
+              if (reminderDate) reminderDate.value = '';
+              if (reminderLabel) reminderLabel.value = '';
+              if (reminderNote) reminderNote.value = '';
+              showToast();
+            }
+          });
+        }
+      }
 
       // При загрузке: показать последний выбранный объект и блок недавних
       renderRecentObjects();
@@ -6977,26 +7125,45 @@
               document.getElementById(typ === 'managing' ? 'show-managing' : typ === 'service' ? 'show-service' : typ === 'fkr' ? 'show-fkr' : 'show-construction-control')?.click();
               if (typeof openDataEntityModal === 'function') setTimeout(() => openDataEntityModal(typ, idx), 150);
             } else if (r.openToData) {
-              calendarContainer.style.display = 'none';
-              roadmapContainer.style.display = 'none';
-              subcontractorsContainer.style.display = 'none';
-        if (contractorsContainer) contractorsContainer.style.display = 'none';
-              responsibleConnectionsContainer.style.display = 'none';
-              container.style.display = 'none';
-              emptyState.style.display = 'none';
-              dataContainer.style.display = 'block';
-              populateDataSelector();
-              dataObjectSelect.value = r.addr;
-              if (typeof syncDataObjectInput === 'function') syncDataObjectInput();
-              selector.value = r.addr;
-              updateSelectorDisplay();
-              renderDataTable(r.addr);
+              // Если пользователь находится в справочнике и ищет объект напрямую, открываем в реестре
+              const isCurrentlyInDataSection = dataContainer && (dataContainer.style.display === 'block' || window.getComputedStyle(dataContainer).display !== 'none');
+              if (isCurrentlyInDataSection && r.type === 'Объект') {
+                // Открываем в реестре вместо справочника
+                calendarContainer.style.display = 'none';
+                dataContainer.style.display = 'none';
+                roadmapContainer.style.display = 'none';
+                subcontractorsContainer.style.display = 'none';
+                if (contractorsContainer) contractorsContainer.style.display = 'none';
+                responsibleConnectionsContainer.style.display = 'none';
+                container.style.display = 'block';
+                emptyState.style.display = 'none';
+                selector.value = r.addr;
+                updateSelectorDisplay();
+                renderObject(r.addr);
+              } else {
+                // Открываем в справочнике для справочной информации
+                calendarContainer.style.display = 'none';
+                roadmapContainer.style.display = 'none';
+                subcontractorsContainer.style.display = 'none';
+                if (contractorsContainer) contractorsContainer.style.display = 'none';
+                responsibleConnectionsContainer.style.display = 'none';
+                container.style.display = 'none';
+                emptyState.style.display = 'none';
+                dataContainer.style.display = 'block';
+                populateDataSelector();
+                dataObjectSelect.value = r.addr;
+                if (typeof syncDataObjectInput === 'function') syncDataObjectInput();
+                selector.value = r.addr;
+                updateSelectorDisplay();
+                renderDataTable(r.addr);
+              }
             } else {
               calendarContainer.style.display = 'none';
               dataContainer.style.display = 'none';
               roadmapContainer.style.display = 'none';
               subcontractorsContainer.style.display = 'none';
-        if (contractorsContainer) contractorsContainer.style.display = 'none';
+              if (contractorsContainer) contractorsContainer.style.display = 'none';
+              responsibleConnectionsContainer.style.display = 'none';
               container.style.display = 'block';
               emptyState.style.display = 'none';
               selector.value = r.addr;
@@ -7499,7 +7666,8 @@
               if (!existing) {
                 const toastEl = document.getElementById('toast');
                 if (toastEl && !toastEl.querySelector('.toast-action-btn')) {
-                  toastEl.innerHTML = 'Создать напоминание на ' + deadlineInput.value + '? <button type="button" class="toast-action-btn" id="toast-btn-rem">Да</button>';
+                  const deadlineValue = deadlineInput ? escapeHtml(deadlineInput.value) : '';
+                  toastEl.innerHTML = 'Создать напоминание на ' + deadlineValue + '? <button type="button" class="toast-action-btn" id="toast-btn-rem">Да</button>';
                   toastEl.classList.remove('toast-error');
                   toastEl.classList.add('show');
                   toastEl.querySelector('#toast-btn-rem').addEventListener('click', function once() {
@@ -7665,11 +7833,12 @@
         const cardEl = container.closest('.post');
         const deleteControlsEl = cardEl ? cardEl.querySelector('.delete-mode-controls') : null;
 
+        // Привязываем обработчики режима удаления только один раз
         if (cardEl && !cardEl._deleteModeAttached) {
           cardEl._deleteModeAttached = true;
 
           function closeDeleteMode() {
-            deleteControlsEl.style.display = 'none';
+            if (deleteControlsEl) deleteControlsEl.style.display = 'none';
             cardEl.classList.remove('delete-mode-active');
             cardEl.querySelectorAll('.doc-item .comment-input').forEach(inp => {
               inp.classList.remove('delete-mode-comment');
@@ -7681,26 +7850,51 @@
           const cancelBtn = cardEl.querySelector('.cancel-delete-mode-btn');
           const confirmBtn = cardEl.querySelector('.confirm-delete-selected-btn');
           const bulkMarkBtn = cardEl.querySelector('.bulk-mark-all-btn');
-          if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteMode);
-          if (bulkMarkBtn) bulkMarkBtn.addEventListener('click', () => {
-            if (!data[addr]) data[addr] = { main: [], extra: [] };
-            const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
-            const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
-            data[addr].main = data[addr].main || [];
-            data[addr].extra = data[addr].extra || [];
-            ensureArrayLength(data[addr].main, mainList.length);
-            ensureArrayLength(data[addr].extra, extraList.length);
-            for (let i = 0; i < mainList.length; i++) data[addr].main[i] = { ...(data[addr].main[i] || {}), checked: true };
-            for (let i = 0; i < extraList.length; i++) data[addr].extra[i] = { ...(data[addr].extra[i] || {}), checked: true };
-            localStorage.setItem('registryData', JSON.stringify(data));
-            cardEl.querySelectorAll('.doc-item').forEach(el => el.classList.add('checked'));
-            renderObject(addr);
-            showToast();
-          });
-          if (confirmBtn) confirmBtn.addEventListener('click', async () => {
-            const card = deleteControlsEl ? deleteControlsEl.closest('.post') : null;
-            if (card) await confirmDeleteSelectedBoth(addr, card);
-          });
+          
+          if (cancelBtn) {
+            // Сохраняем ссылку на обработчик для возможности удаления
+            if (!cancelBtn._deleteModeHandler) {
+              cancelBtn._deleteModeHandler = closeDeleteMode;
+              cancelBtn.addEventListener('click', cancelBtn._deleteModeHandler);
+            }
+          }
+          
+          if (bulkMarkBtn) {
+            if (!bulkMarkBtn._deleteModeHandler) {
+              bulkMarkBtn._deleteModeHandler = () => {
+                if (!data[addr]) data[addr] = { main: [], extra: [] };
+                const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+                const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+                data[addr].main = data[addr].main || [];
+                data[addr].extra = data[addr].extra || [];
+                ensureArrayLength(data[addr].main, mainList.length);
+                ensureArrayLength(data[addr].extra, extraList.length);
+                for (let i = 0; i < mainList.length; i++) data[addr].main[i] = { ...(data[addr].main[i] || {}), checked: true };
+                for (let i = 0; i < extraList.length; i++) data[addr].extra[i] = { ...(data[addr].extra[i] || {}), checked: true };
+                localStorage.setItem('registryData', JSON.stringify(data));
+                cardEl.querySelectorAll('.doc-item').forEach(el => el.classList.add('checked'));
+                renderObject(addr);
+                showToast();
+              };
+              bulkMarkBtn.addEventListener('click', bulkMarkBtn._deleteModeHandler);
+            }
+          }
+          
+          if (confirmBtn) {
+            if (!confirmBtn._deleteModeHandler) {
+              confirmBtn._deleteModeHandler = async (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const card = deleteControlsEl ? deleteControlsEl.closest('.post') : null;
+                if (card) {
+                  await confirmDeleteSelectedBoth(addr, card);
+                  // Закрываем режим удаления после удаления
+                  closeDeleteMode();
+                }
+              };
+              confirmBtn.addEventListener('click', confirmBtn._deleteModeHandler);
+            }
+          }
         }
       }
 
@@ -8074,9 +8268,11 @@
             row.dataset.time = event.time || '';
             row.dataset.dateKey = dateKey;
             row.classList.add(event.color || 'blue');
-            const safeText = (event.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            const timePart = (event.time || '').trim() ? '<span class="event-time">' + (event.time || '').replace(/</g, '&lt;') + '</span> ' : '';
-            row.innerHTML = '<span class="event ' + (event.color || 'blue') + '"></span>' + timePart + '<span class="event-text" title="' + safeText + '">' + safeText + '</span>';
+            const safeText = escapeHtml(event.text || '');
+            const safeTime = escapeHtml(event.time || '');
+            const safeColor = escapeHtml(event.color || 'blue');
+            const timePart = (event.time || '').trim() ? '<span class="event-time">' + safeTime + '</span> ' : '';
+            row.innerHTML = '<span class="event ' + safeColor + '"></span>' + timePart + '<span class="event-text" title="' + safeText + '">' + safeText + '</span>';
             const delBtn = document.createElement('button');
             delBtn.className = 'event-delete';
             delBtn.innerHTML = '×';
@@ -8185,11 +8381,22 @@
         }
       });
 
-      document.getElementById('calendar-add-event-fab')?.addEventListener('click', () => {
-        const today = new Date();
-        const dateKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-        showEventPopup(null, dateKey);
-      });
+      const calendarAddEventFab = document.getElementById('calendar-add-event-fab');
+      if (calendarAddEventFab) {
+        if (!calendarAddEventFab._handlerAttached) {
+          calendarAddEventFab._handlerAttached = true;
+          calendarAddEventFab.addEventListener('click', () => {
+            const today = new Date();
+            const dateKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            if (typeof showEventPopup === 'function') {
+              showEventPopup(null, dateKey);
+            } else {
+              showAlert('Функция открытия формы события не найдена', 'Ошибка');
+            }
+          });
+        }
+      }
+      
 
       function showEventPopup(ev, dateKey) {
         const isEdit = ev && ev.dataset.index !== undefined;
@@ -8222,6 +8429,13 @@
         const saveBtn = popup.querySelector('#save-event');
         const textInput = popup.querySelector('#event-text');
         const timeInput = popup.querySelector('#event-time-inp');
+        
+        if (!closeBtn || !saveBtn || !textInput || !timeInput) {
+          showAlert('Ошибка: не найдены элементы формы календаря', 'Ошибка');
+          popup.remove();
+          return;
+        }
+        
         textInput.value = (ev && ev.dataset.text) ? ev.dataset.text : '';
         timeInput.value = (ev && ev.dataset.time) ? ev.dataset.time : '';
         const colorBtns = popup.querySelectorAll('.color-btn');
@@ -8230,38 +8444,54 @@
 
         colorBtns.forEach(btn => {
           if (btn.dataset.color === selectedColor) btn.style.boxShadow = '0 0 0 2px var(--accent)';
-          btn.addEventListener('click', () => {
-            selectedColor = btn.dataset.color;
-            colorBtns.forEach(b => b.style.boxShadow = '');
-            btn.style.boxShadow = '0 0 0 2px var(--accent)';
-          });
-        });
-
-        function closePopup() { popup.remove(); document.removeEventListener('keydown', onEscape); }
-
-        const onEscape = function(e) { if (e.key === 'Escape') closePopup(); };
-        document.addEventListener('keydown', onEscape);
-
-        closeBtn.addEventListener('click', closePopup);
-
-        saveBtn.addEventListener('click', () => {
-          const text = textInput.value.trim();
-          if (text) {
-            const time = (timeInput.value || '').trim();
-            if (!calendarData[dateKey]) calendarData[dateKey] = [];
-            if (isEdit) {
-              const idx = parseInt(ev.dataset.index, 10);
-              calendarData[dateKey][idx] = { text, color: selectedColor, time: time || undefined };
-            } else {
-              calendarData[dateKey].push({ text, color: selectedColor, time: time || undefined });
-            }
-            localStorage.setItem('calendarData', JSON.stringify(calendarData));
-            closePopup();
-            renderCalendar();
-            renderUpcoming();
-            showToast();
+          if (!btn._colorHandlerAttached) {
+            btn._colorHandlerAttached = true;
+            btn.addEventListener('click', () => {
+              selectedColor = btn.dataset.color;
+              colorBtns.forEach(b => b.style.boxShadow = '');
+              btn.style.boxShadow = '0 0 0 2px var(--accent)';
+            });
           }
         });
+
+        function closePopup() {
+          popup.remove();
+          document.removeEventListener('keydown', onEscape);
+        }
+
+        const onEscape = function(e) {
+          if (e.key === 'Escape') closePopup();
+        };
+        document.addEventListener('keydown', onEscape);
+
+        if (!closeBtn._closeHandlerAttached) {
+          closeBtn._closeHandlerAttached = true;
+          closeBtn.addEventListener('click', closePopup);
+        }
+
+        if (!saveBtn._saveHandlerAttached) {
+          saveBtn._saveHandlerAttached = true;
+          saveBtn.addEventListener('click', () => {
+            const text = textInput.value.trim();
+            if (text) {
+              const time = (timeInput.value || '').trim();
+              if (!calendarData[dateKey]) calendarData[dateKey] = [];
+              if (isEdit) {
+                const idx = parseInt(ev.dataset.index, 10);
+                if (!isNaN(idx) && calendarData[dateKey][idx] !== undefined) {
+                  calendarData[dateKey][idx] = { text, color: selectedColor, time: time || undefined };
+                }
+              } else {
+                calendarData[dateKey].push({ text, color: selectedColor, time: time || undefined });
+              }
+              localStorage.setItem('calendarData', JSON.stringify(calendarData));
+              closePopup();
+              if (typeof renderCalendar === 'function') renderCalendar();
+              if (typeof renderUpcoming === 'function') renderUpcoming();
+              showToast();
+            }
+          });
+        }
 
         const deleteBtn = popup.querySelector('#event-delete-btn');
         if (deleteBtn) {
@@ -9517,6 +9747,208 @@
         sidebar.classList.remove('open');
         window.scrollTo(0, 0);
       });
+
+      // === Поиск документов по объектам ===
+      const documentsSearchModal = document.getElementById('documents-search-modal');
+      const documentsSearchClose = document.getElementById('documents-search-close');
+      const documentsSearchCloseBtn = document.getElementById('documents-search-close-btn');
+      const documentsSearchDocsInput = document.getElementById('documents-search-docs-input');
+      const documentsSearchDocsList = document.getElementById('documents-search-docs-list');
+      const documentsSearchObjectsList = document.getElementById('documents-search-objects-list');
+      let selectedDocumentsForSearch = new Set();
+
+      // Состояние «есть/нет» документ у объекта — сохраняется в localStorage
+      let docObjectStatus = JSON.parse(localStorage.getItem('docObjectStatus') || '{}');
+      function getDocObjectStatus(addr, docName) {
+        const key = addr + '|' + docName;
+        if (docObjectStatus[key] === true || docObjectStatus[key] === false) return docObjectStatus[key];
+        return undefined; // нет сохранённого — используем данные объекта
+      }
+      function setDocObjectStatus(addr, docName, hasDoc) {
+        const key = addr + '|' + docName;
+        docObjectStatus[key] = hasDoc;
+        localStorage.setItem('docObjectStatus', JSON.stringify(docObjectStatus));
+      }
+      function hasDocInData(addr, docName) {
+        const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+        const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+        return mainList.indexOf(docName) !== -1 || extraList.indexOf(docName) !== -1;
+      }
+
+      function getAllUniqueDocuments() {
+        const allDocs = new Set();
+        const activeObjects = typeof getActiveObjects === 'function' ? getActiveObjects() : OBJECTS;
+        activeObjects.forEach(addr => {
+          const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+          const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+          mainList.forEach(doc => allDocs.add(doc));
+          extraList.forEach(doc => allDocs.add(doc));
+        });
+        return Array.from(allDocs).sort();
+      }
+
+      function getObjectsWithDocument(docName) {
+        const activeObjects = typeof getActiveObjects === 'function' ? getActiveObjects() : OBJECTS;
+        const objects = [];
+        activeObjects.forEach(addr => {
+          const mainList = Array.isArray(data[addr]?.mainDocs) ? data[addr].mainDocs : MAIN_DOCS;
+          const extraList = Array.isArray(data[addr]?.extraDocs) ? data[addr].extraDocs : EXTRA_DOCS;
+          if (mainList.indexOf(docName) !== -1 || extraList.indexOf(docName) !== -1) {
+            objects.push(addr);
+          }
+        });
+        return objects;
+      }
+
+      function renderDocumentsSearchList(searchQuery = '') {
+        if (!documentsSearchDocsList) return;
+        const allDocs = getAllUniqueDocuments();
+        const filtered = searchQuery.trim() ? allDocs.filter(doc => searchIncludesAll(doc, searchQuery)) : allDocs;
+        documentsSearchDocsList.innerHTML = '';
+        if (filtered.length === 0) {
+          documentsSearchDocsList.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);">Документы не найдены</div>';
+          return;
+        }
+        filtered.forEach(doc => {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:8px 12px;margin-bottom:4px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:background 0.15s ease;';
+          item.className = 'doc-search-item';
+          if (selectedDocumentsForSearch.has(doc)) {
+            item.style.background = 'var(--accent-glow)';
+            item.style.borderColor = 'var(--accent)';
+          }
+          item.innerHTML = `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" ${selectedDocumentsForSearch.has(doc) ? 'checked' : ''} data-doc="${escapeHtml(doc)}" style="cursor:pointer;"><span>${escapeHtml(doc)}</span></label>`;
+          item.addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+          });
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              selectedDocumentsForSearch.add(doc);
+              item.style.background = 'var(--accent-glow)';
+              item.style.borderColor = 'var(--accent)';
+            } else {
+              selectedDocumentsForSearch.delete(doc);
+              item.style.background = '';
+              item.style.borderColor = 'var(--border)';
+            }
+            renderDocumentsSearchObjects();
+          });
+          documentsSearchDocsList.appendChild(item);
+        });
+      }
+
+      function renderDocumentsSearchObjects() {
+        if (!documentsSearchObjectsList) return;
+        documentsSearchObjectsList.innerHTML = '';
+        if (selectedDocumentsForSearch.size === 0) {
+          documentsSearchObjectsList.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);">Выберите документы для просмотра объектов</div>';
+          return;
+        }
+        const selectedDocsArray = Array.from(selectedDocumentsForSearch).sort();
+        const activeObjects = typeof getActiveObjects === 'function' ? getActiveObjects() : OBJECTS;
+        const objectsArray = activeObjects.slice().sort((a, b) => a.localeCompare(b));
+        if (objectsArray.length === 0) {
+          documentsSearchObjectsList.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);">Нет объектов</div>';
+          return;
+        }
+        objectsArray.forEach(addr => {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-card);';
+          const docRows = selectedDocsArray.map(doc => {
+            const saved = getDocObjectStatus(addr, doc);
+            const hasIt = saved !== undefined ? saved : hasDocInData(addr, doc);
+            return `
+              <label class="doc-search-doc-row" style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:12px;">
+                <input type="checkbox" ${hasIt ? 'checked' : ''} data-addr="${escapeHtml(addr)}" data-doc="${escapeHtml(doc)}" style="cursor:pointer;width:16px;height:16px;">
+                <span>${escapeHtml(doc)}</span>
+                <span style="color:var(--text-muted);font-size:11px;">${hasIt ? 'есть' : 'нет'}</span>
+              </label>
+            `;
+          }).join('');
+          item.innerHTML = `
+            <div style="font-weight:500;margin-bottom:8px;color:var(--accent);cursor:pointer;" class="doc-search-obj-name">${escapeHtml(addr)}</div>
+            <div class="doc-search-docs-rows">${docRows}</div>
+          `;
+          item.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+              const a = cb.dataset.addr, d = cb.dataset.doc;
+              const checked = cb.checked;
+              setDocObjectStatus(a, d, checked);
+              const label = cb.closest('label');
+              if (label) {
+                const span = label.querySelector('span:last-of-type');
+                if (span) span.textContent = checked ? 'есть' : 'нет';
+              }
+              if (typeof showToast === 'function') showToast();
+            });
+          });
+          const objNameEl = item.querySelector('.doc-search-obj-name');
+          if (objNameEl) {
+            objNameEl.addEventListener('click', () => {
+              // Открываем объект в реестре
+              if (documentsSearchModal) documentsSearchModal.style.display = 'none';
+              if (calendarContainer) calendarContainer.style.display = 'none';
+              if (dataContainer) dataContainer.style.display = 'none';
+              if (roadmapContainer) roadmapContainer.style.display = 'none';
+              if (subcontractorsContainer) subcontractorsContainer.style.display = 'none';
+              if (contractorsContainer) contractorsContainer.style.display = 'none';
+              if (responsibleConnectionsContainer) responsibleConnectionsContainer.style.display = 'none';
+              if (container) container.style.display = 'block';
+              if (emptyState) emptyState.style.display = 'none';
+              if (selector) {
+                selector.value = addr;
+                updateSelectorDisplay();
+              }
+              renderObject(addr);
+              if (typeof updateBreadcrumbs === 'function') updateBreadcrumbs('main', addr);
+            });
+          }
+          documentsSearchObjectsList.appendChild(item);
+        });
+      }
+
+      document.getElementById('show-documents-search')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!documentsSearchModal || !documentsSearchDocsList || !documentsSearchObjectsList) {
+          showAlert('Ошибка: элементы поиска документов не найдены', 'Ошибка');
+          return;
+        }
+        selectedDocumentsForSearch.clear();
+        if (documentsSearchDocsInput) documentsSearchDocsInput.value = '';
+        renderDocumentsSearchList();
+        renderDocumentsSearchObjects();
+        documentsSearchModal.style.display = 'flex';
+        if (documentsSearchDocsInput) setTimeout(() => documentsSearchDocsInput.focus(), 100);
+        sidebar.classList.remove('open');
+      });
+
+      if (documentsSearchClose) {
+        documentsSearchClose.addEventListener('click', () => {
+          if (documentsSearchModal) documentsSearchModal.style.display = 'none';
+        });
+      }
+      if (documentsSearchCloseBtn) {
+        documentsSearchCloseBtn.addEventListener('click', () => {
+          if (documentsSearchModal) documentsSearchModal.style.display = 'none';
+        });
+      }
+      if (documentsSearchModal) {
+        documentsSearchModal.addEventListener('click', (e) => {
+          if (e.target === documentsSearchModal) {
+            documentsSearchModal.style.display = 'none';
+          }
+        });
+      }
+
+      if (documentsSearchDocsInput) {
+        documentsSearchDocsInput.addEventListener('input', (e) => {
+          renderDocumentsSearchList(e.target.value);
+        });
+      }
 
       // Инициализация при загрузке
       if (documentsListEl) renderDocuments();
@@ -11152,6 +11584,8 @@
           responsibleConnectionsContainer.style.display = 'none';
           subcontractorsContainer.style.display = 'none';
           if (contractorsContainer) contractorsContainer.style.display = 'none';
+          const documentsContainerEl = document.getElementById('documents-container');
+          if (documentsContainerEl) documentsContainerEl.style.display = 'none';
           ['managing-container', 'service-container', 'fkr-container', 'construction-control-container'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
           const cont = document.getElementById(cfg.containerId);
           if (cont) cont.style.display = 'block';
@@ -13145,6 +13579,10 @@
             localStorage.setItem('documentsList', JSON.stringify(documentsList));
             if (documentsListEl) renderDocuments();
           }
+          if (imported.docObjectStatus && typeof imported.docObjectStatus === 'object') {
+            docObjectStatus = imported.docObjectStatus;
+            localStorage.setItem('docObjectStatus', JSON.stringify(docObjectStatus));
+          }
           if (imported.objects && Array.isArray(imported.objects)) {
             OBJECTS = imported.objects;
             localStorage.setItem('OBJECTS_LIST', JSON.stringify(OBJECTS));
@@ -13281,6 +13719,7 @@
           calendar: calendarData,
           history: history,
           documentsList: documentsList || [],
+          docObjectStatus: docObjectStatus || {},
           objects: OBJECTS,
           personsData: personsData,
           stickyNotes: stickyNotes,
@@ -14057,6 +14496,8 @@
           localStorage.removeItem('documentsList');
           documentsList = [];
           if (documentsListEl) renderDocuments();
+          localStorage.removeItem('docObjectStatus');
+          docObjectStatus = {};
           localStorage.removeItem('lastSelectedObject');
           localStorage.removeItem('recentObjectIds');
           localStorage.removeItem('customTags');
@@ -14285,7 +14726,7 @@
 
       document.getElementById('btn-backup')?.addEventListener('click', (e) => {
         e.preventDefault();
-        const keys = ['OBJECTS_LIST', 'registryData', 'calendarData', 'smartReminders', 'personsData', 'pinnedObjectIds', 'archivedObjects', 'subcontractorsList', 'contractorsList', 'managingCompaniesList', 'serviceOrgsList', 'fkrList', 'constructionControlList', 'dataRows', 'dataColumns', 'customTags', 'calendarLegendLabels', 'roadmapData', 'roadmapNotes', 'roadmapColumns', 'stickyNotes', 'historyLog'];
+        const keys = ['OBJECTS_LIST', 'registryData', 'calendarData', 'smartReminders', 'personsData', 'pinnedObjectIds', 'archivedObjects', 'subcontractorsList', 'contractorsList', 'managingCompaniesList', 'serviceOrgsList', 'fkrList', 'constructionControlList', 'dataRows', 'dataColumns', 'customTags', 'calendarLegendLabels', 'roadmapData', 'roadmapNotes', 'roadmapColumns', 'stickyNotes', 'historyLog', 'documentsList', 'docObjectStatus'];
         const backup = { exportedAt: new Date().toISOString(), data: {} };
         keys.forEach(k => { try { const v = localStorage.getItem(k); if (v) backup.data[k] = JSON.parse(v); } catch (e) { backup.data[k] = localStorage.getItem(k); } });
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
