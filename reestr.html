@@ -3800,6 +3800,43 @@
     }
     body.light-theme #landing-screen .landing-hamburger:hover { background: rgba(0, 120, 212, 0.12); }
 
+    /* === Окно входа на начальном экране === */
+    .landing-login-modal {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    }
+    .landing-login-modal.hidden { display: none; }
+    .landing-login-modal-inner {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 28px; min-width: 320px; max-width: 400px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    .landing-login-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .landing-login-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+    .landing-login-input {
+      width: 100%; padding: 12px 14px; margin-bottom: 16px;
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+      border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+    }
+    .landing-login-input:focus { outline: none; border-color: var(--accent); }
+    .landing-login-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+    .landing-login-btn {
+      flex: 1; min-width: 120px; padding: 10px 16px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
+      border: 1px solid var(--border); transition: var(--transition);
+    }
+    .landing-login-observer {
+      background: var(--bg-input); color: var(--text-secondary);
+    }
+    .landing-login-observer:hover { background: var(--hover); color: var(--text); }
+    .landing-login-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .landing-login-primary:hover { background: var(--accent-hover); }
+    body.light-theme .landing-login-modal-inner { background: #fff; border-color: #e4e4e7; }
+    body.light-theme .landing-login-input { background: #f4f4f5; border-color: #e4e4e7; color: #18181b; }
+    body.light-theme .landing-login-observer { background: #f4f4f5; color: #52525b; }
+    body.light-theme .landing-login-observer:hover { background: #e4e4e7; color: #18181b; }
+
     /* === Плавающий чат ИИ (Grok/Groq) === */
     #ai-chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: inherit; }
     #ai-chat-toggle {
@@ -3873,6 +3910,17 @@
       <div class="grad g2"></div>
       <div class="grad g3"></div>
       <div class="grad g4"></div>
+    </div>
+    <div id="landing-login-modal" class="landing-login-modal" role="dialog" aria-label="Вход в систему">
+      <div class="landing-login-modal-inner">
+        <h3 class="landing-login-title">Вход</h3>
+        <p class="landing-login-desc">Введите пароль для полного доступа или войдите как наблюдатель.</p>
+        <input type="password" id="landing-admin-password" placeholder="Пароль" autocomplete="off" class="landing-login-input">
+        <div class="landing-login-buttons">
+          <button type="button" id="landing-observer-btn" class="landing-login-btn landing-login-observer">Наблюдатель</button>
+          <button type="button" id="landing-admin-login-btn" class="landing-login-btn landing-login-primary">Войти</button>
+        </div>
+      </div>
     </div>
     <button type="button" class="landing-hamburger" id="landing-hamburger" aria-label="Меню">
       <span></span><span></span><span></span>
@@ -6413,6 +6461,45 @@
           });
         }
       }
+
+      // === Окно входа на начальном экране ===
+      const landingLoginModal = document.getElementById('landing-login-modal');
+      const landingObserverBtn = document.getElementById('landing-observer-btn');
+      const landingAdminLoginBtn = document.getElementById('landing-admin-login-btn');
+      const landingAdminPassword = document.getElementById('landing-admin-password');
+      function closeLandingLoginModal() {
+        if (landingLoginModal) landingLoginModal.classList.add('hidden');
+      }
+      if (landingObserverBtn) {
+        landingObserverBtn.addEventListener('click', () => {
+          isFullMode = false;
+          closeLandingLoginModal();
+          if (typeof updateObserverUI === 'function') updateObserverUI();
+        });
+      }
+      if (landingAdminLoginBtn && landingAdminPassword) {
+        landingAdminLoginBtn.addEventListener('click', async () => {
+          if (landingAdminPassword.value === 'grossadmin') {
+            isFullMode = true;
+            landingAdminPassword.value = '';
+            if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+              if (typeof loadFromSupabase === 'function') {
+                loadFromSupabase().then(imported => { if (imported && typeof applyImportedData === 'function') applyImportedData(imported); });
+              }
+              if (supabaseSaveIntervalId) clearInterval(supabaseSaveIntervalId);
+              supabaseSaveIntervalId = setInterval(() => { if (typeof saveToSupabase === 'function') saveToSupabase(); }, 15000);
+            }
+            closeLandingLoginModal();
+            if (typeof updateObserverUI === 'function') updateObserverUI();
+          } else {
+            await showAlert('Неверный пароль.', 'Ошибка');
+          }
+        });
+        landingAdminPassword.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') landingAdminLoginBtn.click();
+        });
+      }
+
       if (typeof updateObserverUI === 'function') updateObserverUI();
 
       // === Добавить объект ===
