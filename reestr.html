@@ -1784,6 +1784,8 @@
 
     /* === Календарь === */
     .calendar-container {
+      position: relative;
+      z-index: 10000;
       background: var(--bg-card);
       border-bottom: 1px solid var(--border);
       overflow: hidden;
@@ -1886,7 +1888,13 @@
       border-color: var(--accent);
     }
 
+    .calendar-weekdays-row {
+      display: flex;
+      gap: 0;
+      background: var(--bg-card);
+    }
     .calendar-weekdays {
+      flex: 1;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
@@ -1896,7 +1904,10 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       color: var(--text-muted);
-      background: var(--bg-card);
+    }
+    .calendar-weekdays-spacer {
+      width: 260px;
+      flex-shrink: 0;
     }
     .calendar-weekdays span {
       text-align: center;
@@ -2245,6 +2256,9 @@
       }
       .calendar-body {
         flex-direction: column;
+      }
+      .calendar-weekdays-spacer {
+        display: none;
       }
     }
 
@@ -4855,8 +4869,11 @@
         </div>
       </div>
     </div>
-    <div class="calendar-weekdays" id="calendar-weekdays">
-      <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+    <div class="calendar-weekdays-row">
+      <div class="calendar-weekdays" id="calendar-weekdays">
+        <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+      </div>
+      <div class="calendar-weekdays-spacer" aria-hidden="true"></div>
     </div>
     <div style="padding: 8px 20px 4px; border-bottom: 1px solid var(--border);">
       <p class="ui-hint">Наведите и остановите мышку на ячейке на 2 секунды, чтобы увеличить её и увидеть все события</p>
